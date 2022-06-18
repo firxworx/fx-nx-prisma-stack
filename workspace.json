@@ -2,7 +2,8 @@
   "$schema": "./node_modules/nx/schemas/workspace-schema.json",
   "version": 2,
   "projects": {
-    "fx-nx-prisma-stack": "apps/fx-nx-prisma-stack",
-    "fx-nx-prisma-stack-e2e": "apps/fx-nx-prisma-stack-e2e"
+    "api": "apps/api",
+    "ui": "apps/ui",
+    "ui-e2e": "apps/ui-e2e"
   }
 }

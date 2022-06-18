@@ -1,17 +1,17 @@
 {
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/fx-nx-prisma-stack-e2e/src",
+  "sourceRoot": "apps/ui-e2e/src",
   "projectType": "application",
   "targets": {
     "e2e": {
       "executor": "@nrwl/cypress:cypress",
       "options": {
-        "cypressConfig": "apps/fx-nx-prisma-stack-e2e/cypress.json",
-        "devServerTarget": "fx-nx-prisma-stack:serve:development"
+        "cypressConfig": "apps/ui-e2e/cypress.json",
+        "devServerTarget": "ui:serve:development"
       },
       "configurations": {
         "production": {
-          "devServerTarget": "fx-nx-prisma-stack:serve:production"
+          "devServerTarget": "ui:serve:production"
         }
       }
     },
@@ -19,10 +19,10 @@
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["apps/fx-nx-prisma-stack-e2e/**/*.{js,ts}"]
+        "lintFilePatterns": ["apps/ui-e2e/**/*.{js,ts}"]
       }
     }
   },
   "tags": [],
-  "implicitDependencies": ["fx-nx-prisma-stack"]
+  "implicitDependencies": ["ui"]
 }

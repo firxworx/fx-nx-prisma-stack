@@ -40,5 +40,5 @@
       }
     }
   },
-  "defaultProject": "fx-nx-prisma-stack"
+  "defaultProject": "ui"
 }

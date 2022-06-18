@@ -1,6 +1,6 @@
 {
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/fx-nx-prisma-stack/src",
+  "sourceRoot": "apps/ui/src",
   "projectType": "application",
   "targets": {
     "build": {
@@ -9,17 +9,14 @@
       "defaultConfiguration": "production",
       "options": {
         "compiler": "babel",
-        "outputPath": "dist/apps/fx-nx-prisma-stack",
-        "index": "apps/fx-nx-prisma-stack/src/index.html",
+        "outputPath": "dist/apps/ui",
+        "index": "apps/ui/src/index.html",
         "baseHref": "/",
-        "main": "apps/fx-nx-prisma-stack/src/main.tsx",
-        "polyfills": "apps/fx-nx-prisma-stack/src/polyfills.ts",
-        "tsConfig": "apps/fx-nx-prisma-stack/tsconfig.app.json",
-        "assets": [
-          "apps/fx-nx-prisma-stack/src/favicon.ico",
-          "apps/fx-nx-prisma-stack/src/assets"
-        ],
-        "styles": ["apps/fx-nx-prisma-stack/src/styles.css"],
+        "main": "apps/ui/src/main.tsx",
+        "polyfills": "apps/ui/src/polyfills.ts",
+        "tsConfig": "apps/ui/tsconfig.app.json",
+        "assets": ["apps/ui/src/favicon.ico", "apps/ui/src/assets"],
+        "styles": ["apps/ui/src/styles.css"],
         "scripts": [],
         "webpackConfig": "@nrwl/react/plugins/webpack"
       },
@@ -33,8 +30,8 @@
         "production": {
           "fileReplacements": [
             {
-              "replace": "apps/fx-nx-prisma-stack/src/environments/environment.ts",
-              "with": "apps/fx-nx-prisma-stack/src/environments/environment.prod.ts"
+              "replace": "apps/ui/src/environments/environment.ts",
+              "with": "apps/ui/src/environments/environment.prod.ts"
             }
           ],
           "optimization": true,
@@ -50,15 +47,15 @@
       "executor": "@nrwl/web:dev-server",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "fx-nx-prisma-stack:build",
+        "buildTarget": "ui:build",
         "hmr": true
       },
       "configurations": {
         "development": {
-          "buildTarget": "fx-nx-prisma-stack:build:development"
+          "buildTarget": "ui:build:development"
         },
         "production": {
-          "buildTarget": "fx-nx-prisma-stack:build:production",
+          "buildTarget": "ui:build:production",
           "hmr": false
         }
       }
@@ -67,14 +64,14 @@
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["apps/fx-nx-prisma-stack/**/*.{ts,tsx,js,jsx}"]
+        "lintFilePatterns": ["apps/ui/**/*.{ts,tsx,js,jsx}"]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/apps/fx-nx-prisma-stack"],
+      "outputs": ["coverage/apps/ui"],
       "options": {
-        "jestConfig": "apps/fx-nx-prisma-stack/jest.config.ts",
+        "jestConfig": "apps/ui/jest.config.ts",
         "passWithNoTests": true
       }
     }
