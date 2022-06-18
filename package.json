@@ -5,7 +5,17 @@
   "scripts": {
     "start": "nx serve",
     "build": "nx build",
-    "test": "nx test"
+    "test": "nx test",
+    "prebuild": "yarn prisma:generate",
+    "prisma:generate": "yarn prisma generate --schema apps/api/prisma/schema.prisma",
+    "prisma:migrate": "yarn prisma migrate --schema apps/api/prisma/schema.prisma",
+    "prisma:seed": "yarn dotenv -e apps/api/.env -- yarn prisma db seed --schema apps/api/prisma/schema.prisma",
+    "prisma:studio": "yarn dotenv -e apps/api/.env -- yarn prisma studio --schema apps/api/prisma/schema.prisma",
+    "prisma:db:push": "yarn dotenv -e apps/api/.env -- yarn prisma db push --schema apps/api/prisma/schema.prisma",
+    "docker:postgres:up": "docker compose up -d postgres && exit 0",
+    "docker:postgres:down": "docker compose down postgres",
+    "docker:postgres:cli": "docker exec -it postgres bash",
+    "docker:down": "docker compose down"
   },
   "private": true,
   "dependencies": {
@@ -13,6 +23,8 @@
     "@nestjs/core": "^8.0.0",
     "@nestjs/platform-express": "^8.0.0",
     "core-js": "^3.6.5",
+    "dotenv": "^16.0.1",
+    "dotenv-cli": "^5.1.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "reflect-metadata": "^0.1.13",
