@@ -1,0 +1,69 @@
+version: '3.8'
+
+# update `image` and `container_name` as appropriate to project
+# port mapping format: host_port:container_port
+
+services:
+  api:
+    image: fx/project-api
+    container_name: fxnxprisma_api
+    build:
+      context: .
+      args:
+        NODE_ENV: development
+      # target: development
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - ${PORT:-3333}:${PORT:-3333}
+      - 9229:9229 # debug port
+    # environment:
+    # env_file:
+    #   - .env
+    networks:
+      - project_network
+    links:
+      - postgres:postgres
+    depends_on:
+      - postgres
+    command: dumb-init node dist/main
+    # command: dumb-init yarn start:prod
+    restart: unless-stopped
+
+  # redis:
+  #   container_name: redis
+  #   image: redis:5
+  #   networks:
+  #     - project_network
+
+  postgres:
+    image: 'postgres:${POSTGRES_VERSION:-14.3}'
+    container_name: fxnxprisma_postgres
+    environment:
+      TZ: UTC
+      PG_DATA: /var/lib/postgresql/data
+      POSTGRES_DB: fxnx
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /var/lib/postgresql/data
+    ports:
+      - '${POSTGRES_PORT:-5477}:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # ./db/initdb.d:/docker-entrypoint-initdb.d  # https://hub.docker.com/_/postgres/ (only runs if data dir empty)
+    networks:
+      - project_network
+    restart: always
+
+  # adminer:
+  #   image: adminer
+  #   restart: always
+  #   ports:
+  #       - 8080:8080
+
+networks:
+  project_network:
+
+volumes:
+  pgdata:
