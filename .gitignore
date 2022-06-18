@@ -1,5 +1,25 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
+#############################################
+# Project
+#############################################
+
+# configuration + environment
+/**/.env
+/**/.env.*
+!/**/.env.sample
+
+# generated files e.g. prisma client (database)
+/apps/**/src/generated
+/libs/**/src/generated
+
+# process
+/notes
+
+#############################################
+# Generated nx
+#############################################
+
 # compiled output
 /dist
 /tmp
