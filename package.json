@@ -7,7 +7,9 @@
     "schema": "apps/api/prisma/schema.prisma"
   },
   "scripts": {
-    "start": "nx serve",
+    "start": "nx run-many --target=serve --projects=ui,api --parallel",
+    "start:ui": "nx serve ui",
+    "start:api": "nx serve api",
     "build": "nx build",
     "test": "nx test",
     "prebuild": "yarn prisma:generate",
