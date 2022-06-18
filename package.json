@@ -11,7 +11,10 @@
     "start:ui": "nx serve ui",
     "start:api": "nx serve api",
     "build": "nx build",
-    "test": "nx test",
+    "test:all": "nx run-many --target=test --all --parallel",
+    "test:affected": "nx affected:test --all --codeCoverage --skip-nx-cache",
+    "test:ui": "nx test ui",
+    "test:api": "nx test api",
     "prebuild": "yarn prisma:generate",
     "prisma:generate": "yarn prisma generate --schema apps/api/prisma/schema.prisma",
     "prisma:migrate": "yarn prisma migrate --schema apps/api/prisma/schema.prisma",
@@ -21,7 +24,8 @@
     "docker:postgres:up": "docker compose up -d postgres && exit 0",
     "docker:postgres:down": "docker compose down postgres",
     "docker:postgres:cli": "docker exec -it postgres bash",
-    "docker:down": "docker compose down"
+    "docker:down": "docker compose down",
+    "nx:migrate": "nx migrate latest"
   },
   "private": true,
   "dependencies": {
