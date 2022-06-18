@@ -1,0 +1,83 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/fx-nx-prisma-stack/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/web:webpack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "compiler": "babel",
+        "outputPath": "dist/apps/fx-nx-prisma-stack",
+        "index": "apps/fx-nx-prisma-stack/src/index.html",
+        "baseHref": "/",
+        "main": "apps/fx-nx-prisma-stack/src/main.tsx",
+        "polyfills": "apps/fx-nx-prisma-stack/src/polyfills.ts",
+        "tsConfig": "apps/fx-nx-prisma-stack/tsconfig.app.json",
+        "assets": [
+          "apps/fx-nx-prisma-stack/src/favicon.ico",
+          "apps/fx-nx-prisma-stack/src/assets"
+        ],
+        "styles": ["apps/fx-nx-prisma-stack/src/styles.css"],
+        "scripts": [],
+        "webpackConfig": "@nrwl/react/plugins/webpack"
+      },
+      "configurations": {
+        "development": {
+          "extractLicenses": false,
+          "optimization": false,
+          "sourceMap": true,
+          "vendorChunk": true
+        },
+        "production": {
+          "fileReplacements": [
+            {
+              "replace": "apps/fx-nx-prisma-stack/src/environments/environment.ts",
+              "with": "apps/fx-nx-prisma-stack/src/environments/environment.prod.ts"
+            }
+          ],
+          "optimization": true,
+          "outputHashing": "all",
+          "sourceMap": false,
+          "namedChunks": false,
+          "extractLicenses": true,
+          "vendorChunk": false
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nrwl/web:dev-server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "fx-nx-prisma-stack:build",
+        "hmr": true
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "fx-nx-prisma-stack:build:development"
+        },
+        "production": {
+          "buildTarget": "fx-nx-prisma-stack:build:production",
+          "hmr": false
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/fx-nx-prisma-stack/**/*.{ts,tsx,js,jsx}"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/apps/fx-nx-prisma-stack"],
+      "options": {
+        "jestConfig": "apps/fx-nx-prisma-stack/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}
