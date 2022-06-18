@@ -48,7 +48,7 @@ services:
       POSTGRES_PASSWORD: postgres
       PGDATA: /var/lib/postgresql/data
     ports:
-      - '${POSTGRES_PORT:-5477}:5432'
+      - '${POSTGRES_PORT:-5482}:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
       # ./db/initdb.d:/docker-entrypoint-initdb.d  # https://hub.docker.com/_/postgres/ (only runs if data dir empty)
