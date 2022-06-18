@@ -2,6 +2,10 @@
   "name": "fx-nx-prisma-stack",
   "version": "0.0.0",
   "license": "MIT",
+  "prisma": {
+    "seed": "ts-node apps/api/prisma/seed.ts",
+    "schema": "apps/api/prisma/schema.prisma"
+  },
   "scripts": {
     "start": "nx serve",
     "build": "nx build",
@@ -9,9 +13,9 @@
     "prebuild": "yarn prisma:generate",
     "prisma:generate": "yarn prisma generate --schema apps/api/prisma/schema.prisma",
     "prisma:migrate": "yarn prisma migrate --schema apps/api/prisma/schema.prisma",
-    "prisma:seed": "yarn dotenv -e apps/api/.env -- yarn prisma db seed --schema apps/api/prisma/schema.prisma",
-    "prisma:studio": "yarn dotenv -e apps/api/.env -- yarn prisma studio --schema apps/api/prisma/schema.prisma",
-    "prisma:db:push": "yarn dotenv -e apps/api/.env -- yarn prisma db push --schema apps/api/prisma/schema.prisma",
+    "prisma:seed": "yarn dotenv -e apps/api/.env yarn prisma db seed --schema apps/api/prisma/schema.prisma",
+    "prisma:studio": "yarn dotenv -e apps/api/.env yarn prisma studio --schema apps/api/prisma/schema.prisma",
+    "prisma:db:push": "yarn dotenv -e apps/api/.env yarn prisma db push --schema apps/api/prisma/schema.prisma",
     "docker:postgres:up": "docker compose up -d postgres && exit 0",
     "docker:postgres:down": "docker compose down postgres",
     "docker:postgres:cli": "docker exec -it postgres bash",
@@ -22,6 +26,7 @@
     "@nestjs/common": "^8.0.0",
     "@nestjs/core": "^8.0.0",
     "@nestjs/platform-express": "^8.0.0",
+    "@prisma/client": "^3.15.2",
     "core-js": "^3.6.5",
     "dotenv": "^16.0.1",
     "dotenv-cli": "^5.1.0",
