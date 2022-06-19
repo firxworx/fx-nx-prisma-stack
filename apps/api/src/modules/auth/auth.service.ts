@@ -12,6 +12,7 @@ import { AuthConfig } from '../../config/types/auth-config.interface'
 
 import { Prisma, User } from '../../generated/prisma-client'
 import { PrismaService } from '../prisma/prisma.service'
+import { ChangePasswordDto } from './dto/change-password.dto'
 import { RegisterUserDto } from './dto/register-user.dto'
 import { PasswordService } from './password.service'
 import { SanitizedUser } from './types/sanitized-user.type'
@@ -22,8 +23,11 @@ export class AuthService {
   private logger = new Logger(this.constructor.name)
 
   private ERROR_MESSAGES = {
+    SERVER_ERROR: 'Server error',
     INVALID_CREDENTIALS: 'Invalid credentials',
     REGISTRATION_FAILED: 'Failed to register user',
+    CHANGE_PASSWORD_FAILED: 'Failed to change user password',
+    EMAIL_CONFLICT: 'Email already exists',
   }
 
   constructor(
@@ -67,29 +71,63 @@ export class AuthService {
       }
 
       return this.getSanitizedUser(user)
-    } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-        throw new ConflictException(`Email ${dto.email} already exists`)
+    } catch (error: unknown) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          this.logger.log(`New user registration email conflict: ${dto.email}`)
+          throw new ConflictException(`${this.ERROR_MESSAGES.EMAIL_CONFLICT}: ${dto.email}`)
+        }
+
+        this.logger.error(`Prisma database error registering user [${error.code}]: ${error.message}`)
       }
 
-      throw e
-      // else {
-      //   throw new Error(String(e))
-      // }
+      this.logger.error(String(error))
+      throw new InternalServerErrorException(this.ERROR_MESSAGES.SERVER_ERROR)
+    }
+  }
+
+  // also reset refresh token / ie. the user should be asked to login again
+  async changeUserPassword(email: string, dto: ChangePasswordDto): Promise<void> {
+    // verify current credentials (throws UnauthorizedException on auth failure)
+    await this.getAuthenticatedUserByCredentials(email, dto.oldPassword)
+
+    const passwordHash = await this.passwordService.hash(dto.newPassword)
+
+    try {
+      await this.prisma.user.update({
+        data: {
+          password: passwordHash,
+          refreshToken: null,
+        },
+        where: {
+          email,
+        },
+      })
+    } catch (error: unknown) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+        this.logger.error(`Failed to change user password - user not found (${error.code}): ${email}`)
+      }
+
+      this.logger.error(String(error))
+      throw new InternalServerErrorException(this.ERROR_MESSAGES.CHANGE_PASSWORD_FAILED)
     }
   }
 
   async setUserRefreshTokenHash(email: string, signedToken: string): Promise<void> {
     const refreshTokenHash = await this.passwordService.hash(signedToken)
 
-    await this.prisma.user.update({
-      data: {
-        refreshToken: refreshTokenHash,
-      },
-      where: {
-        email,
-      },
-    })
+    try {
+      await this.prisma.user.update({
+        data: {
+          refreshToken: refreshTokenHash,
+        },
+        where: {
+          email,
+        },
+      })
+    } catch (error: unknown) {
+      throw new InternalServerErrorException()
+    }
   }
 
   async clearUserRefreshToken(email: string): Promise<void> {

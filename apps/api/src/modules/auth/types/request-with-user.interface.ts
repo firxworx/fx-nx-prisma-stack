@@ -1,5 +1,5 @@
 import { Request } from 'express'
-import { User } from 'apps/api/src/generated/prisma-client'
+import { SanitizedUser } from './sanitized-user.type'
 
 /**
  * Interface for an express `Request` with a `user` property.
@@ -10,5 +10,5 @@ import { User } from 'apps/api/src/generated/prisma-client'
  * Usage: `async signOut(@Req() request: RequestWithUser) ...`
  */
 export interface RequestWithUser extends Request {
-  user: Omit<User, 'password'>
+  user: SanitizedUser
 }
