@@ -49,12 +49,25 @@ export class AuthService {
   //   return result
   // }
 
-  private getSanitizedUser(user: User): SanitizedUser {
+  /**
+   * Return a new `SanitizedUser` based on the given Prisma database client `User` except with the
+   * `password` and `refreshToken` fields removed.
+   *
+   * As `AuthService` functions provide the user to be appended to the request object by Passportjs,
+   * using this method is important to safeguard against sensitive data being leaked into logs, responses, etc.
+   */
+  private sanitizeUser(user: User): SanitizedUser {
     const { password: _password, refreshToken: _refreshToken, ...restUser } = user
     return restUser
   }
 
-  async registerOrThrow(dto: RegisterUserDto): Promise<SanitizedUser> {
+  /**
+   * Register (create) a new user or throw an Error on failure.
+   *
+   * @throws {ConflictException} if given an email that already exists.
+   * @throws {InternalServerErrorException} in other cases of failure.
+   */
+  async registerUser(dto: RegisterUserDto): Promise<SanitizedUser> {
     const { password, ...restDto } = dto
     const passwordHash = await this.passwordService.hash(password)
 
@@ -66,11 +79,7 @@ export class AuthService {
         },
       })
 
-      if (!user) {
-        throw new InternalServerErrorException(this.ERROR_MESSAGES.REGISTRATION_FAILED)
-      }
-
-      return this.getSanitizedUser(user)
+      return this.sanitizeUser(user)
     } catch (error: unknown) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
@@ -86,9 +95,14 @@ export class AuthService {
     }
   }
 
-  // also reset refresh token / ie. the user should be asked to login again
+  /**
+   * Change a user's password and clear their refreshToken hash.
+   *
+   * @throws {UnauthorizedException} if current (old) password fails verification
+   * @throws {InternalServerErrorException} in other cases of failure
+   */
   async changeUserPassword(email: string, dto: ChangePasswordDto): Promise<void> {
-    // verify current credentials (throws UnauthorizedException on auth failure)
+    // verify the current credentials - throws UnauthorizedException on auth failure
     await this.getAuthenticatedUserByCredentials(email, dto.oldPassword)
 
     const passwordHash = await this.passwordService.hash(dto.newPassword)
@@ -113,6 +127,9 @@ export class AuthService {
     }
   }
 
+  /**
+   * Save a user's refresh token hash, as computed from the given signed refresh token.
+   */
   async setUserRefreshTokenHash(email: string, signedToken: string): Promise<void> {
     const refreshTokenHash = await this.passwordService.hash(signedToken)
 
@@ -126,10 +143,13 @@ export class AuthService {
         },
       })
     } catch (error: unknown) {
-      throw new InternalServerErrorException()
+      throw new InternalServerErrorException(this.ERROR_MESSAGES.SERVER_ERROR)
     }
   }
 
+  /**
+   * Reset (set to `null`) a user's refresh token hash.
+   */
   async clearUserRefreshToken(email: string): Promise<void> {
     await this.prisma.user.update({
       data: {
@@ -141,6 +161,11 @@ export class AuthService {
     })
   }
 
+  /**
+   * Return the user associated with the given credentials or else throw an Error.
+   *
+   * @throws {UnauthorizedException} if no user is found or the given credentials are invalid.
+   */
   async getAuthenticatedUserByCredentials(email: string, password: string): Promise<SanitizedUser> {
     const user = await this.prisma.user.findUnique({ where: { email } })
 
@@ -154,10 +179,15 @@ export class AuthService {
       throw new UnauthorizedException(this.ERROR_MESSAGES.INVALID_CREDENTIALS)
     }
 
-    return this.getSanitizedUser(user)
+    return this.sanitizeUser(user)
   }
 
-  // intended for use in jwt strategies
+  /**
+   * Return the user with the given email address.
+   * Applicable to Passport strategies that append the authenticated user to the request object.
+   *
+   * @throws {UnauthorizedException} if no user is found with the given email
+   */
   async getUserByEmail(email: string): Promise<SanitizedUser> {
     const user = await this.prisma.user.findUnique({ where: { email } })
 
@@ -165,10 +195,15 @@ export class AuthService {
       throw new UnauthorizedException(this.ERROR_MESSAGES.INVALID_CREDENTIALS)
     }
 
-    return this.getSanitizedUser(user)
+    return this.sanitizeUser(user)
   }
 
-  // supports jwt-refresh-token strategy
+  /**
+   * Return the `SanitizedUser` corresponding to the given email address and signed refresh token.
+   * Applicable to the Passport JWT refresh token strategy.
+   *
+   * @throws {UnauthorizedException} if no user is found with the given email
+   */
   async getAuthenticatedUserByRefreshToken(email: string, signedRefreshToken: string): Promise<SanitizedUser> {
     const user = await this.prisma.user.findUnique({ where: { email } })
 
@@ -176,7 +211,7 @@ export class AuthService {
       throw new UnauthorizedException(this.ERROR_MESSAGES.INVALID_CREDENTIALS)
     }
 
-    // throw if the user record is missing the hashed value of the refresh token
+    // throw if the user record is missing a refresh token hash
     if (!user.refreshToken) {
       throw new UnauthorizedException(this.ERROR_MESSAGES.INVALID_CREDENTIALS)
     }
@@ -187,12 +222,12 @@ export class AuthService {
       throw new UnauthorizedException(this.ERROR_MESSAGES.INVALID_CREDENTIALS)
     }
 
-    return this.getSanitizedUser(user)
+    return this.sanitizeUser(user)
   }
 
   /**
-   * Return the user corresponding to the `email` in the given JWT token payload, else
-   * `undefined` if the given token cannot be verified or the user is not found.
+   * Return the user corresponding to the `email` contained in the given JWT payload or else `undefined`.
+   * This method may not be necessary if using a PassportJS' JWT strategy to perform this functionality.
    */
   public async getUserByAuthenticationToken(token: string): Promise<SanitizedUser | undefined> {
     const authConfig = this.configService.get<AuthConfig>('auth')
@@ -205,25 +240,27 @@ export class AuthService {
       const user = await this.prisma.user.findUnique({ where: { email: payload.email } })
 
       if (user) {
-        return this.getSanitizedUser(user)
+        return this.sanitizeUser(user)
       }
     }
 
     return undefined
   }
 
-  public getCookiesForLogOut() {
-    return ['Authentication=; HttpOnly; Path=/; Max-Age=0', 'Refresh=; HttpOnly; Path=/; Max-Age=0']
-  }
-
-  public getJwtTokenPayload(user: SanitizedUser): TokenPayload {
+  /**
+   * Return the raw JWT token payload corresponding to the given `SanitizedUser`.
+   */
+  public buildJwtTokenPayload(user: SanitizedUser): TokenPayload {
     return {
       email: user.email,
-      name: user.name ?? '',
+      name: user.name,
     }
   }
 
-  public getCookieWithAccessJwtPayload(tokenPayload: TokenPayload): string {
+  /**
+   * Return an Authentication token cookie with a signed JWT created with the given payload.
+   */
+  public buildSignedAuthenticationTokenCookie(tokenPayload: TokenPayload): string {
     const authConfig = this.configService.get<AuthConfig>('auth')
 
     const token = this.jwtService.sign(tokenPayload, {
@@ -234,7 +271,10 @@ export class AuthService {
     return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${authConfig?.jwt.accessToken.expirationTime}`
   }
 
-  public getCookieWithRefreshJwtPayload(tokenPayload: TokenPayload): { token: string; cookie: string } {
+  /**
+   * Return a Refresh token cookie with a signed JWT created with the given payload.
+   */
+  public buildSignedRefreshTokenCookie(tokenPayload: TokenPayload): { token: string; cookie: string } {
     const authConfig = this.configService.get<AuthConfig>('auth')
 
     const token = this.jwtService.sign(tokenPayload, {
@@ -246,5 +286,12 @@ export class AuthService {
       token,
       cookie: `Refresh=${token}; HttpOnly; Path=/; Max-Age=${authConfig?.jwt.refreshToken.expirationTime}`,
     }
+  }
+
+  /**
+   * Return Authentication and Refresh cookies with Max-Age 0 for sign-out.
+   */
+  public buildSignOutCookies() {
+    return ['Authentication=; HttpOnly; Path=/; Max-Age=0', 'Refresh=; HttpOnly; Path=/; Max-Age=0']
   }
 }

@@ -24,7 +24,6 @@ import { JwtRefreshGuard } from './guards/jwt-refresh.guard'
 import { LocalAuthGuard } from './guards/local-auth.guard'
 import { RequestWithUser } from './types/request-with-user.interface'
 import { SanitizedUser } from './types/sanitized-user.type'
-import { UserResponse } from './types/user-response.type'
 
 @Controller('auth')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -42,7 +41,7 @@ export class AuthController {
     // @todo restrict, send user verification, etc
     this.logger.log(`User registration request: ${dto.email}`)
 
-    return this.authService.registerOrThrow(dto)
+    return this.authService.registerUser(dto)
   }
 
   @Post('change-password')
@@ -51,31 +50,32 @@ export class AuthController {
     @Body() dto: ChangePasswordDto,
     @Res({ passthrough: true }) res: Response,
   ): Promise<void> {
-    this.logger.log(`Change registration request: ${user.email}`)
+    this.logger.log(`Change password request: ${user.email}`)
 
     if (dto.oldPassword === dto.newPassword) {
       throw new BadRequestException(this.ERROR_MESSAGES.INVALID_CHANGE_PASSWORD_MATCH)
     }
 
-    res.setHeader('Set-Cookie', this.authService.getCookiesForLogOut())
+    res.setHeader('Set-Cookie', this.authService.buildSignOutCookies())
     return this.authService.changeUserPassword(user.email, dto)
   }
 
   @Post('sign-in')
   @UseGuards(LocalAuthGuard)
   @HttpCode(HttpStatus.OK) // override nestjs default 201
-  async signIn(@Req() request: RequestWithUser) {
+  async signIn(@Req() request: RequestWithUser): Promise<SanitizedUser> {
     const { user } = request
+    this.logger.log(`Sign-in request: ${user.email}`)
 
-    const payload = this.authService.getJwtTokenPayload(user)
+    const payload = this.authService.buildJwtTokenPayload(user)
 
-    const accessTokenCookie = this.authService.getCookieWithAccessJwtPayload(payload)
+    const authTokenCookie = this.authService.buildSignedAuthenticationTokenCookie(payload)
     const { cookie: refreshTokenCookie, token: signedRefreshToken } =
-      this.authService.getCookieWithRefreshJwtPayload(payload)
+      this.authService.buildSignedRefreshTokenCookie(payload)
 
     await this.authService.setUserRefreshTokenHash(user.email, signedRefreshToken)
 
-    request.res?.setHeader('Set-Cookie', [accessTokenCookie, refreshTokenCookie])
+    request.res?.setHeader('Set-Cookie', [authTokenCookie, refreshTokenCookie])
     return user
   }
 
@@ -83,17 +83,22 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async signOut(@Req() request: RequestWithUser): Promise<void> {
+    this.logger.log(`Sign-out request: ${request.user.email}`)
+
     await this.authService.clearUserRefreshToken(request.user.email)
-    request.res?.setHeader('Set-Cookie', this.authService.getCookiesForLogOut())
+    request.res?.setHeader('Set-Cookie', this.authService.buildSignOutCookies())
   }
 
   @Get('refresh')
   @UseGuards(JwtRefreshGuard)
   @HttpCode(HttpStatus.OK)
-  refreshToken(@Req() request: RequestWithUser): UserResponse<'minimal'> {
-    const accessTokenCookie = this.authService.getCookieWithAccessJwtPayload(request.user)
+  refreshToken(@Req() request: RequestWithUser): SanitizedUser {
+    this.logger.log(`Refresh token request: ${request.user.email}`)
 
-    request.res?.setHeader('Set-Cookie', accessTokenCookie)
+    const payload = this.authService.buildJwtTokenPayload(request.user)
+    const authTokenCookie = this.authService.buildSignedAuthenticationTokenCookie(payload)
+
+    request.res?.setHeader('Set-Cookie', authTokenCookie)
     return request.user
   }
 }

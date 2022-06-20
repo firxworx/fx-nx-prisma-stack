@@ -1,6 +1,6 @@
 import { ExtractJwt, Strategy } from 'passport-jwt'
 import { PassportStrategy } from '@nestjs/passport'
-import { Injectable, UnauthorizedException } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { Request } from 'express'
 
@@ -33,10 +33,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    */
   async validate(payload: TokenPayload): Promise<SanitizedUser> {
     const user = await this.authService.getUserByEmail(payload.email)
-
-    if (!user) {
-      throw new UnauthorizedException()
-    }
 
     return user
   }
