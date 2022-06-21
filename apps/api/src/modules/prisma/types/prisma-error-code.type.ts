@@ -20,7 +20,7 @@ export const PrismaErrorCode = {
   ...PrismaCommonErrorCode,
   ...PrismaMigrationErrorCode,
   ...PrismaQueryErrorCode,
-}
+} as const
 
 /**
  * Type `PrismaErrorCode` representing a union of the `PrismaCommonErrorCode`, `PrismaMigrationErrorCode`,
