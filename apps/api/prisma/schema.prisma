@@ -5,24 +5,26 @@
 // shadow databases: https://www.prisma.io/docs/concepts/components/prisma-migrate/shadow-database
 
 generator client {
-  provider = "prisma-client-js"
-  output   = "../src/generated/prisma-client"
+  provider        = "prisma-client-js"
+  output          = "../src/generated/prisma-client"
   previewFeatures = ["referentialIntegrity"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider             = "postgresql"
+  url                  = env("DATABASE_URL")
   referentialIntegrity = "foreignKeys"
   // shadowDatabaseUrl = env("DATABASE_URL")
 }
 
 model User {
-  id           Int         @id @default(autoincrement())
-  uuid         String      @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  createdAt    DateTime    @default(now()) @db.Timestamptz()
-  updatedAt    DateTime    @updatedAt @db.Timestamptz()
-  verifiedAt   DateTime?   @db.Timestamptz()
-  email        String      @unique
-  name         String?
+  id           Int       @id @default(autoincrement())
+  uuid         String    @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt    DateTime  @default(now()) @db.Timestamptz()
+  updatedAt    DateTime  @updatedAt @db.Timestamptz()
+  verifiedAt   DateTime? @db.Timestamptz()
+  email        String    @unique
+  name         String
+  password     String
+  refreshToken String?
 }

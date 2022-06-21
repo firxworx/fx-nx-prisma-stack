@@ -38,7 +38,7 @@ async function bootstrap() {
   prismaService.enableShutdownHooks(app)
 
   // enable ClassSerializerInterceptor to serialize dto/entity classes returned as responses to json
-  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)))
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector), { excludeExtraneousValues: true }))
 
   // configure ValidationPipe to globally process incoming requests
   app.useGlobalPipes(
