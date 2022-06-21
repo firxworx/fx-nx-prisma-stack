@@ -1,6 +1,6 @@
 import { getGreeting } from '../support/app.po'
 
-describe('fx-nx-prisma-stack', () => {
+describe('ui', () => {
   beforeEach(() => cy.visit('/'))
 
   it('should display welcome message', () => {
@@ -8,6 +8,6 @@ describe('fx-nx-prisma-stack', () => {
     cy.login('my-email@something.com', 'myPassword')
 
     // Function helper example, see `../support/app.po.ts` file
-    getGreeting().contains('Welcome fx-nx-prisma-stack')
+    getGreeting().contains('Welcome ui')
   })
 })
