@@ -34,9 +34,6 @@ export const SessionContextProvider: React.FC<{ children: (isSessionReady: boole
 
   const isSessionReady = !!result
 
-  if (isSessionReady) {
-    console.log('session ready', JSON.stringify(result))
-  }
   return <SessionContext.Provider value={contextValue}>{children(isSessionReady)}</SessionContext.Provider>
 }
 

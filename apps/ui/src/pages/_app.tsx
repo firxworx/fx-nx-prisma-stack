@@ -1,16 +1,49 @@
-import { AppProps } from 'next/app'
+import type { AppProps } from 'next/app'
 import Head from 'next/head'
-import './styles.css'
+import { SWRConfig } from 'swr' // useSWR
+import { SessionContextProvider } from '../context/SessionContextProvider'
+import { ProtectedLayout } from '../components/layout/ProtectedLayout'
+import { PublicLayout } from '../components/layout/PublicLayout'
+import { SessionLoadingScreen } from '../components/layout/SessionLoadingScreen'
 
-function CustomApp({ Component, pageProps }: AppProps) {
+import '../styles/tailwind.css'
+
+// const fetcher = (resource, init) => fetch(resource, init).then((res) => res.json())
+
+const PUBLIC_ROUTES = ['/', '/sign-in']
+
+const isPublicRoute = (routerPath: string) =>
+  PUBLIC_ROUTES.some((route) => routerPath === '/' || routerPath.startsWith(route))
+
+function CustomApp({ Component, pageProps, router }: AppProps) {
   return (
     <>
       <Head>
-        <title>Welcome to ui!</title>
+        <title>UI</title>
       </Head>
-      <main className="app">
-        <Component {...pageProps} />
-      </main>
+      <SWRConfig
+        value={{
+          refreshInterval: 3000,
+          fetcher: (resource, init) => fetch(resource, init).then((res) => res.json()),
+        }}
+      >
+        <SessionContextProvider>
+          {(isSessionReady) =>
+            isPublicRoute(router.asPath) ? (
+              <PublicLayout>
+                <Component {...pageProps} />
+              </PublicLayout>
+            ) : isSessionReady ? (
+              <ProtectedLayout>
+                {/* autherrorlistener, sessiontimer, etc */}
+                <Component {...pageProps} />
+              </ProtectedLayout>
+            ) : (
+              <SessionLoadingScreen />
+            )
+          }
+        </SessionContextProvider>
+      </SWRConfig>
     </>
   )
 }
