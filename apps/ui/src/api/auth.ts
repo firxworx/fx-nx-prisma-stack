@@ -12,6 +12,12 @@ export async function signIn(email: string, password: string): Promise<void> {
   })
 }
 
+export async function signOut() {
+  return apiFetch<void>(`/auth/sign-out`, {
+    method: 'POST',
+  })
+}
+
 export async function fetchSession(): Promise<AuthUser> {
   return apiFetch<AuthUser>(`/auth/session`)
 }
