@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   Body,
-  ClassSerializerInterceptor,
   Controller,
   Get,
   HttpCode,
@@ -11,7 +10,6 @@ import {
   Req,
   Res,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common'
 import { Response } from 'express'
 
@@ -25,8 +23,9 @@ import { LocalAuthGuard } from './guards/local-auth.guard'
 import { RequestWithUser } from './types/request-with-user.interface'
 import { SanitizedUser } from './types/sanitized-user.type'
 
+type SanitizedUserResponse = Pick<SanitizedUser, 'name' | 'email'>
+
 @Controller('auth')
-@UseInterceptors(ClassSerializerInterceptor)
 export class AuthController {
   private logger = new Logger(this.constructor.name)
 
@@ -37,11 +36,12 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  async register(@Body() dto: RegisterUserDto) {
+  async register(@Body() dto: RegisterUserDto): Promise<SanitizedUserResponse> {
     // @todo restrict, send user verification, etc
     this.logger.log(`User registration request: ${dto.email}`)
 
-    return this.authService.registerUser(dto)
+    const { name, email } = await this.authService.registerUser(dto)
+    return { name, email }
   }
 
   @Post('change-password')
@@ -62,10 +62,12 @@ export class AuthController {
 
   @Post('sign-in')
   @UseGuards(LocalAuthGuard)
-  @HttpCode(HttpStatus.OK) // override nestjs default 201
-  async signIn(@Req() request: RequestWithUser): Promise<SanitizedUser> {
+  @HttpCode(HttpStatus.OK) // override default 201
+  async signIn(@Req() request: RequestWithUser): Promise<SanitizedUserResponse> {
     const { user } = request
-    this.logger.log(`Sign-in request: ${user.email}`)
+    const { name, email } = user
+
+    this.logger.log(`Sign-in request: ${user}`)
 
     const payload = this.authService.buildJwtTokenPayload(user)
 
@@ -76,29 +78,50 @@ export class AuthController {
     await this.authService.setUserRefreshTokenHash(user.email, signedRefreshToken)
 
     request.res?.setHeader('Set-Cookie', [authTokenCookie, refreshTokenCookie])
-    return user
+
+    return { name, email }
+  }
+
+  @Get('session')
+  @UseGuards(JwtRefreshGuard)
+  @HttpCode(HttpStatus.OK)
+  session(@Req() request: RequestWithUser): SanitizedUserResponse {
+    const { name, email } = request.user
+
+    return {
+      name,
+      email,
+    }
   }
 
   @Post('sign-out')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async signOut(@Req() request: RequestWithUser): Promise<void> {
-    this.logger.log(`Sign-out request: ${request.user.email}`)
+    const { email } = request.user
+    this.logger.log(`Sign-out request: ${email}`)
 
-    await this.authService.clearUserRefreshToken(request.user.email)
+    await this.authService.clearUserRefreshToken(email)
     request.res?.setHeader('Set-Cookie', this.authService.buildSignOutCookies())
   }
 
   @Get('refresh')
   @UseGuards(JwtRefreshGuard)
   @HttpCode(HttpStatus.OK)
-  refreshToken(@Req() request: RequestWithUser): SanitizedUser {
-    this.logger.log(`Refresh token request: ${request.user.email}`)
+  refreshToken(@Req() request: RequestWithUser): SanitizedUserResponse {
+    const { user } = request
+    const { name, email } = user
 
-    const payload = this.authService.buildJwtTokenPayload(request.user)
+    this.logger.log(`Refresh token request: ${email}`)
+
+    const payload = this.authService.buildJwtTokenPayload(user)
     const authTokenCookie = this.authService.buildSignedAuthenticationTokenCookie(payload)
 
     request.res?.setHeader('Set-Cookie', authTokenCookie)
-    return request.user
+
+    return {
+      name,
+      email,
+    }
   }
 }
