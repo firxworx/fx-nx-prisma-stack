@@ -2,11 +2,11 @@ import { AuthUser } from '../types/auth.types'
 import { apiFetch } from './lib/api-fetch'
 
 // @todo create shared lib with interfaces of api responses
-export async function signIn(username: string, password: string): Promise<void> {
-  return apiFetch(`/auth/sign-in`, {
+export async function signIn(email: string, password: string): Promise<void> {
+  return apiFetch<void>(`/auth/sign-in`, {
     method: 'POST',
     body: JSON.stringify({
-      username,
+      email,
       password,
     }),
   })
