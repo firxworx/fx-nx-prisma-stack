@@ -1,86 +1,68 @@
 import React, { useMemo, useContext } from 'react'
-import { useAsync } from 'react-async-hook'
+import { useQuery } from '@tanstack/react-query'
 import { fetchSession } from '../api/auth'
 import { AuthUser } from '../types/auth.types'
-import { Session, SessionActive, SessionStatus } from '../types/session.types'
-import { isSessionActive } from '../types/type-guards/session.type-guards'
+import { AuthSession, SessionStatus } from '../types/session.types'
+import { isAuthSessionResult } from '../types/type-guards/auth.type-guards'
 
-const SessionContext = React.createContext<{
-  profile: Session<SessionStatus>
-  refresh: () => Promise<AuthUser>
-} | null>(null)
+const SessionContext = React.createContext<AuthSession<SessionStatus> | null>(null)
 
 export const SessionContextProvider: React.FC<{
   children: (isSessionReady: boolean) => React.ReactElement
 }> = ({ children }) => {
-  // @todo - consider using useSwr()
-  // const { data, error, isValidating } = useSWR('/auth/session', fetchSession)
+  const { data: session, refetch, error, status } = useQuery<AuthUser>(['session'], fetchSession, { retry: false })
 
-  // fetch session with setLoading to preserve previous data while loading new data
-  const {
-    loading,
-    result,
-    error,
-    execute: refresh,
-  } = useAsync(fetchSession, [], {
-    setLoading: (state) => ({ ...state, loading: true }),
-  })
-
-  // memoize to ensure stable value
-  const contextValue: { profile: Session<SessionStatus>; refresh: () => Promise<AuthUser> } | null = useMemo(() => {
-    if (result) {
-      return { profile: result, refresh } // set null to trigger infinite reload for dev/debug
+  // memoize to ensure a stable context value
+  const contextValue: AuthSession<SessionStatus> | null = useMemo(() => {
+    if (session) {
+      return { session, refetch } // reminder: set null to trigger infinite reload for dev/debug
     }
 
-    if (loading) {
+    if (status === 'loading') {
       return null
     }
 
     return {
-      profile: { error: (error instanceof Error && error) || new Error('Unknown error loading user data') },
-      refresh,
+      session: undefined,
+      error: (error instanceof Error && error) || new Error(`Unexpected error loading user session: ${String(error)}`),
+      refetch,
     }
-  }, [loading, result, error, refresh])
+  }, [session, error, status, refetch])
 
-  const isSessionReady = !!result
-
+  const isSessionReady = status !== 'loading' && !!session
   return <SessionContext.Provider value={contextValue}>{children(isSessionReady)}</SessionContext.Provider>
 }
 
-export function useSession() {
+export function useSession(): AuthSession<SessionStatus> | null {
   const ctx = useContext(SessionContext)
   return ctx
 }
 
 export function useSessionError(): Error | null {
   const ctx = useContext(SessionContext)
-  return ctx?.profile?.error ? ctx.profile.error : null
+  return ctx?.error ? ctx.error : null
 }
 
-export function useSessionContext(): { profile: SessionActive; refresh: () => Promise<AuthUser> }
-export function useSessionContext(
-  isActiveSessionOptional: boolean,
-): { profile: SessionActive; refresh: () => Promise<AuthUser> } | null
-export function useSessionContext(
-  isActiveSessionOptional?: boolean,
-): { profile: SessionActive; refresh: () => Promise<AuthUser> } | null {
+export function useSessionContext(): AuthSession<SessionStatus.READY>
+export function useSessionContext(isSessionOptional: boolean): AuthSession<SessionStatus.READY> | null
+export function useSessionContext(isSessionOptional?: boolean): AuthSession<SessionStatus.READY> | null {
   const ctx = useContext(SessionContext)
 
-  // this option disables the default behaviour to throw if the session hasn't loaded or is an error
-  if (isActiveSessionOptional && (!ctx || !ctx?.profile || ctx.profile.error)) {
+  // the optional flag disables the default behaviour to throw if the session hasn't loaded or there's an error
+  if (isSessionOptional && (!ctx || !ctx?.session || !!ctx.error)) {
     return null
   }
 
-  if (isSessionActive(ctx?.profile)) {
-    return ctx as { profile: SessionActive; refresh: () => Promise<AuthUser> }
+  if (isAuthSessionResult(ctx)) {
+    return ctx
   }
 
   if (!ctx) {
     throw new Error('User session data not loaded')
   }
 
-  if (ctx.profile.error && ctx.profile.error instanceof Error) {
-    throw ctx.profile.error
+  if (ctx.error && ctx.error instanceof Error) {
+    throw ctx.error
   }
 
   throw new Error('Unexpected API data error: failed to obtain a valid user session')
