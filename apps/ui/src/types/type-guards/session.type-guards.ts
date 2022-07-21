@@ -1,10 +1,9 @@
-import type { SessionActive, SessionError } from '../session.types'
+import type { SessionResult, SessionError } from '../session.types'
+import { isRecord } from './common.type-guards'
 
-const isObject = (x: unknown): boolean => x !== null && typeof x === 'object' && !Array.isArray(x)
-
-export const isSessionActive = (x: unknown): x is SessionActive => {
+export const isSessionActive = (x: unknown): x is SessionResult => {
   return (
-    isObject(x) &&
+    isRecord(x) &&
     Object.prototype.hasOwnProperty.call(x, 'name') &&
     Object.prototype.hasOwnProperty.call(x, 'email') &&
     typeof x['name'] === 'string' &&
@@ -15,7 +14,7 @@ export const isSessionActive = (x: unknown): x is SessionActive => {
 
 export const isSessionError = (x: unknown): x is SessionError => {
   return (
-    isObject(x) &&
+    isRecord(x) &&
     Object.prototype.hasOwnProperty.call(x, 'error') &&
     x['error'] instanceof Error &&
     Object.keys(x).length === 1
