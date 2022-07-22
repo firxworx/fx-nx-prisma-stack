@@ -14,10 +14,11 @@ export interface SignInFormInputs {
 }
 
 export interface SignInFormProps {
-  onSignInRedirectPath?: string
+  signInRedirectPath?: string
+  onSignIn?: () => Promise<unknown>
 }
 
-export const SignInForm: React.FC<SignInFormProps> = ({ onSignInRedirectPath }) => {
+export const SignInForm: React.FC<SignInFormProps> = ({ signInRedirectPath, onSignIn }) => {
   const isMountedRef = useIsMountedRef()
   const { push: routerPush } = useRouter()
 
@@ -35,16 +36,21 @@ export const SignInForm: React.FC<SignInFormProps> = ({ onSignInRedirectPath }) 
 
       try {
         await signIn(email, password)
-        routerPush(onSignInRedirectPath)
+
+        if (typeof onSignIn === 'function') {
+          await onSignIn()
+        }
+
+        routerPush(signInRedirectPath)
       } catch (error: unknown) {
         console.error((error && error instanceof Error && error.message) || String(error))
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- isMountedRef is a ref (eslint false positive)
-    [routerPush, onSignInRedirectPath],
+    [routerPush, signInRedirectPath],
   )
 
-  const [{ loading }, submit] = useAsyncFn(handleSignIn) // if redirecting should prob do it in an effect, no?
+  const [{ loading }, submit] = useAsyncFn(handleSignIn) // @todo if redirecting should maybe do in effect... or refactor for onSignIn
 
   return (
     <form onSubmit={handleSubmit(submit)}>
@@ -63,7 +69,7 @@ export const SignInForm: React.FC<SignInFormProps> = ({ onSignInRedirectPath }) 
         {loading && <div>Loading...</div>}
 
         <div>
-          <input type="submit" className="py-2 px-4 bg-slate-500 rounded-md" />
+          <input type="submit" className="py-2 px-4 bg-slate-300 border-slate-400 rounded-md" />
         </div>
       </div>
     </form>
@@ -71,5 +77,5 @@ export const SignInForm: React.FC<SignInFormProps> = ({ onSignInRedirectPath }) 
 }
 
 SignInForm.defaultProps = {
-  onSignInRedirectPath: SIGN_IN_REDIRECT_PATH,
+  signInRedirectPath: SIGN_IN_REDIRECT_PATH,
 }

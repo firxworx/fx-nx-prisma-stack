@@ -10,7 +10,12 @@ const SessionContext = React.createContext<AuthSession<SessionStatus> | null>(nu
 export const SessionContextProvider: React.FC<{
   children: (isSessionReady: boolean) => React.ReactElement
 }> = ({ children }) => {
-  const { data: session, refetch, error, status } = useQuery<AuthUser>(['session'], fetchSession, { retry: false })
+  const {
+    data: session,
+    refetch,
+    error,
+    status,
+  } = useQuery<AuthUser>(['session'], fetchSession, { retry: false, refetchInterval: 900000 })
 
   // memoize to ensure a stable context value
   const contextValue: AuthSession<SessionStatus> | null = useMemo(() => {

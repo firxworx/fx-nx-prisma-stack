@@ -9,9 +9,10 @@ const SIGN_OUT_REDIRECT_PATH = '/'
 
 export interface SignOutButtonProps {
   onSignOutRedirectPath?: string
+  onSignOut?: () => Promise<unknown>
 }
 
-export const SignOutButton: React.FC<SignOutButtonProps> = ({ onSignOutRedirectPath }) => {
+export const SignOutButton: React.FC<SignOutButtonProps> = ({ onSignOutRedirectPath, onSignOut }) => {
   const isMountedRef = useIsMountedRef()
   const { push: routerPush } = useRouter()
 
@@ -30,6 +31,10 @@ export const SignOutButton: React.FC<SignOutButtonProps> = ({ onSignOutRedirectP
   const handleSignOut = (_event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     try {
       signOutAsync.execute()
+
+      if (typeof onSignOut === 'function') {
+        onSignOut()
+      }
     } catch (error: unknown) {
       console.error((error && error instanceof Error && error.message) || String(error))
     }
