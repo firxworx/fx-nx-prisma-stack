@@ -50,7 +50,7 @@ export class AuthController {
     @Body() dto: ChangePasswordDto,
     @Res({ passthrough: true }) res: Response,
   ): Promise<void> {
-    this.logger.log(`Change password request: ${user.email}`)
+    this.logger.log(`User change password request: ${user.email}`)
 
     if (dto.oldPassword === dto.newPassword) {
       throw new BadRequestException(this.ERROR_MESSAGES.INVALID_CHANGE_PASSWORD_MATCH)
@@ -67,7 +67,7 @@ export class AuthController {
     const { user } = request
     const { name, email } = user
 
-    this.logger.log(`Sign-in request: ${user}`)
+    this.logger.log(`User sign-in: ${user.email} -- ${user.id} -- ${user.uuid} -- ${user.name}`)
 
     const payload = this.authService.buildJwtTokenPayload(user)
 
@@ -87,6 +87,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   session(@Req() request: RequestWithUser): SanitizedUserResponse {
     const { name, email } = request.user
+    this.logger.debug(`User fetch session: ${email}`)
 
     return {
       name,
@@ -99,7 +100,7 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async signOut(@Req() request: RequestWithUser): Promise<void> {
     const { email } = request.user
-    this.logger.log(`Sign-out request: ${email}`)
+    this.logger.log(`User sign-out: ${email}`)
 
     await this.authService.clearUserRefreshToken(email)
     request.res?.setHeader('Set-Cookie', this.authService.buildSignOutCookies())
@@ -112,7 +113,7 @@ export class AuthController {
     const { user } = request
     const { name, email } = user
 
-    this.logger.log(`Refresh token request: ${email}`)
+    this.logger.log(`Auth refresh token request: ${email}`)
 
     const payload = this.authService.buildJwtTokenPayload(user)
     const authTokenCookie = this.authService.buildSignedAuthenticationTokenCookie(payload)
