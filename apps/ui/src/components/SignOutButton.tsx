@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 import { useAsyncCallback } from 'react-async-hook'
 
 import { signOut } from '../api/auth'
-import { useIsMountedRef } from '../hooks/useIsMountedRef'
+import { useIsMounted } from '../hooks/useIsMounted'
 
 const SIGN_OUT_REDIRECT_PATH = '/'
 
@@ -13,24 +13,23 @@ export interface SignOutButtonProps {
 }
 
 export const SignOutButton: React.FC<SignOutButtonProps> = ({ onSignOutRedirectPath, onSignOut }) => {
-  const isMountedRef = useIsMountedRef()
+  const isMounted = useIsMounted()
   const { push: routerPush } = useRouter()
 
   const signOutAsync = useAsyncCallback(async () => {
     await signOut()
-    return true // require a truthy result
+    return true // require truthy result for logic in useEffect
   })
 
   useEffect(() => {
-    if (isMountedRef.current && signOutAsync.result) {
+    if (isMounted() && signOutAsync.result) {
       if (typeof onSignOut === 'function') {
         onSignOut()
       }
 
       routerPush(onSignOutRedirectPath)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- isMountedRef is a ref (eslint false positive)
-  }, [signOutAsync.result, onSignOutRedirectPath, routerPush])
+  }, [signOutAsync.result, onSignOutRedirectPath, routerPush, isMounted, onSignOut])
 
   const handleSignOut = (_event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     try {

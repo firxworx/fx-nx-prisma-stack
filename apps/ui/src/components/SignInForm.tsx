@@ -5,7 +5,7 @@ import { useAsyncFn } from 'react-use'
 
 import { signIn } from '../api/auth'
 import { useSession } from '../context/SessionContextProvider'
-import { useIsMountedRef } from '../hooks/useIsMountedRef'
+import { useIsMounted } from '../hooks/useIsMounted'
 
 const SIGN_IN_REDIRECT_PATH = '/app'
 
@@ -20,7 +20,7 @@ export interface SignInFormProps {
 }
 
 export const SignInForm: React.FC<SignInFormProps> = ({ signInRedirectPath, onSignIn }) => {
-  const isMountedRef = useIsMountedRef()
+  const isMounted = useIsMounted()
   const { push: routerPush } = useRouter()
   const session = useSession()
 
@@ -32,7 +32,7 @@ export const SignInForm: React.FC<SignInFormProps> = ({ signInRedirectPath, onSi
 
   const handleSignIn: SubmitHandler<SignInFormInputs> = useCallback(
     async ({ email, password }) => {
-      if (!isMountedRef.current) {
+      if (!isMounted()) {
         return
       }
 
@@ -51,11 +51,11 @@ export const SignInForm: React.FC<SignInFormProps> = ({ signInRedirectPath, onSi
         console.error((error && error instanceof Error && error.message) || String(error))
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- isMountedRef is a ref (eslint false positive)
-    [routerPush, signInRedirectPath],
+    [routerPush, signInRedirectPath, onSignIn, session, isMounted],
   )
 
-  const [{ loading }, submit] = useAsyncFn(handleSignIn) // @todo if redirecting should maybe do in effect... or refactor for onSignIn
+  // @todo if redirecting should maybe do in effect... or refactor for onSignIn + to implement w/ a react-query mutation
+  const [{ loading }, submit] = useAsyncFn(handleSignIn)
 
   return (
     <form onSubmit={handleSubmit(submit)}>
@@ -74,7 +74,7 @@ export const SignInForm: React.FC<SignInFormProps> = ({ signInRedirectPath, onSi
         {loading && <div>Loading...</div>}
 
         <div>
-          <input type="submit" className="py-2 px-4 bg-slate-300 border-slate-400 rounded-md" />
+          <input type="submit" className="py-2 px-4 bg-sky-700 text-white rounded-md" />
         </div>
       </div>
     </form>
