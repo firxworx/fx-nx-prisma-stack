@@ -1,6 +1,7 @@
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 import '../styles/tailwind.css'
 import { ErrorBoundary } from '../components/layout/ErrorBoundary'
@@ -55,6 +56,8 @@ function CustomApp({ Component, pageProps, router }: AppProps) {
               </AppLayout>
             )}
           </SessionContextProvider>
+          {/* note: by default ReactQueryDevtools is only included in bundles when NODE_ENV 'development' */}
+          <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
       </ErrorBoundary>
     </>

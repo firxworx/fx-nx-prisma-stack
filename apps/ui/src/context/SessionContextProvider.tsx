@@ -1,5 +1,5 @@
-import React, { useMemo, useContext } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import React, { useMemo, useContext, useCallback } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { fetchSession } from '../api/auth'
 import { AuthUser } from '../types/auth.types'
 import { AuthSession, SessionStatus } from '../types/session.types'
@@ -17,22 +17,33 @@ export const SessionContextProvider: React.FC<{
     status,
   } = useQuery<AuthUser>(['session'], fetchSession, { retry: false, refetchInterval: 900000 })
 
+  const queryClient = useQueryClient()
+
+  const invalidateCache = useCallback(async (): Promise<void> => {
+    await queryClient.invalidateQueries(['session'])
+  }, [queryClient])
+
+  const clear = useCallback((): void => {
+    queryClient.removeQueries(['session'])
+  }, [queryClient])
+
   // memoize to ensure a stable context value
   const contextValue: AuthSession<SessionStatus> | null = useMemo(() => {
-    if (session) {
-      return { session, refetch } // reminder: set null to trigger infinite reload for dev/debug
-    }
+    const isLoading = status === 'loading'
 
-    if (status === 'loading') {
-      return null
+    if (session) {
+      return { session, isLoading, refetch, invalidateCache, clear }
     }
 
     return {
       session: undefined,
-      error: (error instanceof Error && error) || new Error(`Unexpected error loading user session: ${String(error)}`),
+      error: (error instanceof Error && error) || new Error(`Unexpected error loading session: ${String(error)}`),
+      isLoading,
       refetch,
+      invalidateCache,
+      clear,
     }
-  }, [session, error, status, refetch])
+  }, [session, status, error, refetch, invalidateCache, clear])
 
   const isSessionReady = status !== 'loading' && !!session
   return <SessionContext.Provider value={contextValue}>{children(isSessionReady)}</SessionContext.Provider>
@@ -45,7 +56,7 @@ export function useSession(): AuthSession<SessionStatus> | null {
 
 export function useSessionError(): Error | null {
   const ctx = useContext(SessionContext)
-  return ctx?.error ? ctx.error : null
+  return ctx?.session && ctx?.error ? ctx.error : null
 }
 
 export function useSessionContext(): AuthSession<SessionStatus.READY>

@@ -46,6 +46,7 @@
     "@tailwindcss/line-clamp": "^0.4.0",
     "@tailwindcss/typography": "^0.5.4",
     "@tanstack/react-query": "^4.0.8",
+    "@tanstack/react-query-devtools": "^4.0.10",
     "add": "^2.0.6",
     "argon2": "^0.28.5",
     "class-transformer": "^0.5.1",

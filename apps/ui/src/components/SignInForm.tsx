@@ -4,6 +4,7 @@ import { useForm, type SubmitHandler } from 'react-hook-form'
 import { useAsyncFn } from 'react-use'
 
 import { signIn } from '../api/auth'
+import { useSession } from '../context/SessionContextProvider'
 import { useIsMountedRef } from '../hooks/useIsMountedRef'
 
 const SIGN_IN_REDIRECT_PATH = '/app'
@@ -21,6 +22,7 @@ export interface SignInFormProps {
 export const SignInForm: React.FC<SignInFormProps> = ({ signInRedirectPath, onSignIn }) => {
   const isMountedRef = useIsMountedRef()
   const { push: routerPush } = useRouter()
+  const session = useSession()
 
   const {
     register,
@@ -40,6 +42,9 @@ export const SignInForm: React.FC<SignInFormProps> = ({ signInRedirectPath, onSi
         if (typeof onSignIn === 'function') {
           await onSignIn()
         }
+
+        // session.clear()
+        await session.refetch()
 
         routerPush(signInRedirectPath)
       } catch (error: unknown) {

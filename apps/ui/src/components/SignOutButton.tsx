@@ -23,6 +23,10 @@ export const SignOutButton: React.FC<SignOutButtonProps> = ({ onSignOutRedirectP
 
   useEffect(() => {
     if (isMountedRef.current && signOutAsync.result) {
+      if (typeof onSignOut === 'function') {
+        onSignOut()
+      }
+
       routerPush(onSignOutRedirectPath)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- isMountedRef is a ref (eslint false positive)
@@ -31,10 +35,6 @@ export const SignOutButton: React.FC<SignOutButtonProps> = ({ onSignOutRedirectP
   const handleSignOut = (_event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     try {
       signOutAsync.execute()
-
-      if (typeof onSignOut === 'function') {
-        onSignOut()
-      }
     } catch (error: unknown) {
       console.error((error && error instanceof Error && error.message) || String(error))
     }
