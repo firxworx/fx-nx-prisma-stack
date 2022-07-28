@@ -1,7 +1,5 @@
-import React, { useMemo, useContext, useCallback } from 'react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { fetchSession } from '../api/auth'
-import { AuthUser } from '../types/auth.types'
+import React, { useMemo, useContext } from 'react'
+import { useApiSession } from '../api/auth'
 import { AuthSession, SessionStatus } from '../types/session.types'
 import { isAuthSessionResult } from '../types/type-guards/auth.type-guards'
 
@@ -10,29 +8,14 @@ const SessionContext = React.createContext<AuthSession<SessionStatus> | null>(nu
 export const SessionContextProvider: React.FC<{
   children: (isSessionReady: boolean) => React.ReactElement
 }> = ({ children }) => {
-  const {
-    data: session,
-    refetch,
-    error,
-    status,
-  } = useQuery<AuthUser>(['session'], fetchSession, { retry: false, refetchInterval: 900000 })
-
-  const queryClient = useQueryClient()
-
-  const invalidateCache = useCallback(async (): Promise<void> => {
-    await queryClient.invalidateQueries(['session'])
-  }, [queryClient])
-
-  const clear = useCallback((): void => {
-    queryClient.removeQueries(['session'])
-  }, [queryClient])
+  const { data: session, refetch, error, status, invalidate, remove } = useApiSession()
 
   // memoize to ensure a stable context value
   const contextValue: AuthSession<SessionStatus> | null = useMemo(() => {
     const isLoading = status === 'loading'
 
     if (session) {
-      return { session, isLoading, refetch, invalidateCache, clear }
+      return { session, isLoading, refetch, invalidate, remove }
     }
 
     return {
@@ -40,10 +23,10 @@ export const SessionContextProvider: React.FC<{
       error: (error instanceof Error && error) || new Error(`Unexpected error loading session: ${String(error)}`),
       isLoading,
       refetch,
-      invalidateCache,
-      clear,
+      invalidate,
+      remove,
     }
-  }, [session, status, error, refetch, invalidateCache, clear])
+  }, [session, status, error, refetch, invalidate, remove])
 
   const isSessionReady = status !== 'loading' && !!session
   return <SessionContext.Provider value={contextValue}>{children(isSessionReady)}</SessionContext.Provider>

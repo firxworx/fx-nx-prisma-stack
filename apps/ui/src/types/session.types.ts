@@ -9,8 +9,8 @@ export enum SessionStatus {
 export interface SessionBase {
   isLoading: boolean
   refetch: () => Promise<QueryObserverResult<AuthUser, unknown>>
-  invalidateCache: () => Promise<void>
-  clear: () => void
+  invalidate: () => Promise<void>
+  remove: () => void
 }
 
 export interface SessionResult extends SessionBase {
