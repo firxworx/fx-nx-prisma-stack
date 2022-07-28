@@ -14,17 +14,17 @@ import { AppLayout } from '../components/layout/AppLayout'
 import { useState } from 'react'
 
 const PUBLIC_ROUTES = ['/', '/sign-in']
-const NAVIGATION_LINKS = [
+
+const PUBLIC_NAVIGATION_LINKS = [{ title: 'Sign-In', href: '/sign-in' }]
+const AUTH_NAVIGATION_LINKS = [
   { title: 'App', href: '/app' },
   { title: 'Secret', href: '/secret' },
-  { title: 'Sign-In', href: '/sign-in' },
 ]
 
 const isPublicRoute = (routerPath: string) =>
   routerPath === '/' ? true : PUBLIC_ROUTES.some((route) => (route === '/' ? false : routerPath.startsWith(route)))
 
-// @todo - some setting in vscode/nx/prettier/? keeps _intermittently_ removing the `AppProps` type - find and fix!
-
+// prettier-ignore - preserve AppProps typing
 function CustomApp({ Component, pageProps, router }: AppProps) {
   const [queryClient] = useState(() => new QueryClient())
 
@@ -33,14 +33,14 @@ function CustomApp({ Component, pageProps, router }: AppProps) {
       <Head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="initial-scale=1.0, width=device-width" />
-        <meta name="description" content="Web Application" key="description" />
-        <title>UI</title>
+        <meta name="description" content={process.env.NEXT_PUBLIC_SITE_META_DESCRIPTION} key="description" />
+        <title>{process.env.NEXT_PUBLIC_SITE_TITLE}</title>
       </Head>
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
           <SessionContextProvider>
             {(isSessionReady) => (
-              <AppLayout navigationLinks={NAVIGATION_LINKS}>
+              <AppLayout navigationLinks={isSessionReady ? AUTH_NAVIGATION_LINKS : PUBLIC_NAVIGATION_LINKS}>
                 {isPublicRoute(router.asPath) ? (
                   <PublicLayout>
                     <Component {...pageProps} />
@@ -56,7 +56,7 @@ function CustomApp({ Component, pageProps, router }: AppProps) {
               </AppLayout>
             )}
           </SessionContextProvider>
-          {/* note: by default ReactQueryDevtools is only included in bundles when NODE_ENV 'development' */}
+          {/* note: by default ReactQueryDevtools is only included in bundles when NODE_ENV is 'development' */}
           <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
       </ErrorBoundary>
