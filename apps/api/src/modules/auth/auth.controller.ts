@@ -67,7 +67,7 @@ export class AuthController {
     const { user } = request
     const { name, email } = user
 
-    this.logger.log(`User sign-in: ${user.email} -- ${user.id} -- ${user.uuid} -- ${user.name}`)
+    this.logger.log(`User sign-in: ${user.email} <${user.id}> <${user.uuid}> <${user.name}>`)
 
     const payload = this.authService.buildJwtTokenPayload(user)
 

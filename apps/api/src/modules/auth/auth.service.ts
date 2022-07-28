@@ -128,7 +128,7 @@ export class AuthService {
   }
 
   /**
-   * Save a user's refresh token hash, as computed from the given signed refresh token.
+   * Save a user's refresh token hash to the database, as computed from the given signed refresh token.
    */
   async setUserRefreshTokenHash(email: string, signedToken: string): Promise<void> {
     const refreshTokenHash = await this.passwordService.hash(signedToken)
@@ -148,7 +148,7 @@ export class AuthService {
   }
 
   /**
-   * Reset (set to `null`) a user's refresh token hash.
+   * Reset (set to `null`) a user's refresh token hash in the database.
    */
   async clearUserRefreshToken(email: string): Promise<void> {
     await this.prisma.user.update({
