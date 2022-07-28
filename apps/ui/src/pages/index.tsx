@@ -2,10 +2,10 @@ import { HomeIcon } from '@heroicons/react/outline'
 import type { NextPage } from 'next'
 import { SignInForm } from '../components/SignInForm'
 import { SignOutButton } from '../components/SignOutButton'
-import { useSessionContext } from '../context/SessionContextProvider'
+import { useAuthSession } from '../context/SessionContextProvider'
 
 export const IndexPage: NextPage = (_props) => {
-  const session = useSessionContext(true)
+  const session = useAuthSession(true)
 
   return (
     <div className="flex flex-col items-center">

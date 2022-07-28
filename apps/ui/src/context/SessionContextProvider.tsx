@@ -37,18 +37,13 @@ export function useSession(): AuthSession<SessionStatus> | null {
   return ctx
 }
 
-export function useSessionError(): Error | null {
-  const ctx = useContext(SessionContext)
-  return ctx?.session && ctx?.error ? ctx.error : null
-}
-
-export function useSessionContext(): AuthSession<SessionStatus.READY>
-export function useSessionContext(isSessionOptional: boolean): AuthSession<SessionStatus.READY> | null
-export function useSessionContext(isSessionOptional?: boolean): AuthSession<SessionStatus.READY> | null {
+export function useAuthSession(): AuthSession<SessionStatus.READY>
+export function useAuthSession(isSessionOptional: boolean): AuthSession<SessionStatus.READY> | null
+export function useAuthSession(isSessionOptional?: boolean): AuthSession<SessionStatus.READY> | null {
   const ctx = useContext(SessionContext)
 
-  // the optional flag disables the default behaviour to throw if the session hasn't loaded or there's an error
-  if (isSessionOptional && (!ctx || !ctx?.session || !!ctx.error)) {
+  // the optional flag disables the default behaviour to throw if the session hasn't loaded yet
+  if (isSessionOptional && (!ctx || !ctx?.session)) {
     return null
   }
 
