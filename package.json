@@ -2,6 +2,9 @@
   "name": "fx-nx-prisma-stack",
   "version": "0.1.0",
   "license": "Apache-2.0",
+  "engines": {
+    "npm": "please-use-yarn"
+  },
   "prisma": {
     "seed": "ts-node apps/api/prisma/seed.ts",
     "schema": "apps/api/prisma/schema.prisma"
@@ -55,6 +58,7 @@
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.6",
     "core-js": "^3.6.5",
+    "csurf": "^1.11.0",
     "dotenv": "^16.0.1",
     "dotenv-cli": "^5.1.0",
     "helmet": "^5.1.0",
@@ -93,6 +97,7 @@
     "@testing-library/react": "13.3.0",
     "@types/compression": "^1.7.2",
     "@types/cookie-parser": "^1.4.3",
+    "@types/csurf": "^1.11.2",
     "@types/jest": "27.4.1",
     "@types/node": "18.0.0",
     "@types/passport-jwt": "^3.0.6",

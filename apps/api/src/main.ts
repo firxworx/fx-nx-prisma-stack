@@ -11,6 +11,7 @@ import { NestFactory, Reflector } from '@nestjs/core'
 import { useContainer } from 'class-validator'
 import helmet from 'helmet'
 import * as cookieParser from 'cookie-parser'
+import * as csurf from 'csurf'
 import * as compression from 'compression'
 
 import { AppModule } from './app.module'
@@ -66,7 +67,7 @@ async function bootstrap() {
     }),
   )
 
-  // enable cors for REST endpoints only (graphql/apollo requires separate configuration if in use)
+  // enable cors for REST endpoints only (graphql/apollo requires separate configuration if used)
   app.enableCors({
     origin,
     credentials: true, // required for auth cookies
@@ -76,6 +77,9 @@ async function bootstrap() {
 
   // use cookie-parser express middleware to populate `req.cookies`
   app.use(cookieParser())
+
+  // use csurf for csrf/xsrf protection (must follow cookie-parser initialization)
+  app.use(csurf({ cookie: { key: '_csrf', sameSite: true } }))
 
   // conditionally enable express middleware for compression
   if (enableCompression) {
