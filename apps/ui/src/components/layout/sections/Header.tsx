@@ -8,7 +8,7 @@ import { MenuIcon, XIcon, CloudIcon } from '@heroicons/react/outline'
 
 import type { NavigationLink } from '../../../types/navigation.types'
 import { useAuthSession } from '../../../context/SessionContextProvider'
-import { SessionMenu } from '../menus/SessionMenu'
+import { UserProfileMenu } from '../menus/UserProfileMenu'
 
 export interface HeaderProps {
   contentConstraintStyle: string
@@ -21,7 +21,7 @@ export interface HeaderProps {
  */
 const LogoLink: React.FC<{ href?: string; appendClassName?: string }> = ({ href, appendClassName }) => {
   return (
-    <Link href={href}>
+    <Link href={href ?? '/'}>
       <a className={clsx('inline-block w-fit relative', appendClassName)}>
         <span className="sr-only">{process.env.NEXT_PUBLIC_PROJECT_ORG} Home</span>
         <CloudIcon className="h-8 sm:h-10 w-auto text-slate-500" />
@@ -96,7 +96,7 @@ const DesktopNavMenu: React.FC<Pick<HeaderProps, 'navigationLinks'>> = ({ naviga
             linkCurrentClassName={'text-slate-900'}
           />
         </div>
-        {session && <SessionMenu name={session.session.name} />}
+        {session && <UserProfileMenu name={session.session.name} />}
       </div>
     </div>
   )
