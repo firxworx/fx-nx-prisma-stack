@@ -83,7 +83,7 @@ export class AuthController {
   }
 
   @Get('session')
-  @UseGuards(JwtRefreshGuard)
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   session(@Req() request: RequestWithUser): SanitizedUserResponse {
     const { name, email } = request.user
