@@ -5,7 +5,7 @@ import { useAsyncCallback } from 'react-async-hook'
 import { signOut } from '../api/auth'
 import { useIsMounted } from '../hooks/useIsMounted'
 
-const SIGN_OUT_REDIRECT_PATH = '/'
+const DEFAULT_SIGN_OUT_REDIRECT_PATH = '/'
 
 export interface SignOutButtonProps {
   onSignOutRedirectPath?: string
@@ -27,7 +27,7 @@ export const SignOutButton: React.FC<SignOutButtonProps> = ({ onSignOutRedirectP
         onSignOut()
       }
 
-      routerPush(onSignOutRedirectPath)
+      routerPush(onSignOutRedirectPath ?? DEFAULT_SIGN_OUT_REDIRECT_PATH)
     }
   }, [signOutAsync.result, onSignOutRedirectPath, routerPush, isMounted, onSignOut])
 
@@ -47,5 +47,5 @@ export const SignOutButton: React.FC<SignOutButtonProps> = ({ onSignOutRedirectP
 }
 
 SignOutButton.defaultProps = {
-  onSignOutRedirectPath: SIGN_OUT_REDIRECT_PATH,
+  onSignOutRedirectPath: DEFAULT_SIGN_OUT_REDIRECT_PATH,
 }

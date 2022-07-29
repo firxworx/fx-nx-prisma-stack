@@ -1,14 +1,14 @@
 import type { NextPage } from 'next'
 import { SignInForm } from '../components/SignInForm'
 import { SignOutButton } from '../components/SignOutButton'
-import { useAuthSession } from '../context/SessionContextProvider'
+import { useSessionContext } from '../context/SessionContextProvider'
 
 export const SignInPage: NextPage = (_props) => {
-  const session = useAuthSession(true)
+  const session = useSessionContext()
 
   return (
     <div>
-      {session ? (
+      {session?.session ? (
         <div>
           <div>Hello {session.session.name}, you are signed in.</div>
           <div className="mt-4">
@@ -16,7 +16,7 @@ export const SignInPage: NextPage = (_props) => {
           </div>
         </div>
       ) : (
-        <SignInForm onSignIn={async () => session?.refetch()} />
+        <SignInForm />
       )}
     </div>
   )

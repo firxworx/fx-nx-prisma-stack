@@ -46,7 +46,11 @@ export async function apiFetch<T>(path: string, options?: RequestInit): Promise<
   } catch (error: unknown) {
     // getApiEvents().emit(EVENT_NETWORK_ERROR)
 
-    // return via a rejected promise to provide the error to the calling hook or component
-    return Promise.reject(error)
+    // return via a rejected promise to provide the error to the calling hook/component
+    if (error instanceof Error) {
+      return Promise.reject(error)
+    }
+
+    return Promise.reject(new Error(String(error)))
   }
 }

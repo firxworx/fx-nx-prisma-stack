@@ -32,7 +32,7 @@ export const SessionContextProvider: React.FC<{
   return <SessionContext.Provider value={contextValue}>{children(isSessionReady)}</SessionContext.Provider>
 }
 
-export function useSession(): AuthSession<SessionStatus> | null {
+export function useSessionContext(): AuthSession<SessionStatus> | null {
   const ctx = useContext(SessionContext)
   return ctx
 }
