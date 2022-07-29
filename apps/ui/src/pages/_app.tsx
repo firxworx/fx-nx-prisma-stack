@@ -1,19 +1,19 @@
+import { useState } from 'react'
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 import '../styles/tailwind.css'
+
 import { ErrorBoundary } from '../components/layout/ErrorBoundary'
-import { SessionContextProvider } from '../context/SessionContextProvider'
+import { SessionLoadingScreen } from '../components/layout/SessionLoadingScreen'
+import { AppLayout } from '../components/layout/AppLayout'
 import { ProtectedLayout } from '../components/layout/ProtectedLayout'
 import { PublicLayout } from '../components/layout/PublicLayout'
-import { SessionLoadingScreen } from '../components/layout/SessionLoadingScreen'
+import { SessionContextProvider } from '../context/SessionContextProvider'
 
-import { AppLayout } from '../components/layout/AppLayout'
-import { useState } from 'react'
-
-const PUBLIC_ROUTES = ['/', '/sign-in']
+const PUBLIC_ROUTES = ['/', '/sign-in'] // all public routes must be whitelisted here
 
 const PUBLIC_NAVIGATION_LINKS = [{ title: 'Sign-In', href: '/sign-in' }]
 const AUTH_NAVIGATION_LINKS = [
@@ -22,7 +22,9 @@ const AUTH_NAVIGATION_LINKS = [
 ]
 
 const isPublicRoute = (routerPath: string) =>
-  routerPath === '/' ? true : PUBLIC_ROUTES.some((route) => (route === '/' ? false : routerPath.startsWith(route)))
+  routerPath === '/'
+    ? true
+    : PUBLIC_ROUTES.concat(['/500', '/404']).some((route) => (route === '/' ? false : routerPath.startsWith(route)))
 
 // prettier-ignore - preserve AppProps typing
 function CustomApp({ Component, pageProps, router }: AppProps) {

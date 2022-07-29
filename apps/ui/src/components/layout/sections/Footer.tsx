@@ -15,7 +15,7 @@ export const Footer: React.FC<FooterProps> = ({ contentConstraintStyle, containe
       <div
         className={clsx(
           'flex flex-col sm:flex-row items-center justify-center w-full mx-auto text-center py-4',
-          'text-sm font-medium leading-none text-brand-slate-800',
+          'text-xs font-normal leading-none text-brand-slate-800',
           contentConstraintStyle,
           containerXPaddingStyle,
         )}
