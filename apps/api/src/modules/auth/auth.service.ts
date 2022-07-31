@@ -268,7 +268,9 @@ export class AuthService {
       expiresIn: `${authConfig?.jwt.accessToken.expirationTime}s`,
     })
 
-    return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${authConfig?.jwt.accessToken.expirationTime}`
+    const secureCookie = process.env.NODE_ENV === 'production' ? 'Secure; ' : ''
+
+    return `Authentication=${token}; HttpOnly; ${secureCookie}Path=/; Max-Age=${authConfig?.jwt.accessToken.expirationTime}`
   }
 
   /**
@@ -282,9 +284,11 @@ export class AuthService {
       expiresIn: `${authConfig?.jwt.refreshToken.expirationTime}s`,
     })
 
+    const secureCookie = process.env.NODE_ENV === 'production' ? 'Secure; ' : ''
+
     return {
       token,
-      cookie: `Refresh=${token}; HttpOnly; Path=/; Max-Age=${authConfig?.jwt.refreshToken.expirationTime}`,
+      cookie: `Refresh=${token}; HttpOnly; ${secureCookie}Path=/; Max-Age=${authConfig?.jwt.refreshToken.expirationTime}`,
     }
   }
 
@@ -292,6 +296,11 @@ export class AuthService {
    * Return Authentication and Refresh cookies with Max-Age 0 for sign-out.
    */
   public buildSignOutCookies() {
-    return ['Authentication=; HttpOnly; Path=/; Max-Age=0', 'Refresh=; HttpOnly; Path=/; Max-Age=0']
+    const secureCookie = process.env.NODE_ENV === 'production' ? 'Secure; ' : ''
+
+    return [
+      `Authentication=; HttpOnly; ${secureCookie}Path=/; Max-Age=0`,
+      `Refresh=; HttpOnly; ${secureCookie}Path=/; Max-Age=0`,
+    ]
   }
 }
