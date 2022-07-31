@@ -3,17 +3,19 @@ import { useRouter } from 'next/router'
 import { Menu, Transition } from '@headlessui/react'
 import clsx from 'clsx'
 
-export interface SessionMenuProps {
+export interface UserProfileMenuProps {
   name: string
 }
 
 const menuItems = ['My Profile', 'Settings', 'Sign-Out'] as const
 
 /**
- * Menu with options relevant to the user's session + preferences, including sign-out.
- * Intended for desktop viewports, the user's first initial is rendered inside an avatar-esque circle.
+ * Drop-down menu (for desktop viewports) with options relevant to the user's session + preferences,
+ * including sign-out.
+ *
+ * The first initial is rendered inside an avatar-esque circle.
  */
-export const UserSessionMenu: React.FC<SessionMenuProps> = ({ name }) => {
+export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({ name }) => {
   const router = useRouter()
 
   const handleMenuItemClick = useCallback(
