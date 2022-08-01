@@ -5,8 +5,6 @@ import { useAuthSignOut } from '../api/auth'
 import { useIsMounted } from '../hooks/useIsMounted'
 import { Spinner } from './elements/Spinner'
 
-const DEFAULT_SIGN_OUT_REDIRECT_PATH = '/'
-
 export interface SignOutButtonProps {
   signOutRedirectPath?: string
   onSignOut?: () => Promise<unknown>
@@ -25,7 +23,7 @@ export const SignOutButton: React.FC<SignOutButtonProps> = ({ signOutRedirectPat
       }
 
       if (isMounted()) {
-        routerPush(signOutRedirectPath ?? DEFAULT_SIGN_OUT_REDIRECT_PATH)
+        routerPush(signOutRedirectPath ?? process.env.NEXT_PUBLIC_DEFAULT_SIGN_OUT_REDIRECT_PATH ?? '/')
       }
     }
   }, [isSuccess, isMounted, routerPush, onSignOut, signOutRedirectPath])
@@ -48,8 +46,4 @@ export const SignOutButton: React.FC<SignOutButtonProps> = ({ signOutRedirectPat
       <span>Sign Out</span>
     </button>
   )
-}
-
-SignOutButton.defaultProps = {
-  signOutRedirectPath: DEFAULT_SIGN_OUT_REDIRECT_PATH,
 }

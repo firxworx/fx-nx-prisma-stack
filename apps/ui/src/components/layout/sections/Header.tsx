@@ -105,8 +105,6 @@ const DesktopNavMenu: React.FC<Pick<HeaderProps, 'navigationLinks'>> = ({ naviga
   )
 }
 
-const DEFAULT_SIGN_OUT_REDIRECT_PATH = '/'
-
 /**
  * Mobile navigation menu body, intended for rendering as a child of HeadlessUI's `Popover.Panel`.
  *
@@ -124,7 +122,7 @@ const MobileNavMenu: React.FC<
 
   useEffect(() => {
     if (isSignOutSuccess && isMounted()) {
-      routerPush(DEFAULT_SIGN_OUT_REDIRECT_PATH)
+      routerPush(process.env.NEXT_PUBLIC_DEFAULT_SIGN_OUT_REDIRECT_PATH ?? '/')
     }
   }, [isSignOutSuccess, isMounted, routerPush])
 
