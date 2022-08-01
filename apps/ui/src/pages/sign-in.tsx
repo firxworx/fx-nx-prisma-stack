@@ -12,7 +12,7 @@ export const SignInPage: NextPage = (_props) => {
         <div>
           <div>Hello {session.session.name}, you are signed in.</div>
           <div className="mt-4">
-            <SignOutButton onSignOut={() => Promise.resolve(session.remove())} />
+            <SignOutButton />
           </div>
         </div>
       ) : (

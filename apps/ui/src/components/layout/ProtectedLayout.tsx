@@ -1,7 +1,7 @@
 import type { PropsWithChildren } from 'react'
 
-import { SignOutButton } from '../SignOutButton'
 import { useAuthSession } from '../../context/SessionContextProvider'
+import { SignOutButton } from '../SignOutButton'
 
 export const ProtectedLayout: React.FC<PropsWithChildren> = ({ children }) => {
   const session = useAuthSession()
@@ -11,7 +11,7 @@ export const ProtectedLayout: React.FC<PropsWithChildren> = ({ children }) => {
       <h1 className="text-xl sm:text-2xl">Protected Layout</h1>
       <h2 className="text-base">Hello {session.session.name}</h2>
       <div className="my-4">
-        <SignOutButton onSignOut={() => Promise.resolve(session.remove())} />
+        <SignOutButton />
       </div>
       <div>{children}</div>
     </div>

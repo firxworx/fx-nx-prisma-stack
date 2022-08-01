@@ -14,7 +14,7 @@ export const IndexPage: NextPage = (_props) => {
       {session ? (
         <div>
           <div>Hello {session.session.name}</div>
-          <SignOutButton onSignOut={() => Promise.resolve(session.remove())} />
+          <SignOutButton />
         </div>
       ) : (
         <SignInForm />
