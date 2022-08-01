@@ -1,12 +1,12 @@
 # fx-nx-prisma-stack
 
-A full-stack example project in TypeScript powered by NextJS + NestJS with database persistence via Prisma + Postgres.
+A full-stack example TypeScript project in powered by NextJS + NestJS with data persistence via Prisma + Postgres.
 
-Front-end styles are powered by TailwindCSS.
+The front-end leverages react-query + react-hook-form and is styled using TailwindCSS.
 
-This project's monorepo is managed by the [Nx build system](https://nx.dev) with package management via yarn.
+This project's monorepo is managed by the [Nx build system](https://nx.dev) using yarn as the package manager.
 
-This repo was created as a familiarity exercise + feasibility assessment of Prisma that can also serve as a project starter.
+This repo was created as an exercise to build greater personal familiarity with Prisma, react-hook-form, react-query, and others that are popular yet I haven't had the opportunity to work with very much. The code can serve as a full-stack project starter that — at the time of writing — incorporates some of the best projects in the TypeScript ecosystem.
 
 ## Development
 
@@ -61,3 +61,9 @@ Running generators:
 Libraries are shareable across libraries and applications. They can be imported via `@fx-nx-prisma-stack/my-lib`. Nx automatically manages the dependencies within the project.
 
 Run `nx graph` to generate a diagram of the dependencies within the workspace.
+
+## Acknowledgements
+
+- Theodorus Clarence for the foundations of reusable form input components compatible with react-hook-form (released under MIT license)
+  - <https://github.com/theodorusclarence/ts-nextjs-tailwind-starter>
+  - <https://github.com/theodorusclarence/expansion-pack>
