@@ -1,14 +1,17 @@
-import React, { Fragment } from 'react'
+import React, { Fragment, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import clsx from 'clsx'
 import { Popover, Transition } from '@headlessui/react'
 
 import { MenuIcon, XIcon, CloudIcon } from '@heroicons/react/outline'
+import { LogoutIcon } from '@heroicons/react/solid'
 
 import type { NavigationLink } from '../../../types/navigation.types'
-import { useAuthSession } from '../../../context/SessionContextProvider'
+import { useAuthSession, useSessionContext } from '../../../context/SessionContextProvider'
+import { useAuthSignOut } from '../../../api/auth'
 import { UserProfileMenu } from '../menus/UserProfileMenu'
+import { useIsMounted } from '../../../hooks/useIsMounted'
 
 export interface HeaderProps {
   contentConstraintStyle: string
@@ -102,6 +105,8 @@ const DesktopNavMenu: React.FC<Pick<HeaderProps, 'navigationLinks'>> = ({ naviga
   )
 }
 
+const DEFAULT_SIGN_OUT_REDIRECT_PATH = '/'
+
 /**
  * Mobile navigation menu body, intended for rendering as a child of HeadlessUI's `Popover.Panel`.
  *
@@ -111,12 +116,26 @@ const DesktopNavMenu: React.FC<Pick<HeaderProps, 'navigationLinks'>> = ({ naviga
 const MobileNavMenu: React.FC<
   Pick<HeaderProps, 'navigationLinks'> & { isMenuOpen: boolean; onMenuItemClick: () => void }
 > = ({ navigationLinks, isMenuOpen, onMenuItemClick }) => {
+  const { push: routerPush } = useRouter()
+
+  const session = useSessionContext()
+  const isMounted = useIsMounted()
+  const { signOut, isSuccess: isSignOutSuccess } = useAuthSignOut()
+
+  useEffect(() => {
+    if (isSignOutSuccess && isMounted()) {
+      routerPush(DEFAULT_SIGN_OUT_REDIRECT_PATH)
+    }
+  }, [isSignOutSuccess, isMounted, routerPush])
+
   // @todo listen for router events for navigation change -- more idiomatic and explicit vs. click events
   const handleMenuLinkClick = () => {
     if (isMenuOpen) {
       onMenuItemClick()
     }
   }
+
+  const linkClassName = 'w-full px-5 py-2 ui-focus ui-focus-inset text-lg font-medium'
 
   return (
     <div className="rounded-b-lg shadow-lg bg-slate-200 ring-1 ring-black ring-opacity-5 overflow-hidden">
@@ -135,15 +154,28 @@ const MobileNavMenu: React.FC<
           </Popover.Button>
         </div>
       </div>
-      <div className="py-6">
-        <div className="space-y-1 text-slate-600">
+      <div className="py-6 text-slate-600">
+        <div className="space-y-1">
           <MenuLinks
             navigationLinks={navigationLinks}
-            linkClassName={clsx('block w-full px-5 py-2 ui-focus ui-focus-inset text-lg font-medium')}
+            linkClassName={clsx('block', linkClassName)}
             linkCurrentClassName={'bg-slate-100 text-slate-500'}
             onLinkClick={handleMenuLinkClick}
           />
         </div>
+        {session?.session && (
+          <div className="mt-3">
+            <button
+              type="button"
+              className={clsx('flex items-center justify-start text-sky-700', linkClassName)}
+              role="menuitem"
+              onClick={() => signOut()}
+            >
+              <LogoutIcon className="inline-block h-5 w-5 mr-2" aria-hidden />
+              <span>Sign Out</span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
