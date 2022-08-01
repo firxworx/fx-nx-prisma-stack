@@ -79,15 +79,26 @@ export async function signOut(): Promise<void> {
   })
 }
 
+/**
+ * Hook to request sign out from the back-end API. Clears response cache on successful sign-out.
+ */
 export function useAuthSignOut() {
   const queryClient = useQueryClient()
 
-  const logoutMutation = useMutation(authQueryKeys.signOut, signOut, {
+  const signOutMutation = useMutation(authQueryKeys.signOut, signOut, {
     retry: false,
     onSuccess: () => {
       queryClient.clear()
     },
   })
 
-  return [logoutMutation.mutateAsync, logoutMutation.isLoading]
+  const { mutateAsync, error, isLoading, isSuccess, isError } = signOutMutation
+
+  return {
+    signOut: mutateAsync,
+    error,
+    isLoading,
+    isSuccess,
+    isError,
+  }
 }

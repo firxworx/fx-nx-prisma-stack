@@ -1,51 +1,55 @@
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
-import { useAsyncCallback } from 'react-async-hook'
 
-import { signOut } from '../api/auth'
+import { useAuthSignOut } from '../api/auth'
 import { useIsMounted } from '../hooks/useIsMounted'
+import { Spinner } from './elements/Spinner'
 
 const DEFAULT_SIGN_OUT_REDIRECT_PATH = '/'
 
 export interface SignOutButtonProps {
-  onSignOutRedirectPath?: string
+  signOutRedirectPath?: string
   onSignOut?: () => Promise<unknown>
 }
 
-export const SignOutButton: React.FC<SignOutButtonProps> = ({ onSignOutRedirectPath, onSignOut }) => {
+export const SignOutButton: React.FC<SignOutButtonProps> = ({ signOutRedirectPath, onSignOut }) => {
   const isMounted = useIsMounted()
   const { push: routerPush } = useRouter()
 
-  const signOutAsync = useAsyncCallback(async () => {
-    await signOut()
-    return true // require truthy result for logic in useEffect
-  })
+  const { signOut, isLoading, isSuccess, isError } = useAuthSignOut() // @todo - add errors globally (toast?) or to sign-out
 
   useEffect(() => {
-    if (isMounted() && signOutAsync.result) {
+    if (isSuccess) {
       if (typeof onSignOut === 'function') {
         onSignOut()
       }
 
-      routerPush(onSignOutRedirectPath ?? DEFAULT_SIGN_OUT_REDIRECT_PATH)
+      if (isMounted()) {
+        routerPush(signOutRedirectPath ?? DEFAULT_SIGN_OUT_REDIRECT_PATH)
+      }
     }
-  }, [signOutAsync.result, onSignOutRedirectPath, routerPush, isMounted, onSignOut])
+  }, [isSuccess, isMounted, routerPush, onSignOut, signOutRedirectPath])
 
-  const handleSignOut = (_event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    try {
-      signOutAsync.execute()
-    } catch (error: unknown) {
-      console.error((error && error instanceof Error && error.message) || String(error))
+  const handleSignOut = async () => {
+    if (!isMounted()) {
+      return
     }
+
+    await signOut()
   }
 
   return (
-    <button className="px-4 py-2 rounded-md bg-sky-700 text-white" onClick={handleSignOut}>
-      Sign Out
+    <button
+      className="inline-flex items-center px-4 py-2 rounded-md bg-sky-700 text-white"
+      disabled={isLoading}
+      onClick={handleSignOut}
+    >
+      {isLoading && !isError && <Spinner size="sm" appendClassName="mr-1" />}
+      <span>Sign Out</span>
     </button>
   )
 }
 
 SignOutButton.defaultProps = {
-  onSignOutRedirectPath: DEFAULT_SIGN_OUT_REDIRECT_PATH,
+  signOutRedirectPath: DEFAULT_SIGN_OUT_REDIRECT_PATH,
 }
