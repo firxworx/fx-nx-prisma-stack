@@ -1,11 +1,12 @@
 import { useRouter } from 'next/router'
 import { useCallback, useEffect } from 'react'
-import { useForm, type SubmitHandler } from 'react-hook-form'
+import { FormProvider, useForm, type SubmitHandler } from 'react-hook-form'
 
 import { useAuthSignIn } from '../api/auth'
 import { useIsMounted } from '../hooks/useIsMounted'
+import { FormButton } from './forms/FormButton'
 
-const DEAFULT_SIGN_IN_REDIRECT_PATH = '/app'
+const DEFAULT_SIGN_IN_REDIRECT_PATH = '/app'
 
 export interface SignInFormInputs {
   email: string
@@ -21,13 +22,14 @@ export const SignInForm: React.FC<SignInFormProps> = ({ signInRedirectPath, onSi
   const isMounted = useIsMounted()
   const { push: routerPush } = useRouter()
 
-  const { signIn, isLoading, isSuccess } = useAuthSignIn() // @todo add error to sign in (add user feedback)
+  const { signIn, isSuccess } = useAuthSignIn() // @todo add error to sign in (add user feedback)
 
+  const form = useForm<SignInFormInputs>()
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<SignInFormInputs>()
+  } = form
 
   useEffect(() => {
     if (isSuccess) {
@@ -36,7 +38,7 @@ export const SignInForm: React.FC<SignInFormProps> = ({ signInRedirectPath, onSi
       }
 
       if (isMounted()) {
-        routerPush(signInRedirectPath ?? DEAFULT_SIGN_IN_REDIRECT_PATH)
+        routerPush(signInRedirectPath ?? DEFAULT_SIGN_IN_REDIRECT_PATH)
       }
     }
   }, [isSuccess, isMounted, routerPush, onSignIn, signInRedirectPath])
@@ -53,29 +55,29 @@ export const SignInForm: React.FC<SignInFormProps> = ({ signInRedirectPath, onSi
   )
 
   return (
-    <form onSubmit={handleSubmit(handleSignInSubmit)}>
-      <div className="space-y-4 p-4 mt-4">
-        <div>
-          <input type="text" {...register('email', { required: true, pattern: /.+@.+/ })} />
-          {errors.email?.type === 'required' && <span>This field is required</span>}
-          {errors.email?.type === 'pattern' && <span>Valid email required</span>}
-        </div>
+    <FormProvider {...form}>
+      <form onSubmit={handleSubmit(handleSignInSubmit)}>
+        <div className="space-y-4 p-4 mt-4">
+          <div>
+            <input type="text" {...register('email', { required: true, pattern: /.+@.+/ })} />
+            {errors.email?.type === 'required' && <span>This field is required</span>}
+            {errors.email?.type === 'pattern' && <span>Valid email required</span>}
+          </div>
 
-        <div>
-          <input type="password" {...register('password', { required: true })} />
-          {errors.password && <span>This field is required</span>}
-        </div>
+          <div>
+            <input type="password" {...register('password', { required: true })} />
+            {errors.password && <span>This field is required</span>}
+          </div>
 
-        {isLoading && <div>Loading...</div>}
-
-        <div>
-          <input type="submit" className="py-2 px-4 bg-sky-700 text-white rounded-md" />
+          <div>
+            <FormButton type="submit">Sign In</FormButton>
+          </div>
         </div>
-      </div>
-    </form>
+      </form>
+    </FormProvider>
   )
 }
 
 SignInForm.defaultProps = {
-  signInRedirectPath: DEAFULT_SIGN_IN_REDIRECT_PATH,
+  signInRedirectPath: DEFAULT_SIGN_IN_REDIRECT_PATH,
 }
