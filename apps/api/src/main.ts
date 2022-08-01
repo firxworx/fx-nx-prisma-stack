@@ -100,7 +100,7 @@ async function bootstrap() {
 
   // send csrf token to client via cookie in every request - client js must read the value and send back via header
   // csurf middleware checks a handful of eligible client request headers including XSRF-TOKEN and X-XSRF-TOKEN
-  app.use('*', (req: Request, res: Response, next: NextFunction) => {
+  app.use((req: Request, res: Response, next: NextFunction) => {
     res.cookie('CSRF-TOKEN', req.csrfToken(), {
       httpOnly: false,
       sameSite: 'strict',
