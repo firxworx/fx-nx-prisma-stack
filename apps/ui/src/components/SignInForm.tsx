@@ -5,6 +5,7 @@ import { FormProvider, useForm, type SubmitHandler } from 'react-hook-form'
 import { useAuthSignIn } from '../api/auth'
 import { useIsMounted } from '../hooks/useIsMounted'
 import { FormButton } from './forms/FormButton'
+import { FormInput } from './forms/FormInput'
 
 const DEFAULT_SIGN_IN_REDIRECT_PATH = '/app'
 
@@ -25,11 +26,7 @@ export const SignInForm: React.FC<SignInFormProps> = ({ signInRedirectPath, onSi
   const { signIn, isSuccess } = useAuthSignIn() // @todo add error to sign in (add user feedback)
 
   const form = useForm<SignInFormInputs>()
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = form
+  const { handleSubmit } = form
 
   useEffect(() => {
     if (isSuccess) {
@@ -58,20 +55,24 @@ export const SignInForm: React.FC<SignInFormProps> = ({ signInRedirectPath, onSi
     <FormProvider {...form}>
       <form onSubmit={handleSubmit(handleSignInSubmit)}>
         <div className="space-y-4 p-4 mt-4">
-          <div>
-            <input type="text" {...register('email', { required: true, pattern: /.+@.+/ })} />
-            {errors.email?.type === 'required' && <span>This field is required</span>}
-            {errors.email?.type === 'pattern' && <span>Valid email required</span>}
-          </div>
+          <FormInput
+            name="email"
+            label="Email Address"
+            placeholder="Email Address"
+            hideLabel
+            validationOptions={{ required: true, pattern: /.+@.+/ }}
+          />
 
-          <div>
-            <input type="password" {...register('password', { required: true })} />
-            {errors.password && <span>This field is required</span>}
-          </div>
+          <FormInput
+            type="password"
+            name="password"
+            label="Password"
+            placeholder="Password"
+            hideLabel
+            validationOptions={{ required: true }}
+          />
 
-          <div>
-            <FormButton type="submit">Sign In</FormButton>
-          </div>
+          <FormButton type="submit">Sign In</FormButton>
         </div>
       </form>
     </FormProvider>

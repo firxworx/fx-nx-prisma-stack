@@ -16,7 +16,7 @@ export const SignOutButton: React.FC<SignOutButtonProps> = ({ signOutRedirectPat
   const isMounted = useIsMounted()
   const { push: routerPush } = useRouter()
 
-  const { signOut, isLoading, isSuccess, isError } = useAuthSignOut() // @todo - add errors globally (toast?) or to sign-out
+  const { signOut, isLoading, isSuccess } = useAuthSignOut() // @todo - add errors globally (toast?) or to sign-out (isError)
 
   useEffect(() => {
     if (isSuccess) {
@@ -44,7 +44,7 @@ export const SignOutButton: React.FC<SignOutButtonProps> = ({ signOutRedirectPat
       disabled={isLoading}
       onClick={handleSignOut}
     >
-      {isLoading && !isError && <Spinner size="sm" appendClassName="mr-1" />}
+      {isLoading && <Spinner size="sm" appendClassName="mr-1" />}
       <span>Sign Out</span>
     </button>
   )
