@@ -9,10 +9,13 @@
       "defaultConfiguration": "production",
       "options": {
         "root": "apps/ui",
-        "outputPath": "dist/apps/ui"
+        "outputPath": "dist/apps/ui",
+        "generatePackageJson": true
       },
       "configurations": {
-        "development": {},
+        "development": {
+          "outputPath": "tmp/apps/ui"
+        },
         "production": {}
       }
     },
