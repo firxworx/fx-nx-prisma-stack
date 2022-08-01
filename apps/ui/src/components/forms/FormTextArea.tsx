@@ -1,13 +1,16 @@
 import clsx from 'clsx'
 import { RegisterOptions, useFormContext } from 'react-hook-form'
 import { ExclamationCircleIcon } from '@heroicons/react/outline'
+import { useId } from '@reach/auto-id'
 
 export interface TextAreaProps extends React.ComponentPropsWithoutRef<'textarea'> {
+  id?: string
+  name: string
   label: string
-  id: string
   placeholder?: string
   helperText?: string
   readOnly?: boolean
+  hideLabel?: boolean
   hideError?: boolean
   validation?: RegisterOptions
 }
@@ -21,53 +24,58 @@ export interface TextAreaProps extends React.ComponentPropsWithoutRef<'textarea'
  * @see {@link https://react-hook-form.com/api/useformcontext}
  */
 export const TextArea = ({
+  name,
   label,
   placeholder = '',
   helperText,
-  id,
   readOnly = false,
+  hideLabel = false,
   hideError = false,
   validation,
-  ...rest
+  ...restProps
 }: TextAreaProps) => {
   const {
     register,
-    formState: { errors },
+    formState: { isSubmitting, errors },
   } = useFormContext()
+
+  const id = useId(restProps.id)
 
   return (
     <div>
-      <label htmlFor={id} className="block text-sm font-normal text-slate-700">
-        {label}
-      </label>
+      {!hideLabel && ( // @todo more a11y-friendly label hide of FormInput
+        <label htmlFor={id} className="block text-sm font-normal text-slate-700">
+          {label}
+        </label>
+      )}
       <div className="relative mt-1">
         <textarea
-          {...register(id, validation)}
-          rows={3}
-          {...rest}
-          name={id}
           id={id}
+          disabled={restProps.disabled || isSubmitting}
+          {...register(name, validation)}
+          rows={3} // default -- overridden by `...restProps` if provided
+          {...restProps}
           readOnly={readOnly}
+          placeholder={placeholder}
           className={clsx(
             readOnly
               ? 'bg-slate-100 focus:ring-0 cursor-not-allowed border-slate-300 focus:border-slate-300'
-              : errors[id]
+              : errors[name]
               ? 'focus:ring-error-500 border-error-500 focus:border-error-500'
               : 'focus:ring-primary-500 border-slate-300 focus:border-primary-500',
             'block w-full rounded-md shadow-sm',
           )}
-          placeholder={placeholder}
-          aria-describedby={id}
+          aria-label={hideLabel ? label : undefined}
         />
-        {!hideError && errors[id] && (
+        {!hideError && errors[name] && (
           <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-            <ExclamationCircleIcon className="text-xl text-error-600" />
+            <ExclamationCircleIcon className="h-5 w-5 text-error-500" aria-hidden />
           </div>
         )}
       </div>
       <div className="mt-1">
         {helperText && <p className="text-xs text-slate-500">{helperText}</p>}
-        {!hideError && errors[id] && <span className="text-sm text-error-600">{String(errors[id]?.message)}</span>}
+        {!hideError && errors[name] && <span className="text-sm text-error-600">{String(errors[name]?.message)}</span>}
       </div>
     </div>
   )

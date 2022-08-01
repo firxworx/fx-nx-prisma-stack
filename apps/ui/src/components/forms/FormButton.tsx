@@ -27,7 +27,8 @@ export const FormButton: React.FC<FormButtonProps> = ({ children, ...props }) =>
       })}
       disabled={isDisabled}
     >
-      {isSubmitting ? <Spinner size="sm" appendClassName="mr-1" /> : children}
+      {isSubmitting && <Spinner size="sm" appendClassName="mr-1" />}
+      {children}
     </button>
   )
 }
