@@ -16,21 +16,22 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   }
 
   /**
-   * Given email and password credentials, return the user associated with the email + password tuple or else throw an `UnauthorizedException`.
+   * Given email and password credentials, return the user associated with the email + password tuple,
+   * or else throw an `UnauthorizedException`.
    *
-   * The user instance returned by this method is added to the request object of any controller method that is decorated
-   * with the appropriate guard, e.g. `LocalAuthGuard`.
+   * The user returned by this method is added to the request object of any controller method decorated
+   * with the appropriate guard - `LocalAuthGuard`.
    */
   async validate(email: string, password: string): Promise<SanitizedUser> {
-    const authFailureMessage = 'Authorization failed'
+    this.logger.log(`User sign-in request: ${email}`)
 
     try {
       const user = await this.authService.getAuthenticatedUserByCredentials(email, password)
 
       return user
     } catch (error) {
-      this.logger.warn(`Authentication error (email/password): <${email}>`)
-      throw new UnauthorizedException(authFailureMessage)
+      this.logger.warn(`User sign-in authentication error (email/password): ${email}`)
+      throw new UnauthorizedException('Authorization failed')
     }
   }
 }

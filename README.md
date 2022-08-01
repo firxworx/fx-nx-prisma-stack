@@ -1,20 +1,41 @@
+# fx-nx-prisma-stack
 
+A full-stack example TypeScript project in powered by NextJS + NestJS with data persistence via Prisma + Postgres.
 
-# FxNxPrismaStack
+The front-end leverages react-query + react-hook-form and is styled using TailwindCSS.
 
-This project was generated using [Nx](https://nx.dev).
+This project's monorepo is managed by the [Nx build system](https://nx.dev) using yarn as the package manager.
 
-<p style="text-align: center;"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="450"></p>
+This repo was created as an exercise to build greater personal familiarity with Prisma, react-hook-form, react-query, and others that are popular yet I haven't had the opportunity to work with very much. The code can serve as a full-stack project starter that — at the time of writing — incorporates some of the best projects in the TypeScript ecosystem.
 
-🔎 **Smart, Fast and Extensible Build System**
+## Development
 
-## Adding capabilities to your workspace
+Run `yarn docker:up` to start development dependencies (postgres) via `docker compose`.
 
-Nx supports many plugins which add capabilities for developing different types of applications and different tools.
+Prisma can be managed via the following script targets:
 
-These capabilities include generating applications, libraries, etc as well as the devtools to test, and build projects as well.
+- `prisma:generate`
+- `prisma:migrate`
+- `prisma:db:push`
+- `prisma:db:seed`
 
-Below are our core plugins:
+Start the NextJS UI and NestJS API development servers with: `yarn start`.
+
+The UI will start on <http://localhost:4200/> with the back-end available at <http://localhost:4200/api> via proxy.
+
+Refer to `package.json` for the complete suite of script targets.
+
+## Production
+
+Run `yarn build` to build the entire project, or `nx build my-app` to build a specific app. Add the `--prod` flag for a production-optimized build.
+
+The build outputs to the `dist/` folder.
+
+## Nx Workspace
+
+Nx supports many plugins that add tools and capabilities for developing different types of applications. Capabilities include generating applications, libraries, etc as well as the devtools to test, and build projects as well.
+
+Nx core plugins:
 
 - [React](https://reactjs.org)
   - `npm install --save-dev @nrwl/react`
@@ -29,66 +50,20 @@ Below are our core plugins:
 - [Node](https://nodejs.org)
   - `npm install --save-dev @nrwl/node`
 
-There are also many [community plugins](https://nx.dev/community) you could add.
+There are also many [community plugins](https://nx.dev/community).
 
-## Generate an application
+Running generators:
 
-Run `nx g @nrwl/react:app my-app` to generate an application.
+- To generate a new application within the project workspace, run `nx g @nrwl/react:app my-app` or use a plugin.
+- To generate a new library, run `nx g @nrwl/react:lib my-lib` or use a plugin.
+- To generate a new React component via nx generator, run `nx g @nrwl/react:component my-component --project=my-app`.
 
-> You can use any of the plugins above to generate applications as well.
+Libraries are shareable across libraries and applications. They can be imported via `@fx-nx-prisma-stack/my-lib`. Nx automatically manages the dependencies within the project.
 
-When using Nx, you can create multiple applications and libraries in the same workspace.
+Run `nx graph` to generate a diagram of the dependencies within the workspace.
 
-## Generate a library
+## Acknowledgements
 
-Run `nx g @nrwl/react:lib my-lib` to generate a library.
-
-> You can also use any of the plugins above to generate libraries as well.
-
-Libraries are shareable across libraries and applications. They can be imported from `@fx-nx-prisma-stack/mylib`.
-
-## Development server
-
-Run `nx serve my-app` for a dev server. Navigate to http://localhost:4200/. The app will automatically reload if you change any of the source files.
-
-## Code scaffolding
-
-Run `nx g @nrwl/react:component my-component --project=my-app` to generate a new component.
-
-## Build
-
-Run `nx build my-app` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
-
-## Running unit tests
-
-Run `nx test my-app` to execute the unit tests via [Jest](https://jestjs.io).
-
-Run `nx affected:test` to execute the unit tests affected by a change.
-
-## Running end-to-end tests
-
-Run `nx e2e my-app` to execute the end-to-end tests via [Cypress](https://www.cypress.io).
-
-Run `nx affected:e2e` to execute the end-to-end tests affected by a change.
-
-## Understand your workspace
-
-Run `nx graph` to see a diagram of the dependencies of your projects.
-
-## Further help
-
-Visit the [Nx Documentation](https://nx.dev) to learn more.
-
-
-
-## ☁ Nx Cloud
-
-### Distributed Computation Caching & Distributed Task Execution
-
-<p style="text-align: center;"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-cloud-card.png"></p>
-
-Nx Cloud pairs with Nx in order to enable you to build and test code more rapidly, by up to 10 times. Even teams that are new to Nx can connect to Nx Cloud and start saving time instantly.
-
-Teams using Nx gain the advantage of building full-stack applications with their preferred framework alongside Nx’s advanced code generation and project dependency graph, plus a unified experience for both frontend and backend developers.
-
-Visit [Nx Cloud](https://nx.app/) to learn more.
+- Theodorus Clarence for the foundations of reusable form input components compatible with react-hook-form (released under MIT license)
+  - <https://github.com/theodorusclarence/ts-nextjs-tailwind-starter>
+  - <https://github.com/theodorusclarence/expansion-pack>

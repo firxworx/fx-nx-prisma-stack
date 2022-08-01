@@ -1,70 +1,43 @@
 {
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/ui/src",
+  "sourceRoot": "apps/ui",
   "projectType": "application",
   "targets": {
     "build": {
-      "executor": "@nrwl/web:webpack",
+      "executor": "@nrwl/next:build",
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
-        "compiler": "babel",
-        "outputPath": "dist/apps/ui",
-        "index": "apps/ui/src/index.html",
-        "baseHref": "/",
-        "main": "apps/ui/src/main.tsx",
-        "polyfills": "apps/ui/src/polyfills.ts",
-        "tsConfig": "apps/ui/tsconfig.app.json",
-        "assets": ["apps/ui/src/favicon.ico", "apps/ui/src/assets"],
-        "styles": ["apps/ui/src/styles.css"],
-        "scripts": [],
-        "webpackConfig": "@nrwl/react/plugins/webpack"
+        "root": "apps/ui",
+        "outputPath": "dist/apps/ui"
       },
       "configurations": {
-        "development": {
-          "extractLicenses": false,
-          "optimization": false,
-          "sourceMap": true,
-          "vendorChunk": true
-        },
-        "production": {
-          "fileReplacements": [
-            {
-              "replace": "apps/ui/src/environments/environment.ts",
-              "with": "apps/ui/src/environments/environment.prod.ts"
-            }
-          ],
-          "optimization": true,
-          "outputHashing": "all",
-          "sourceMap": false,
-          "namedChunks": false,
-          "extractLicenses": true,
-          "vendorChunk": false
-        }
+        "development": {},
+        "production": {}
       }
     },
     "serve": {
-      "executor": "@nrwl/web:dev-server",
+      "executor": "@nrwl/next:server",
       "defaultConfiguration": "development",
       "options": {
         "buildTarget": "ui:build",
-        "hmr": true
+        "dev": true
       },
       "configurations": {
         "development": {
-          "buildTarget": "ui:build:development"
+          "buildTarget": "ui:build:development",
+          "dev": true
         },
         "production": {
           "buildTarget": "ui:build:production",
-          "hmr": false
+          "dev": false
         }
       }
     },
-    "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+    "export": {
+      "executor": "@nrwl/next:export",
       "options": {
-        "lintFilePatterns": ["apps/ui/**/*.{ts,tsx,js,jsx}"]
+        "buildTarget": "ui:build:production"
       }
     },
     "test": {
@@ -73,6 +46,13 @@
       "options": {
         "jestConfig": "apps/ui/jest.config.ts",
         "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/ui/**/*.{ts,tsx,js,jsx}"]
       }
     }
   },

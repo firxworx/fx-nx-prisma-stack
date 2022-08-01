@@ -7,17 +7,20 @@ import {
   ValidationPipe,
 } from '@nestjs/common'
 import { NestFactory, Reflector } from '@nestjs/core'
+import type { NestExpressApplication } from '@nestjs/platform-express'
+import type { Request, Response, NextFunction } from 'express'
 
 import { useContainer } from 'class-validator'
 import helmet from 'helmet'
 import * as cookieParser from 'cookie-parser'
+import * as csurf from 'csurf'
 import * as compression from 'compression'
 
 import { AppModule } from './app.module'
 import { PrismaService } from './modules/prisma/prisma.service'
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule)
+  const app = await NestFactory.create<NestExpressApplication>(AppModule)
 
   // @todo - leverage @nestjs/config to centralize origin/port/globalPrefix/compression/etc values
   const origin = process.env.ORIGIN || 'http://localhost:3333'
@@ -26,6 +29,9 @@ async function bootstrap() {
   const enableCompression = Boolean(process.env.ENABLE_COMPRESSION === 'false' ? false : process.env.ENABLE_COMPRESSION)
 
   app.setGlobalPrefix(globalPrefix)
+
+  // disable underlying expressjs from identifying itself in response headers
+  app.disable('x-powered-by')
 
   // enable class-validator to use classes via NestJS direct injection (DI)
   useContainer(app.select(AppModule), { fallbackOnErrors: true })
@@ -66,7 +72,7 @@ async function bootstrap() {
     }),
   )
 
-  // enable cors for REST endpoints only (graphql/apollo requires separate configuration if in use)
+  // enable cors for REST endpoints only (graphql/apollo requires separate configuration if used)
   app.enableCors({
     origin,
     credentials: true, // required for auth cookies
@@ -74,8 +80,34 @@ async function bootstrap() {
     // allowedHeaders: ...
   })
 
-  // use cookie-parser express middleware to populate `req.cookies`
-  app.use(cookieParser())
+  // cookie-parser (express middleware) populates `req.cookies`
+  app.use(cookieParser()) // @todo add cookie secret set via config -> env when setting up cookie-parser
+
+  // csurf (express middleware) facilitates csrf/xsrf protection (initializion must follow cookie-parser)
+  // the _csrf cookie stores the token secret client-side so it must be httpOnly to block access by client js
+  const csurfMiddleware = csurf({
+    cookie: { key: '_csrf', sameSite: 'strict', httpOnly: true, secure: process.env.NODE_ENV === 'production' },
+  })
+
+  // add csurf via middleware function to provide a means for conditionally disabling csrf protection by route
+  // note: authentication routes should always have csrf protection to mitigate login csrf attacks
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    // example of disabling csrf protection for a given path --
+    // if (req.path === `${globalPrefix}/example-route/example`) return next()
+
+    csurfMiddleware(req, res, next)
+  })
+
+  // send csrf token to client via cookie in every request - client js must read the value and send back via header
+  // csurf middleware checks a handful of eligible client request headers including XSRF-TOKEN and X-XSRF-TOKEN
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    res.cookie('CSRF-TOKEN', req.csrfToken(), {
+      httpOnly: false,
+      sameSite: 'strict',
+      secure: process.env.NODE_ENV === 'production',
+    })
+    next()
+  })
 
   // conditionally enable express middleware for compression
   if (enableCompression) {
