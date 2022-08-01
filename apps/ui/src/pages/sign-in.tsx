@@ -8,9 +8,9 @@ export const SignInPage: NextPage = (_props) => {
 
   return (
     <div>
-      {session?.session ? (
+      {session?.profile ? (
         <div>
-          <div>Hello {session.session.name}, you are signed in.</div>
+          <div>Hello {session.profile.name}, you are signed in.</div>
           <div className="mt-4">
             <SignOutButton />
           </div>

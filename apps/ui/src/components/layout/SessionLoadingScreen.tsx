@@ -8,7 +8,7 @@ export const SessionLoadingScreen = () => {
   const { push: routerPush } = useRouter()
   const session = useSessionContext()
 
-  const userSession = session?.session
+  const userSession = session?.profile
   const userSessionError = session?.error
 
   // delayed redirect is used to support the back-button

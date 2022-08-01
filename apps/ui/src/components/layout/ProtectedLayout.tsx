@@ -7,9 +7,9 @@ export const ProtectedLayout: React.FC<PropsWithChildren> = ({ children }) => {
   const session = useAuthSession()
 
   return (
-    <div className="bg-slate-100 p-4 sm:p-8 rounded-md">
+    <div className="p-4 sm:p-8 border-2 bg-slate-100 border-slate-200 rounded-md">
       <h1 className="text-xl sm:text-2xl">Protected Layout</h1>
-      <h2 className="text-base">Hello {session.session.name}</h2>
+      <h2 className="text-base">Hello {session.profile.name}</h2>
       <div className="my-4">
         <SignOutButton />
       </div>

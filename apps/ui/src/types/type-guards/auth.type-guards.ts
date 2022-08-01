@@ -1,4 +1,5 @@
-import type { AuthSession, SessionStatus } from '../session.types'
+import type { SessionStatus } from '../enums/session.enums'
+import type { AuthSession } from '../session.types'
 import { isRecord } from './common.type-guards'
 
 /**
@@ -7,12 +8,12 @@ import { isRecord } from './common.type-guards'
 export const isAuthSessionResult = (x: unknown): x is AuthSession<SessionStatus.READY> => {
   return (
     isRecord(x) &&
-    isRecord(x['session']) &&
-    Object.prototype.hasOwnProperty.call(x, 'session') &&
-    Object.prototype.hasOwnProperty.call(x['session'], 'name') &&
-    Object.prototype.hasOwnProperty.call(x['session'], 'email') &&
-    typeof x['session']['name'] === 'string' &&
-    typeof x['session']['email'] === 'string' &&
+    isRecord(x['profile']) &&
+    Object.prototype.hasOwnProperty.call(x, 'profile') &&
+    Object.prototype.hasOwnProperty.call(x['profile'], 'name') &&
+    Object.prototype.hasOwnProperty.call(x['profile'], 'email') &&
+    typeof x['profile']['name'] === 'string' &&
+    typeof x['profile']['email'] === 'string' &&
     x['error'] === undefined
   )
 }

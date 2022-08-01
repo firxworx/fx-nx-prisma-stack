@@ -1,10 +1,6 @@
 import type { QueryObserverResult } from '@tanstack/react-query'
 import type { AuthUser } from './auth.types'
-
-export enum SessionStatus {
-  'READY' = 'READY',
-  'ERROR' = 'ERROR',
-}
+import type { SessionStatus } from './enums/session.enums'
 
 export interface SessionBase {
   isLoading: boolean
@@ -14,12 +10,12 @@ export interface SessionBase {
 }
 
 export interface SessionResult extends SessionBase {
-  session: AuthUser
+  profile: AuthUser
   error?: undefined
 }
 
 export interface SessionError extends SessionBase {
-  session: undefined | null
+  profile: undefined | null
   error: Error
 }
 

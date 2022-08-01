@@ -1,21 +1,23 @@
 import React, { useMemo, useContext } from 'react'
+
 import { useApiSession } from '../api/auth'
-import { AuthSession, SessionStatus } from '../types/session.types'
 import { isAuthSessionResult } from '../types/type-guards/auth.type-guards'
+import type { AuthSession } from '../types/session.types'
+import type { SessionStatus } from '../types/enums/session.enums'
 
 const SessionContext = React.createContext<AuthSession<SessionStatus> | null>(null)
 
 export const SessionContextProvider: React.FC<{
   children: (isSessionReady: boolean) => React.ReactElement
 }> = ({ children }) => {
-  const { data: session, refetch, error, status, invalidate, remove } = useApiSession()
+  const { data: profile, refetch, error, status, invalidate, remove } = useApiSession()
 
   // memoize to ensure a stable context value
   const contextValue: AuthSession<SessionStatus> | null = useMemo(() => {
     const isLoading = status === 'loading'
 
-    if (session) {
-      return { session, isLoading, refetch, invalidate, remove }
+    if (profile) {
+      return { profile, isLoading, refetch, invalidate, remove }
     }
 
     return {
@@ -26,9 +28,9 @@ export const SessionContextProvider: React.FC<{
       invalidate,
       remove,
     }
-  }, [session, status, error, refetch, invalidate, remove])
+  }, [profile, status, error, refetch, invalidate, remove])
 
-  const isSessionReady = status !== 'loading' && !!session
+  const isSessionReady = status !== 'loading' && !!profile
   return <SessionContext.Provider value={contextValue}>{children(isSessionReady)}</SessionContext.Provider>
 }
 
@@ -43,7 +45,7 @@ export function useAuthSession(isSessionOptional?: boolean): AuthSession<Session
   const ctx = useContext(SessionContext)
 
   // the optional flag disables the default behaviour to throw if the session hasn't loaded yet
-  if (isSessionOptional && (!ctx || !ctx?.session)) {
+  if (isSessionOptional && (!ctx || !ctx?.profile)) {
     return null
   }
 

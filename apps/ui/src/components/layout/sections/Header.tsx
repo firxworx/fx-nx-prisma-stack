@@ -52,7 +52,7 @@ const MenuLinks: React.FC<
 > = ({ navigationLinks, linkClassName, linkCurrentClassName, onLinkClick }) => {
   const router = useRouter()
 
-  // check is tolerant if there happens to be no trailing slash on router.pathname
+  // check is tolerant to no trailing slash on router.pathname
   const isCurrentMenuLink = (routerPathName: string, itemHref: string): boolean => {
     return routerPathName !== '/' && itemHref.includes(routerPathName)
   }
@@ -99,7 +99,7 @@ const DesktopNavMenu: React.FC<Pick<HeaderProps, 'navigationLinks'>> = ({ naviga
             linkCurrentClassName={'text-slate-900'}
           />
         </div>
-        {session && <UserProfileMenu name={session.session.name} />}
+        {session && <UserProfileMenu name={session.profile.name} />}
       </div>
     </div>
   )
@@ -161,7 +161,7 @@ const MobileNavMenu: React.FC<
             onLinkClick={handleMenuLinkClick}
           />
         </div>
-        {session?.session && (
+        {session?.profile && (
           <div className="mt-3">
             <button
               type="button"

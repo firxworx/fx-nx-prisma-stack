@@ -13,7 +13,7 @@ export const IndexPage: NextPage = (_props) => {
 
       {session ? (
         <div>
-          <div>Hello {session.session.name}</div>
+          <div>Hello {session.profile.name}</div>
           <SignOutButton />
         </div>
       ) : (
