@@ -3,9 +3,16 @@ import { useFormContext } from 'react-hook-form'
 import { Spinner } from '../elements/Spinner'
 
 export interface FormButtonProps extends React.ComponentPropsWithoutRef<'button'> {
-  type: React.ComponentPropsWithoutRef<'button'>['type'] // require explicit type
+  /** button `type` is explicitly required to protect against corner-cases. */
+  type: React.ComponentPropsWithoutRef<'button'>['type']
 }
 
+/**
+ * Form button component for use with react-hook-form.
+ *
+ * An explicit `type`
+ * Forms that use this component must be wrapped in `<FormProvider>..</FormProvider>`
+ */
 export const FormButton: React.FC<FormButtonProps> = ({ children, ...props }) => {
   const {
     formState: { isSubmitting },

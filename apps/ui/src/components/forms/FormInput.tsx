@@ -1,33 +1,46 @@
+import * as React from 'react'
 import clsx from 'clsx'
-import { RegisterOptions, useFormContext } from 'react-hook-form'
+import { type RegisterOptions, useFormContext } from 'react-hook-form'
 import { ExclamationCircleIcon } from '@heroicons/react/outline'
 
-export interface TextAreaProps extends React.ComponentPropsWithoutRef<'textarea'> {
-  label: string
+export interface InputProps extends React.ComponentPropsWithoutRef<'input'> {
+  /** id to initialize with react-hook-form */
   id: string
+  /** input label */
+  label: string
+  /** input placeholder */
   placeholder?: string
+  /** small helper text below input, for any additional information */
   helperText?: string
+  /** input type e.g. 'text', 'email', 'password' */
+  type?: React.HTMLInputTypeAttribute
+  /** disable input and show defaultValue (may be set via react-hook-form) */
   readOnly?: boolean
+  /** disable error style (does not disable error validation) */
   hideError?: boolean
+  /** manual validation using react-hook-form, it is encouraged to use yup resolver instead */
   validation?: RegisterOptions
 }
 
 /**
- * Form textarea (textbox) component that's compatible with react-hook-form.
+ * Form input component for use with react-hook-form.
+ * Forms that use this component must be wrapped in `<FormProvider>..</FormProvider>`
  *
- * Thanks to `@theodorusclarence` for the MIT-licensed foundation code for this component that was
- * customized for this project.
+ * Thanks to `@theodorusclarence` for the MIT-licensed foundation for this component.
+ *
+ * @see {@link https://react-hook-form.com/api/useformcontext}
  */
-export const TextArea = ({
+export const Input = ({
+  id,
   label,
   placeholder = '',
   helperText,
-  id,
+  type = 'text',
   readOnly = false,
   hideError = false,
   validation,
   ...rest
-}: TextAreaProps) => {
+}: InputProps) => {
   const {
     register,
     formState: { errors },
@@ -39,10 +52,10 @@ export const TextArea = ({
         {label}
       </label>
       <div className="relative mt-1">
-        <textarea
+        <input
           {...register(id, validation)}
-          rows={3}
           {...rest}
+          type={type}
           name={id}
           id={id}
           readOnly={readOnly}
@@ -57,6 +70,7 @@ export const TextArea = ({
           placeholder={placeholder}
           aria-describedby={id}
         />
+
         {!hideError && errors[id] && (
           <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
             <ExclamationCircleIcon className="text-xl text-error-600" />
@@ -64,8 +78,8 @@ export const TextArea = ({
         )}
       </div>
       <div className="mt-1">
-        {helperText && <p className="text-xs text-slate-500">{helperText}</p>}
-        {!hideError && errors[id] && <span className="text-sm text-error-600">{String(errors[id].message)}</span>}
+        {helperText && <div className="text-xs text-slate-500">{helperText}</div>}
+        {!hideError && errors[id] && <div className="text-sm text-error-600">{String(errors[id]?.message)}</div>}
       </div>
     </div>
   )

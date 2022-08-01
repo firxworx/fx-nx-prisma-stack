@@ -15,10 +15,12 @@ export interface SelectInputProps extends React.ComponentPropsWithoutRef<'select
 }
 
 /**
- * Form select (drop-down) component that's compatible with react-hook-form.
+ * Form select (drop-down) for use with react-hook-form.
+ * Forms that use this component must be wrapped in `<FormProvider>..</FormProvider>`
  *
- * Thanks to `@theodorusclarence` for the MIT-licensed foundation code for this component that was
- * customized for this project.
+ * Thanks to `@theodorusclarence` for the MIT-licensed foundation for this component.
+ *
+ * @see {@link https://react-hook-form.com/api/useformcontext}
  */
 export const SelectInput = ({
   label,
@@ -87,7 +89,7 @@ export const SelectInput = ({
       </div>
       <div className="mt-1">
         {helperText && <p className="text-xs text-slate-500">{helperText}</p>}
-        {errors[id] && <span className="text-sm text-error-600">{String(errors[id].message)}</span>}
+        {errors[id] && <span className="text-sm text-error-600">{String(errors[id]?.message)}</span>}
       </div>
     </div>
   )
