@@ -7,6 +7,7 @@ import { isRecord } from './common.type-guards'
 export const isAuthSessionResult = (x: unknown): x is AuthSession<SessionStatus.READY> => {
   return (
     isRecord(x) &&
+    isRecord(x['session']) &&
     Object.prototype.hasOwnProperty.call(x, 'session') &&
     Object.prototype.hasOwnProperty.call(x['session'], 'name') &&
     Object.prototype.hasOwnProperty.call(x['session'], 'email') &&
