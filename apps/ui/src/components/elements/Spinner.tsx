@@ -16,7 +16,7 @@ export interface SpinnerProps {
  */
 export const Spinner: React.FC<SpinnerProps> = ({ size, appendClassName }) => {
   return (
-    <div className="flex items-center">
+    <div className="flex items-center" role="status" aria-label="Loading...">
       <svg
         className={clsx(
           'animate-spin',
@@ -30,6 +30,7 @@ export const Spinner: React.FC<SpinnerProps> = ({ size, appendClassName }) => {
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
         viewBox="0 0 24 24"
+        aria-hidden
       >
         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
         <path
