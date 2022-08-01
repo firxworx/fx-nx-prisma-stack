@@ -20,16 +20,20 @@ export const Footer: React.FC<FooterProps> = ({ contentConstraintStyle, containe
           containerXPaddingStyle,
         )}
       >
-        <div>
-          <span>&copy; {new Date().getFullYear()} </span>
-          <Link href={process.env.NEXT_PUBLIC_PROJECT_ORG_CONTACT_URL ?? '/'}>
-            <a className="hover:underline">{process.env.NEXT_PUBLIC_PROJECT_ORG_NAME}</a>
-          </Link>
-        </div>
-        <div>
-          <span className="hidden sm:inline-block mx-1">&bull;</span>
-          <span>{process.env.NEXT_PUBLIC_PROJECT_ORG_ADDRESS}</span>
-        </div>
+        {process.env.NEXT_PUBLIC_PROJECT_ORG_CONTACT_URL && process.env.NEXT_PUBLIC_PROJECT_ORG_NAME && (
+          <div>
+            <span>&copy; {new Date().getFullYear()} </span>
+            <Link href={process.env.NEXT_PUBLIC_PROJECT_ORG_CONTACT_URL}>
+              <a className="hover:underline">{process.env.NEXT_PUBLIC_PROJECT_ORG_NAME}</a>
+            </Link>
+          </div>
+        )}
+        {process.env.NEXT_PUBLIC_PROJECT_ORG_ADDRESS && (
+          <div>
+            <span className="hidden sm:inline-block mx-1">&bull;</span>
+            <span>{process.env.NEXT_PUBLIC_PROJECT_ORG_ADDRESS}</span>
+          </div>
+        )}
       </div>
     </footer>
   )
