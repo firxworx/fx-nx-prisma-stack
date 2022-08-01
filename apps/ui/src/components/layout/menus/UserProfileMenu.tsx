@@ -1,13 +1,17 @@
-import React, { Fragment, useCallback } from 'react'
+import React, { Fragment, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { Menu, Transition } from '@headlessui/react'
 import clsx from 'clsx'
+import { useAuthSignOut } from '../../../api/auth'
+import { useIsMounted } from '../../../hooks/useIsMounted'
+
+const DEFAULT_SIGN_OUT_REDIRECT_PATH = '/'
 
 export interface UserProfileMenuProps {
   name: string
 }
 
-const menuItems = ['My Profile', 'Settings', 'Sign-Out'] as const
+const menuItems = ['My Profile', 'Settings', 'Sign Out'] as const
 
 /**
  * Drop-down menu (for desktop viewports) with options relevant to the user's session + preferences,
@@ -16,26 +20,35 @@ const menuItems = ['My Profile', 'Settings', 'Sign-Out'] as const
  * The first initial is rendered inside an avatar-esque circle.
  */
 export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({ name }) => {
-  const router = useRouter()
+  const { push: routerPush } = useRouter()
+
+  const isMounted = useIsMounted()
+  const { signOut, isSuccess: isSignOutSuccess } = useAuthSignOut()
+
+  useEffect(() => {
+    if (isSignOutSuccess && isMounted()) {
+      routerPush(DEFAULT_SIGN_OUT_REDIRECT_PATH)
+    }
+  }, [isSignOutSuccess, isMounted, routerPush])
 
   const handleMenuItemClick = useCallback(
     (item: typeof menuItems[number]) => (_event: React.MouseEvent<HTMLButtonElement>) => {
       switch (item) {
         case 'My Profile': {
-          router.push('/app/profile')
+          routerPush('/app/profile')
           break
         }
         case 'Settings': {
-          router.push('/app/settings')
+          routerPush('/app/settings')
           break
         }
-        case 'Sign-Out': {
-          alert('sign-out') // @todo sign out from SessionMenu
+        case 'Sign Out': {
+          signOut()
+          break
         }
       }
-      router.push(router.pathname, router.asPath)
     },
-    [router],
+    [routerPush, signOut],
   )
 
   return (
