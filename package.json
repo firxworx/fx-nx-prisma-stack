@@ -6,7 +6,7 @@
     "npm": "please-use-yarn"
   },
   "prisma": {
-    "seed": "ts-node apps/api/prisma/seed.ts",
+    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} apps/api/prisma/seed.ts",
     "schema": "apps/api/prisma/schema.prisma"
   },
   "scripts": {
@@ -23,6 +23,8 @@
     "prebuild": "yarn prisma:generate",
     "prisma:generate": "yarn prisma generate --schema apps/api/prisma/schema.prisma",
     "prisma:migrate": "yarn prisma migrate --schema apps/api/prisma/schema.prisma",
+    "prisma:migrate:dev": "yarn prisma migrate dev --schema apps/api/prisma/schema.prisma",
+    "prisma:migrate:reset": "yarn prisma migrate reset --schema apps/api/prisma/schema.prisma",
     "prisma:studio": "yarn dotenv -e apps/api/.env yarn prisma studio --schema apps/api/prisma/schema.prisma",
     "prisma:db:seed": "yarn dotenv -e apps/api/.env yarn prisma db seed --schema apps/api/prisma/schema.prisma",
     "prisma:db:push": "yarn dotenv -e apps/api/.env yarn prisma db push --schema apps/api/prisma/schema.prisma",
