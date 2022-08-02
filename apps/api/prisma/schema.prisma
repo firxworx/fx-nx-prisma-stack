@@ -17,14 +17,77 @@ datasource db {
   // shadowDatabaseUrl = env("DATABASE_URL")
 }
 
+enum Role {
+  USER
+  ADMIN
+}
+
 model User {
-  id           Int       @id @default(autoincrement())
-  uuid         String    @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  createdAt    DateTime  @default(now()) @db.Timestamptz()
-  updatedAt    DateTime  @updatedAt @db.Timestamptz()
-  verifiedAt   DateTime? @db.Timestamptz()
-  email        String    @unique
+  id           Int          @id @default(autoincrement())
+  uuid         String       @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt    DateTime     @default(now()) @db.Timestamptz()
+  updatedAt    DateTime     @updatedAt @db.Timestamptz()
+  verifiedAt   DateTime?    @db.Timestamptz()
+  role         Role         @default(USER)
   name         String
+  email        String       @unique
   password     String
+  profile      UserProfile?
   refreshToken String?
+  videos       Video[]
+}
+
+model UserProfile {
+  id        Int      @id @default(autoincrement())
+  uuid      String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int      @unique
+
+  bio    String?
+  tz     String  @default("America/Toronto")
+  locale String  @default("en-US")
+}
+
+enum VideoPlatform {
+  YOUTUBE
+}
+
+model Video {
+  id        Int      @id @default(autoincrement())
+  uuid      String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+
+  name       String
+  platform   VideoPlatform
+  externalId String
+  groups     VideoGroupsOnVideos[]
+
+  @@unique([userId, platform, externalId])
+}
+
+model VideoGroup {
+  id        Int      @id @default(autoincrement())
+  uuid      String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+
+  name        String
+  description String
+  videos      VideoGroupsOnVideos[]
+}
+
+model VideoGroupsOnVideos {
+  video        Video      @relation(fields: [videoId], references: [id])
+  videoId      Int
+  videoGroup   VideoGroup @relation(fields: [videoGroupId], references: [id])
+  videoGroupId Int
+  assignedAt   DateTime   @default(now()) @db.Timestamptz()
+  assignedBy   String
+
+  @@id([videoId, videoGroupId])
 }
