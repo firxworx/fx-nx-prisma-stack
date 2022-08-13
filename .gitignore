@@ -1,6 +1,19 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
 #############################################
+# Package Manager
+#############################################
+
+.pnp.*
+.yarn/*
+!.yarn/cache
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+#############################################
 # Project
 #############################################
 
@@ -57,3 +70,6 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
+
+# Next.js
+.next
