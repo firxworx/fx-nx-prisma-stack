@@ -18,9 +18,18 @@ import * as compression from 'compression'
 
 import { AppModule } from './app.module'
 import { PrismaService } from './modules/prisma/prisma.service'
+import { ConfigService } from '@nestjs/config'
+import { ApiConfig } from './config/types/api-config.interface'
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule)
+
+  const configService = app.get<ConfigService>(ConfigService)
+  const apiConfig = configService.get<ApiConfig>('api')
+
+  if (!apiConfig) {
+    throw new Error('Configuration error: missing ApiConfig')
+  }
 
   // @todo - leverage @nestjs/config to centralize origin/port/globalPrefix/compression/etc values
   const origin = process.env.ORIGIN || 'http://localhost:3333'
@@ -41,7 +50,7 @@ async function bootstrap() {
 
   // add listener for prisma onExit event to prevent prisma from interfering w/ nestjs shutdown hooks
   const prismaService: PrismaService = app.get(PrismaService)
-  prismaService.enableShutdownHooks(app)
+  await prismaService.enableShutdownHooks(app)
 
   // enable ClassSerializerInterceptor to serialize dto/entity classes returned as responses to json
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector), { excludeExtraneousValues: true }))
@@ -49,7 +58,7 @@ async function bootstrap() {
   // configure ValidationPipe to globally process incoming requests
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true, // strip validated object of properties missing validation decorators
+      whitelist: true, // strip validated object of properties that are not class properties w/ validation decorators
       transform: true, // enable class-transformer to transform js objects to classes via `plainToClass()` (use with `@Type()` decorator)
       transformOptions: {
         enableImplicitConversion: false,
@@ -83,34 +92,36 @@ async function bootstrap() {
   // cookie-parser (express middleware) populates `req.cookies`
   app.use(cookieParser()) // @todo add cookie secret set via config -> env when setting up cookie-parser
 
-  // csurf (express middleware) facilitates csrf/xsrf protection (initializion must follow cookie-parser)
-  // the _csrf cookie stores the token secret client-side so it must be httpOnly to block access by client js
-  const csurfMiddleware = csurf({
-    cookie: { key: '_csrf', sameSite: 'strict', httpOnly: true, secure: process.env.NODE_ENV === 'production' },
-  })
-
-  // add csurf via middleware function to provide a means for conditionally disabling csrf protection by route
-  // note: authentication routes should always have csrf protection to mitigate login csrf attacks
-  app.use((req: Request, res: Response, next: NextFunction) => {
-    // example of disabling csrf protection for a given path --
-    // if (req.path === `${globalPrefix}/example-route/example`) return next()
-
-    csurfMiddleware(req, res, next)
-  })
-
-  // send csrf token to client via cookie in every request - client js must read the value and send back via header
-  // csurf middleware checks a handful of eligible client request headers including XSRF-TOKEN and X-XSRF-TOKEN
-  app.use((req: Request, res: Response, next: NextFunction) => {
-    res.cookie('CSRF-TOKEN', req.csrfToken(), {
-      httpOnly: false,
-      sameSite: 'strict',
-      secure: process.env.NODE_ENV === 'production',
+  // conditionally enable csurf (express middleware) for csrf/xsrf protection (initializion must follow cookie-parser)
+  if (apiConfig.options.csrfProtection) {
+    // the _csrf cookie stores the token secret client-side so httpOnly is required to block access by js
+    const csurfMiddleware = csurf({
+      cookie: { key: '_csrf', sameSite: 'strict', httpOnly: true, secure: process.env.NODE_ENV === 'production' },
     })
-    next()
-  })
+
+    // csurf is added via middleware function to provide a lever for conditionally disabling csrf protection by route
+    app.use((req: Request, res: Response, next: NextFunction) => {
+      // example of disabling csrf protection for a given path
+      // if (req.path === `${globalPrefix}/example-route/example`) return next()
+      // note: auth routes for ui's should have csrf protection enabled to mitigate login csrf attacks
+
+      csurfMiddleware(req, res, next)
+    })
+
+    // send csrf token to client via cookie in every request - client js must read the value and include via http header
+    // the csurf middleware supports a few client request headers including CSRF-TOKEN, XSRF-TOKEN, X-XSRF-TOKEN, etc
+    app.use((req: Request, res: Response, next: NextFunction) => {
+      res.cookie('CSRF-TOKEN', req.csrfToken(), {
+        httpOnly: false,
+        sameSite: 'strict',
+        secure: process.env.NODE_ENV === 'production',
+      })
+      next()
+    })
+  }
 
   // conditionally enable express middleware for compression
-  if (enableCompression) {
+  if (apiConfig.options.compression) {
     Logger.log('Enabling compression via express middleware')
     app.use(compression())
   }
