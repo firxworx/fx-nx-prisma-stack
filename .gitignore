@@ -6,7 +6,7 @@
 
 .pnp.*
 .yarn/*
-!.yarn/cache
+#!.yarn/cache # uncomment if using yarn zero-installs
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases
