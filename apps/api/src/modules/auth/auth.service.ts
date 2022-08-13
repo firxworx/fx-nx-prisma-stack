@@ -6,11 +6,11 @@ import {
   UnauthorizedException,
 } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-
 import { JwtService } from '@nestjs/jwt'
-import { AuthConfig } from '../../config/types/auth-config.interface'
 
-import { Prisma, User } from '../../generated/prisma-client'
+import { Prisma, User } from '@prisma/client'
+import type { AuthConfig } from '../../config/types/auth-config.interface'
+
 import { PrismaService } from '../prisma/prisma.service'
 import { ChangePasswordDto } from './dto/change-password.dto'
 import { RegisterUserDto } from './dto/register-user.dto'
