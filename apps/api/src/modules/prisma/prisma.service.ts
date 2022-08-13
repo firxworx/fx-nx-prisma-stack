@@ -1,5 +1,5 @@
 import { Injectable, OnModuleInit, INestApplication } from '@nestjs/common'
-import { PrismaClient } from '../../generated/prisma-client' // import from custom output path specified in schema.prisma
+import { PrismaClient } from '@prisma/client' // '../../generated/prisma-client' // import from custom output path specified in schema.prisma
 
 /**
  * NestJS service that wraps the Prisma database client.

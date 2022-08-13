@@ -1,6 +1,3 @@
-/**
- * @see PrismaErrorCode
- */
 export enum PrismaCommonErrorCode {
   /**
    * Authentication failed against database server at `{database_host}`, the provided database credentials for `{database_user}` are not valid. Please make sure to provide valid database credentials for the database server at `{database_host}`.

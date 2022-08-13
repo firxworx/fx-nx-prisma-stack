@@ -6,8 +6,10 @@
 
 generator client {
   provider        = "prisma-client-js"
-  output          = "../src/generated/prisma-client"
   previewFeatures = ["referentialIntegrity"]
+
+  // note: removed custom output as it confused webpack w/ nx
+  // output          = "../src/generated/prisma-client"
 }
 
 datasource db {
