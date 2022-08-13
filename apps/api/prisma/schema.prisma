@@ -19,24 +19,20 @@ datasource db {
   // shadowDatabaseUrl = env("DATABASE_URL")
 }
 
-enum Role {
-  USER
-  ADMIN
-}
-
 model User {
   id           Int          @id @default(autoincrement())
   uuid         String       @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   createdAt    DateTime     @default(now()) @db.Timestamptz()
   updatedAt    DateTime     @updatedAt @db.Timestamptz()
   verifiedAt   DateTime?    @db.Timestamptz()
-  role         Role         @default(USER)
-  name         String
   email        String       @unique
+  name         String
   password     String
-  profile      UserProfile?
   refreshToken String?
-  videos       Video[]
+  profile      UserProfile?
+
+  videos      Video[]
+  videoGroups VideoGroup[]
 }
 
 model UserProfile {
@@ -61,7 +57,7 @@ model Video {
   uuid      String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   createdAt DateTime @default(now()) @db.Timestamptz()
   updatedAt DateTime @updatedAt @db.Timestamptz()
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId    Int
 
   name       String
@@ -77,19 +73,21 @@ model VideoGroup {
   uuid      String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   createdAt DateTime @default(now()) @db.Timestamptz()
   updatedAt DateTime @updatedAt @db.Timestamptz()
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId    Int
 
   name        String
-  description String
+  description String?
   videos      VideoGroupsOnVideos[]
+
+  @@unique([userId, name])
 }
 
 model VideoGroupsOnVideos {
-  video        Video      @relation(fields: [videoId], references: [id])
+  video        Video      @relation(fields: [videoId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   videoId      Int
-  videoGroup   VideoGroup @relation(fields: [videoGroupId], references: [id])
+  videoGroup   VideoGroup @relation(fields: [videoGroupId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   videoGroupId Int
-  assignedAt   DateTime   @default(now()) @db.Timestamptz()
-  assignedBy   String
 
   @@id([videoId, videoGroupId])
 }
