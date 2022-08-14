@@ -1,20 +1,15 @@
 import { Prisma } from '@prisma/client'
-import type { VideoGroupModelDto, VideoModelDto } from '../types'
-import { VIDEO_DTO_FIELDS } from '../types/type-constants/video-dto-fields'
-import { VIDEO_GROUP_DTO_FIELDS } from '../types/type-constants/video-group-dto-fields'
-
-export type VideoModelPrismaSelectFields = Record<keyof VideoModelDto, true>
-export type VideoGroupModelPrismaSelectFields = Record<keyof VideoGroupModelDto, true>
-
-export type VideoDtoPrismaSelectClause = VideoModelPrismaSelectFields & {
-  groups: { select: { videoGroup: { select: VideoGroupModelPrismaSelectFields } } }
-}
-export type VideoGroupDtoPrismaSelectClause = VideoGroupModelPrismaSelectFields & {
-  videos: { select: { video: { select: VideoModelPrismaSelectFields } } }
-}
+import { VIDEO_MODEL_PUBLIC_FIELDS } from '../constants/video-model-public-fields.const'
+import { VIDEO_GROUP_MODEL_PUBLIC_FIELDS } from '../constants/video-group-model-public-fields.const'
+import {
+  VideoDtoPrismaSelectClause,
+  VideoGroupDtoPrismaSelectClause,
+  VideoGroupModelPrismaSelectFields,
+  VideoModelPrismaSelectFields,
+} from '../types/queries.types'
 
 export const videoPrismaSelectFields: VideoModelPrismaSelectFields = Prisma.validator<Prisma.VideoSelect>()(
-  VIDEO_DTO_FIELDS.reduce((acc, fieldName) => {
+  VIDEO_MODEL_PUBLIC_FIELDS.reduce((acc, fieldName) => {
     return {
       ...acc,
       [fieldName]: true,
@@ -24,7 +19,7 @@ export const videoPrismaSelectFields: VideoModelPrismaSelectFields = Prisma.vali
 
 export const videoGroupPrismaSelectFields: VideoGroupModelPrismaSelectFields =
   Prisma.validator<Prisma.VideoGroupSelect>()(
-    VIDEO_GROUP_DTO_FIELDS.reduce(
+    VIDEO_GROUP_MODEL_PUBLIC_FIELDS.reduce(
       (acc, fieldName) => ({ ...acc, [fieldName]: true }),
       {} as VideoGroupModelPrismaSelectFields,
     ),

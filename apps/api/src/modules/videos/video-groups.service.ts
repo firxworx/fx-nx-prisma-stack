@@ -16,7 +16,8 @@ import { PrismaService } from '../prisma/prisma.service'
 import { CreateVideoGroupDto } from './dto/create-video-group.dto'
 import { UpdateVideoGroupDto } from './dto/update-video-group.dto'
 import { videoGroupDtoPrismaSelectClause } from './prisma/queries'
-import { PrismaVideoGroupQueryResult, VideoGroupDto, VideoGroupModelDto } from './types'
+import { PrismaVideoGroupQueryResult } from './types/queries.types'
+import { VideoGroupResponse } from './types/response.types'
 import { VideosService } from './videos.service'
 
 @Injectable()
@@ -55,11 +56,11 @@ export class VideoGroupsService {
    * Flatten prisma query result to omit redundant `videoGroup` object hierarchy and return an array of
    * cleaner `VideoDto` objects.
    */
-  private flattenNestedVideos<T extends PrismaVideoGroupQueryResult>(input: T): VideoGroupDto
-  private flattenNestedVideos<T extends PrismaVideoGroupQueryResult[]>(input: T): VideoGroupDto[]
+  private flattenNestedVideos<T extends PrismaVideoGroupQueryResult>(input: T): VideoGroupResponse
+  private flattenNestedVideos<T extends PrismaVideoGroupQueryResult[]>(input: T): VideoGroupResponse[]
   private flattenNestedVideos<T extends PrismaVideoGroupQueryResult | PrismaVideoGroupQueryResult[]>(
     input: T,
-  ): VideoGroupDto | VideoGroupDto[] {
+  ): VideoGroupResponse | VideoGroupResponse[] {
     if (Array.isArray(input)) {
       return input.map((videoGroup) => {
         return {
@@ -122,7 +123,7 @@ export class VideoGroupsService {
     return videoGroup === null ? undefined : this.flattenNestedVideos(videoGroup)
   }
 
-  async findOneByUser(user: AuthUser, identifier: string | number): Promise<VideoGroupModelDto | undefined> {
+  async findOneByUser(user: AuthUser, identifier: string | number): Promise<VideoGroupResponse | undefined> {
     const condition = this.getIdentifierCondition(identifier)
 
     const videoGroup = await this.prisma.videoGroup.findFirst({
@@ -130,10 +131,10 @@ export class VideoGroupsService {
       where: { userId: user.id, ...condition },
     })
 
-    return videoGroup ?? undefined
+    return videoGroup ? this.flattenNestedVideos(videoGroup) : undefined
   }
 
-  async getOneByUser(user: AuthUser, identifier: string | number): Promise<VideoGroupDto> {
+  async getOneByUser(user: AuthUser, identifier: string | number): Promise<VideoGroupResponse> {
     try {
       const condition = this.getIdentifierCondition(identifier)
 

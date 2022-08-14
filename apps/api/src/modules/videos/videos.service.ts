@@ -11,15 +11,16 @@ import { ConfigService } from '@nestjs/config'
 import type { Video } from '@prisma/client'
 
 import type { AuthUser } from '../auth/types/auth-user.type'
-import type { PrismaVideoQueryResult, VideoDto, VideoModelDto } from './types'
+import type { VideoResponse } from './types/response.types'
 
 import { PrismaHelperService } from '../prisma/prisma-helper.service'
 import { PrismaService } from '../prisma/prisma.service'
 import { CreateVideoDto } from './dto/create-video.dto'
-import { VideoResponseDto } from './dto/response/video.response.dto'
 import { UpdateVideoDto } from './dto/update-video.dto'
 import { videoDtoPrismaSelectClause } from './prisma/queries'
 import { VideoGroupsService } from './video-groups.service'
+import { PrismaVideoQueryResult } from './types/queries.types'
+import { VideoDto } from './dto/video.dto'
 
 @Injectable()
 export class VideosService {
@@ -57,11 +58,11 @@ export class VideosService {
    * Flatten prisma query result to omit redundant `videoGroup` object hierarchy and return an array of
    * cleaner `VideoDto` objects.
    */
-  private flattenNestedVideoGroups<T extends PrismaVideoQueryResult>(input: T): VideoDto
-  private flattenNestedVideoGroups<T extends PrismaVideoQueryResult[]>(input: T): VideoDto[]
+  private flattenNestedVideoGroups<T extends PrismaVideoQueryResult>(input: T): VideoResponse
+  private flattenNestedVideoGroups<T extends PrismaVideoQueryResult[]>(input: T): VideoResponse[]
   private flattenNestedVideoGroups<T extends PrismaVideoQueryResult | PrismaVideoQueryResult[]>(
     input: T,
-  ): VideoDto | VideoDto[] {
+  ): VideoResponse | VideoResponse[] {
     if (Array.isArray(input)) {
       return input.map((video) => {
         return {
@@ -77,7 +78,7 @@ export class VideosService {
     }
   }
 
-  async findAll(): Promise<VideoDto[]> {
+  async findAll(): Promise<VideoResponse[]> {
     const videos = await this.prisma.video.findMany({
       select: videoDtoPrismaSelectClause,
     })
@@ -86,13 +87,13 @@ export class VideosService {
   }
 
   // revised in experiment w/ response DTO + serializer interceptor + class transformer
-  async findAllByUser(userId: number): Promise<VideoResponseDto[]> {
+  async findAllByUser(userId: number): Promise<VideoDto[]> {
     const videos = await this.prisma.video.findMany({
       select: videoDtoPrismaSelectClause,
       where: { user: { id: userId } },
     })
 
-    return videos.map((video) => new VideoResponseDto(video))
+    return videos.map((video) => new VideoDto(video))
   }
 
   async findAllByUserAndUuids(user: AuthUser, videoUuids: string[]): Promise<Video[]> {
@@ -118,7 +119,7 @@ export class VideosService {
     return true
   }
 
-  async findOne(identifier: string | number): Promise<VideoDto | undefined> {
+  async findOne(identifier: string | number): Promise<VideoResponse | undefined> {
     const condition = this.getIdentifierCondition(identifier)
 
     const video = await this.prisma.video.findFirst({
@@ -129,7 +130,7 @@ export class VideosService {
     return video === null ? undefined : this.flattenNestedVideoGroups(video)
   }
 
-  async findOneByUser(user: AuthUser, identifier: string | number): Promise<VideoModelDto | undefined> {
+  async findOneByUser(user: AuthUser, identifier: string | number): Promise<VideoResponse | undefined> {
     const condition = this.getIdentifierCondition(identifier)
 
     const video = await this.prisma.video.findFirst({
@@ -137,10 +138,10 @@ export class VideosService {
       where: { userId: user.id, ...condition },
     })
 
-    return video ?? undefined
+    return video ? this.flattenNestedVideoGroups(video) : undefined
   }
 
-  async getOne(identifier: string | number): Promise<VideoDto> {
+  async getOne(identifier: string | number): Promise<VideoResponse> {
     try {
       const condition = this.getIdentifierCondition(identifier)
       const video = await this.prisma.video.findUniqueOrThrow({
@@ -154,7 +155,7 @@ export class VideosService {
     }
   }
 
-  async getOneByUser(user: AuthUser, identifier: string | number): Promise<VideoDto> {
+  async getOneByUser(user: AuthUser, identifier: string | number): Promise<VideoResponse> {
     try {
       const condition = this.getIdentifierCondition(identifier)
 
@@ -169,6 +170,7 @@ export class VideosService {
     }
   }
 
+  // @todo revise to return only the required response fields (VideoResponse)
   async createByUser(user: AuthUser, dto: CreateVideoDto): Promise<Video> {
     const { groups: videoGroupUuids, ...restDto } = dto
 
@@ -200,7 +202,7 @@ export class VideosService {
     })
   }
 
-  async updateByUser(user: AuthUser, identifier: string | number, dto: UpdateVideoDto): Promise<VideoDto> {
+  async updateByUser(user: AuthUser, identifier: string | number, dto: UpdateVideoDto): Promise<VideoResponse> {
     const videoWhereCondition = this.getIdentifierCondition(identifier)
     const { groups: videoGroupUuids, ...restDto } = dto
 
