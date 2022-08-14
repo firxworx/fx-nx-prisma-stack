@@ -1,16 +1,18 @@
 import {
   ClassSerializerInterceptor,
   HttpStatus,
-  Logger,
   UnprocessableEntityException,
   ValidationError,
   ValidationPipe,
+  // Logger,
 } from '@nestjs/common'
 import { NestFactory, Reflector } from '@nestjs/core'
+import { ConfigService } from '@nestjs/config'
 import type { NestExpressApplication } from '@nestjs/platform-express'
-import type { Request, Response, NextFunction } from 'express'
-
+import { Logger } from 'nestjs-pino'
 import { useContainer } from 'class-validator'
+
+import type { Request, Response, NextFunction } from 'express'
 import helmet from 'helmet'
 import * as cookieParser from 'cookie-parser'
 import * as csurf from 'csurf'
@@ -18,11 +20,16 @@ import * as compression from 'compression'
 
 import { AppModule } from './app.module'
 import { PrismaService } from './modules/prisma/prisma.service'
-import { ConfigService } from '@nestjs/config'
-import { ApiConfig } from './config/types/api-config.interface'
+import type { ApiConfig } from './config/types/api-config.interface'
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule)
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bufferLogs: true, // @see readme of nestjs-pino
+  })
+  const logger = app.get(Logger)
+  app.useLogger(logger)
+
+  // const app = await NestFactory.create<NestExpressApplication>(AppModule)
 
   const configService = app.get<ConfigService>(ConfigService)
   const apiConfig = configService.get<ApiConfig>('api')
@@ -31,13 +38,12 @@ async function bootstrap() {
     throw new Error('Configuration error: missing ApiConfig')
   }
 
-  // @todo - leverage @nestjs/config to centralize origin/port/globalPrefix/compression/etc values
-  const origin = process.env.ORIGIN || 'http://localhost:3333'
-  const port = process.env.PORT || 3333
-  const globalPrefix = `${process.env.BASE_PATH ?? 'api'}/${process.env.API_VERSION ?? 'v1'}`
-  const enableCompression = Boolean(process.env.ENABLE_COMPRESSION === 'false' ? false : process.env.ENABLE_COMPRESSION)
+  const { origin, port, globalPrefix } = apiConfig
 
-  app.setGlobalPrefix(globalPrefix)
+  // set global prefix for api (e.g. `api/v1`)
+  app.setGlobalPrefix(globalPrefix, {
+    exclude: [], // e.g. ['/path/to/healthcheck', '/path/to/hook']
+  })
 
   // disable underlying expressjs from identifying itself in response headers
   app.disable('x-powered-by')
@@ -53,7 +59,12 @@ async function bootstrap() {
   await prismaService.enableShutdownHooks(app)
 
   // enable ClassSerializerInterceptor to serialize dto/entity classes returned as responses to json
-  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector), { excludeExtraneousValues: true }))
+  app.useGlobalInterceptors(
+    new ClassSerializerInterceptor(app.get(Reflector), {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: false, // explicit false - reinforce rigorous behavior
+    }),
+  )
 
   // configure ValidationPipe to globally process incoming requests
   app.useGlobalPipes(
@@ -122,7 +133,7 @@ async function bootstrap() {
 
   // conditionally enable express middleware for compression
   if (apiConfig.options.compression) {
-    Logger.log('Enabling compression via express middleware')
+    logger.log('Enabling compression via express middleware')
     app.use(compression())
   }
 
@@ -130,16 +141,16 @@ async function bootstrap() {
   app.use(helmet())
 
   const httpServer = await app.listen(port, () => {
-    Logger.log(`🚀 Application environment: ${process.env.NODE_ENV}`)
-    Logger.log(`🚀 Application listening on port ${port} at path /${globalPrefix}`)
-    Logger.log(`🚀 Accepting requests from origin: ${origin}`)
+    logger.log(`🚀 Application environment: ${process.env.NODE_ENV}`)
+    logger.log(`🚀 Application listening on port ${port} at path /${globalPrefix}`)
+    logger.log(`🚀 Accepting requests from origin: ${origin}`)
   })
 
   const url = await app.getUrl()
-  Logger.log(`🚀 Application running: ${url}`)
+  logger.log(`🚀 Application running: ${url}`)
 
   if (process.env.NODE_ENV === 'development') {
-    Logger.log(`🚀 Local development URL: http://localhost:${port}/${globalPrefix}`)
+    logger.log(`🚀 Local development URL: http://localhost:${port}/${globalPrefix}`)
   }
 
   return httpServer
