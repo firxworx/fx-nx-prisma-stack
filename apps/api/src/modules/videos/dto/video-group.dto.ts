@@ -1,6 +1,7 @@
 import { InternalServerErrorException } from '@nestjs/common'
 import type { Video, VideoGroup } from '@prisma/client'
 import { Expose, Type } from 'class-transformer'
+import { VIDEO_GROUP_MODEL_PUBLIC_FIELDS } from '../constants/video-group-model-public-fields.const'
 import type { VideoGroupResponse } from '../types/response.types'
 import { VideoDto } from './video.dto'
 
@@ -16,6 +17,12 @@ export class VideoGroupDto implements VideoGroupResponse {
   uuid!: string
 
   @Expose()
+  createdAt!: Date
+
+  @Expose()
+  updatedAt!: Date
+
+  @Expose()
   name!: string
 
   @Expose()
@@ -26,10 +33,9 @@ export class VideoGroupDto implements VideoGroupResponse {
   videos!: VideoDto[]
 
   constructor(partial: Partial<VideoGroup & { videos: { video: Partial<Video> }[] }>) {
-    const VIDEO_GROUP_MODEL_DTO_FIELDS = ['uuid', 'name', 'description'] as const
-    const VIDEO_GROUP_MODEL_DTO_OPTIONAL_FIELDS: typeof VIDEO_GROUP_MODEL_DTO_FIELDS[number][] = ['description']
+    const VIDEO_GROUP_MODEL_DTO_OPTIONAL_FIELDS: typeof VIDEO_GROUP_MODEL_PUBLIC_FIELDS[number][] = ['description']
 
-    const videoGroupFields = VIDEO_GROUP_MODEL_DTO_FIELDS.reduce((acc, fieldName) => {
+    const videoGroupFields = VIDEO_GROUP_MODEL_PUBLIC_FIELDS.reduce((acc, fieldName) => {
       if (
         (!VIDEO_GROUP_MODEL_DTO_OPTIONAL_FIELDS.includes(fieldName) && partial[fieldName] === undefined) ||
         partial[fieldName] === null
