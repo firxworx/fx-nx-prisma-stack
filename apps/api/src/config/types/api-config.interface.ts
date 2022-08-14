@@ -11,7 +11,7 @@ export interface ApiConfig {
      *
      * Per docs, `sync` is usually best set to `true` for host environments that modify stdout e.g. AWS Lambda.
      *
-     * @see <https://github.com/pinojs/pino/blob/master/docs/asynchronous.md>
+     * @see {@link https://github.com/pinojs/pino/blob/master/docs/asynchronous.md}
      */
     sync: boolean
     /**

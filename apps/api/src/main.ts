@@ -138,7 +138,11 @@ async function bootstrap() {
   }
 
   // use helmet to add common http headers that enhance security
-  app.use(helmet())
+  app.use(
+    helmet({
+      // contentSecurityPolicy: { directives: {...} }
+    }),
+  )
 
   const httpServer = await app.listen(port, () => {
     logger.log(`🚀 Application environment: ${process.env.NODE_ENV}`)

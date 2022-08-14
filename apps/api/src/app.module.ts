@@ -42,6 +42,23 @@ import { AppConfig } from './config/types/app-config.interface'
             customProps: (_req, _res) => ({
               context: 'HTTP', // set context value 'HTTP' for auto http request logging re grouping, filtering, etc
             }),
+            // https://github.com/pinojs/pino-http#pinohttpopts-stream
+            // genReqId: (req: Record<string, any>): { sessionId: string; reqId: string } => ({
+            //   // https://github.com/goldbergyoni/nodebestpractices/blob/49da9e5e41bd4617856a6ecd847da5b9c299852e/sections/production/assigntransactionid.md
+            //   sessionId: req.session?.id,
+            //   reqId: uuid(),
+            // }),
+            // customLogLevel: (_req, res): string => {
+            //   if (res.err || res.statusCode >= 500) {
+            //     return 'error'
+            //   }
+
+            //   if (res.statusCode >= 400) {
+            //     return 'warn'
+            //   }
+
+            //   return 'info'
+            // },
             transport:
               process.env.NODE_ENV === 'production'
                 ? undefined
