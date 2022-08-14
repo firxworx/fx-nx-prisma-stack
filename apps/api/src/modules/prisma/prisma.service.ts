@@ -9,6 +9,26 @@ import { PrismaClient } from '@prisma/client' // '../../generated/prisma-client'
  */
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit {
+  // @todo configure PrismaService to use app logger after adding + configuring an improved logger to project
+  constructor() {
+    super({
+      log:
+        process.env.NODE_ENV === 'production'
+          ? [
+              { emit: 'stdout', level: 'warn' },
+              { emit: 'stdout', level: 'error' },
+            ]
+          : [
+              // { emit: 'event', level: 'query' },
+              { emit: 'stdout', level: 'query' },
+              { emit: 'stdout', level: 'info' },
+              { emit: 'stdout', level: 'warn' },
+              { emit: 'stdout', level: 'error' },
+            ],
+      errorFormat: 'colorless',
+    })
+  }
+
   async onModuleInit() {
     await this.$connect()
   }
