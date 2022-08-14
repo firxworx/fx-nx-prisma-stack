@@ -39,26 +39,35 @@ import { AppConfig } from './config/types/app-config.interface'
               hostname: os.hostname(),
             },
             level: apiConfig.logger.logLevel,
+
+            // set context value 'HTTP' for auto http request logging to facilitate grouping, filtering, etc
             customProps: (_req, _res) => ({
-              context: 'HTTP', // set context value 'HTTP' for auto http request logging re grouping, filtering, etc
+              context: 'HTTP',
             }),
-            // https://github.com/pinojs/pino-http#pinohttpopts-stream
+
+            // set custom log levels depending on response status code
+            // note: nestjs-pino maps pino `trace` and `info` to nestjs `verbose` and `log` to satisfy LoggerService interface
+            customLogLevel: (_req, res): pino.LevelWithSilent => {
+              // if (res.err)...
+              if (res.statusCode >= 500) {
+                return 'error'
+              }
+
+              if (res.statusCode >= 400) {
+                return 'warn'
+              }
+
+              return 'info'
+            },
+
+            // set a request identifier - @see <https://github.com/pinojs/pino-http#pinohttpopts-stream>
+            // @future note could also leverage aws for request tracing features
             // genReqId: (req: Record<string, any>): { sessionId: string; reqId: string } => ({
             //   // https://github.com/goldbergyoni/nodebestpractices/blob/49da9e5e41bd4617856a6ecd847da5b9c299852e/sections/production/assigntransactionid.md
             //   sessionId: req.session?.id,
             //   reqId: uuid(),
             // }),
-            // customLogLevel: (_req, res): string => {
-            //   if (res.err || res.statusCode >= 500) {
-            //     return 'error'
-            //   }
 
-            //   if (res.statusCode >= 400) {
-            //     return 'warn'
-            //   }
-
-            //   return 'info'
-            // },
             transport:
               process.env.NODE_ENV === 'production'
                 ? undefined
@@ -66,7 +75,8 @@ import { AppConfig } from './config/types/app-config.interface'
                     // @see <https://github.com/pinojs/pino-pretty>
                     target: 'pino-pretty',
                     options: {
-                      translateTime: true,
+                      levelFirst: true,
+                      translateTime: 'UTC:yyyy-mm-dd hh:MM:ss TT Z', // @see options at <https://www.npmjs.com/package/dateformat>
                       colorize: true,
                       singleLine: true,
                       sync: apiConfig.logger.sync,
@@ -75,7 +85,7 @@ import { AppConfig } from './config/types/app-config.interface'
             autoLogging: true, // toggle automatic 'request completed'/'request errored' log entries
             quietReqLogger: false,
             stream: pino.destination({
-              minLength: 4096, // buffer logs before writing - applies when sync: true
+              minLength: 4096, // buffer logs before writing (applies when sync: true)
               sync: apiConfig.logger.sync, // sync: false enables asynchronous logging
             }),
           },

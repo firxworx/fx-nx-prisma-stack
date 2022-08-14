@@ -4,12 +4,11 @@ import {
   UnprocessableEntityException,
   ValidationError,
   ValidationPipe,
-  // Logger,
 } from '@nestjs/common'
 import { NestFactory, Reflector } from '@nestjs/core'
 import { ConfigService } from '@nestjs/config'
 import type { NestExpressApplication } from '@nestjs/platform-express'
-import { Logger } from 'nestjs-pino'
+import { Logger, LoggerErrorInterceptor } from 'nestjs-pino'
 import { useContainer } from 'class-validator'
 
 import type { Request, Response, NextFunction } from 'express'
@@ -24,12 +23,11 @@ import type { ApiConfig } from './config/types/api-config.interface'
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    bufferLogs: true, // @see readme of nestjs-pino
+    bufferLogs: true, // @see <https://github.com/iamolegga/nestjs-pino>
   })
+
   const logger = app.get(Logger)
   app.useLogger(logger)
-
-  // const app = await NestFactory.create<NestExpressApplication>(AppModule)
 
   const configService = app.get<ConfigService>(ConfigService)
   const apiConfig = configService.get<ApiConfig>('api')
@@ -58,7 +56,10 @@ async function bootstrap() {
   const prismaService: PrismaService = app.get(PrismaService)
   await prismaService.enableShutdownHooks(app)
 
-  // enable ClassSerializerInterceptor to serialize dto/entity classes returned as responses to json
+  // use nestjs-pino LoggerErrorInterceptor to capture full error details in error logs
+  app.useGlobalInterceptors(new LoggerErrorInterceptor())
+
+  // enable ClassSerializerInterceptor to json serialize any dto/entity classes returned as a response
   app.useGlobalInterceptors(
     new ClassSerializerInterceptor(app.get(Reflector), {
       excludeExtraneousValues: true,
