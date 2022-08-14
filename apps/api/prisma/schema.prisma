@@ -6,7 +6,7 @@
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["referentialIntegrity"]
+  previewFeatures = ["referentialIntegrity", "interactiveTransactions"]
 
   // note: removed custom output as it confused webpack w/ nx
   // output          = "../src/generated/prisma-client"
