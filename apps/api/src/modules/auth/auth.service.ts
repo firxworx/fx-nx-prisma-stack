@@ -9,6 +9,7 @@ import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 
 import { Prisma, User } from '@prisma/client'
+import type { AppConfig } from '../../config/types/app-config.interface'
 import type { AuthConfig } from '../../config/types/auth-config.interface'
 
 import { PrismaService } from '../prisma/prisma.service'
@@ -31,7 +32,7 @@ export class AuthService {
   }
 
   constructor(
-    private readonly configService: ConfigService,
+    private readonly configService: ConfigService<AppConfig>,
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
     private readonly passwordService: PasswordService,

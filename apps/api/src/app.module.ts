@@ -13,6 +13,8 @@ import { PrismaModule } from './modules/prisma/prisma.module'
 import { VideosModule } from './modules/videos/videos.module'
 import { ApiConfig } from './config/types/api-config.interface'
 import { AppConfig } from './config/types/app-config.interface'
+import { APP_INTERCEPTOR } from '@nestjs/core'
+import { LoggingInterceptor } from './interceptors/logging.interceptor'
 
 @Module({
   imports: [
@@ -75,14 +77,20 @@ import { AppConfig } from './config/types/app-config.interface'
                     // @see <https://github.com/pinojs/pino-pretty>
                     target: 'pino-pretty',
                     options: {
-                      levelFirst: true,
-                      translateTime: 'UTC:yyyy-mm-dd hh:MM:ss TT Z', // @see options at <https://www.npmjs.com/package/dateformat>
-                      colorize: true,
+                      // levelFirst: true,
+                      // translateTime: "yyyy-MM-dd'T'HH:mm:ss.l'Z'", // @see options at <https://www.npmjs.com/package/dateformat>
+                      // colorize: true,
                       singleLine: true,
+                      // errorLikeObjectKeys: ['err', 'error'],
                       sync: apiConfig.logger.sync,
+
+                      // unused
+                      // translateTime: 'UTC:yyyy-mm-dd hh:MM:ss TT Z',
+                      // ignore: "pid,hostname,context,req,res,responseTime",
+                      // messageFormat: '{req.headers.x-correlation-id} [{context}] {msg}',
                     },
                   },
-            autoLogging: true, // toggle automatic 'request completed'/'request errored' log entries
+            autoLogging: false, // toggle automatic 'request completed'/'request errored' log entries
             quietReqLogger: false,
             stream: pino.destination({
               minLength: 4096, // buffer logs before writing (applies when sync: true)
@@ -98,6 +106,11 @@ import { AppConfig } from './config/types/app-config.interface'
     VideosModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: LoggingInterceptor,
+    },
+  ],
 })
 export class AppModule {}
