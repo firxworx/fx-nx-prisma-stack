@@ -13,12 +13,12 @@ import {
   UseGuards,
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
-import type { VideoGroup } from '@prisma/client'
 import { GetUser } from '../auth/decorators/get-user.decorator'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { SanitizedUser } from '../auth/types/sanitized-user.type'
 import { CreateVideoGroupDto } from './dto/create-video-group.dto'
 import { UpdateVideoGroupDto } from './dto/update-video-group.dto'
+import { VideoGroupDto } from './dto/video-group.dto'
 import { VideoGroupsService } from './video-groups.service'
 
 const CONTROLLER_NAME = 'video-groups'
@@ -31,11 +31,8 @@ export class VideoGroupsController {
 
   constructor(private readonly videosGroupsService: VideoGroupsService) {}
 
-  // @todo stricter return types for all methods in VideoGroupsController class
-
   @Get()
-  async getVideoGroups(@GetUser() user: SanitizedUser): Promise<Partial<VideoGroup>[]> {
-    this.logger.debug(`Get all system video groups request by ${user.email}`)
+  async getVideoGroups(@GetUser() user: SanitizedUser): Promise<VideoGroupDto[]> {
     return this.videosGroupsService.findAllByUser(user)
   }
 
@@ -43,17 +40,12 @@ export class VideoGroupsController {
   async getVideoGroup(
     @GetUser() user: SanitizedUser,
     @Param('uuid', new ParseUUIDPipe({ version: '4' })) uuid: string,
-  ) {
-    this.logger.debug(`Get all user video groups request by ${user.email}`)
+  ): Promise<VideoGroupDto> {
     return this.videosGroupsService.getOneByUser(user, uuid)
   }
 
   @Post()
-  async createVideoGroup(
-    @GetUser() user: SanitizedUser,
-    @Body() dto: CreateVideoGroupDto,
-  ): Promise<Partial<VideoGroup>> {
-    this.logger.debug(`Create video group request by ${user.email}`)
+  async createVideoGroup(@GetUser() user: SanitizedUser, @Body() dto: CreateVideoGroupDto): Promise<VideoGroupDto> {
     return this.videosGroupsService.createByUser(user, dto)
   }
 
@@ -62,8 +54,7 @@ export class VideoGroupsController {
     @GetUser() user: SanitizedUser,
     @Param('uuid', new ParseUUIDPipe({ version: '4' })) uuid: string,
     @Body() dto: UpdateVideoGroupDto,
-  ): Promise<Partial<VideoGroup>> {
-    this.logger.debug(`User update video '${uuid}' by ${user.email}`)
+  ): Promise<VideoGroupDto> {
     return this.videosGroupsService.updateByUser(user, uuid, dto)
   }
 
@@ -73,7 +64,6 @@ export class VideoGroupsController {
     @GetUser() user: SanitizedUser,
     @Param('uuid', new ParseUUIDPipe({ version: '4' })) uuid: string,
   ): Promise<void> {
-    this.logger.debug(`Delete user video group '${uuid}' request by ${user.email}`)
     return this.videosGroupsService.deleteByUser(user, uuid)
   }
 }
