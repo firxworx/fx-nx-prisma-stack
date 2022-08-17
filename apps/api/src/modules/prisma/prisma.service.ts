@@ -12,7 +12,7 @@ export class PrismaService
   extends PrismaClient<Prisma.PrismaClientOptions, 'query' | 'warn' | 'error'>
   implements OnModuleInit
 {
-  private readonly logger = new Logger(PrismaService.name)
+  private readonly logger = new Logger(this.constructor.name)
 
   constructor() {
     super({
