@@ -1,23 +1,10 @@
 import { registerAs } from '@nestjs/config'
+import { mapEnvVarsToConfigOptionFlags } from './lib/env-mapper'
 import type { ApiConfig } from './types/api-config.interface'
 
-const mapEnvOptionsToApiConfigOptions = (): ApiConfig['options'] => {
-  const requiredEnvsKeyMap: Record<string, keyof ApiConfig['options']> = {
-    API_OPT_COMPRESSION: 'compression',
-    API_OPT_CSRF_PROTECTION: 'csrfProtection',
-  }
-
-  return Object.entries(requiredEnvsKeyMap).reduce((acc, [envVarName, configKey]) => {
-    const value = String(process.env[envVarName])
-
-    if (!['ON', 'OFF'].includes(value)) {
-      throw new Error(`API config error: environment var ${envVarName} must be set with value of "ON" or "OFF"`)
-    }
-
-    acc[configKey] = value === 'ON' ? true : false
-
-    return acc
-  }, {} as ApiConfig['options'])
+const requiredEnvsKeyMap: Record<string, keyof ApiConfig['options']> = {
+  API_OPT_COMPRESSION: 'compression',
+  API_OPT_CSRF_PROTECTION: 'csrfProtection',
 }
 
 export default registerAs('api', (): ApiConfig => {
@@ -28,6 +15,6 @@ export default registerAs('api', (): ApiConfig => {
     meta: {
       projectTag: process.env.API_PROJECT_TAG ?? 'fx',
     },
-    options: mapEnvOptionsToApiConfigOptions(),
+    options: mapEnvVarsToConfigOptionFlags(requiredEnvsKeyMap),
   }
 })
