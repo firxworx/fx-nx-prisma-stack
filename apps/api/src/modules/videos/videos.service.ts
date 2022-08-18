@@ -1,33 +1,32 @@
 import { BadRequestException, forwardRef, Inject, Injectable } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
+
+import { Prisma } from '@prisma/client'
+import { PrismaModelCrudService } from '../prisma/prisma-model-crud.abstract.service'
 
 import type { AuthUser } from '../auth/types/auth-user.type'
-
-import { PrismaHelperService } from '../prisma/prisma-helper.service'
 import { PrismaService } from '../prisma/prisma.service'
 import { CreateVideoDto } from './dto/create-video.dto'
 import { UpdateVideoDto } from './dto/update-video.dto'
 import { videoDtoPrismaSelectClause } from './prisma/queries'
 import { VideoGroupsService } from './video-groups.service'
 import { VideoDto } from './dto/video.dto'
-import { Prisma } from '@prisma/client'
-import { PrismaModelCrudService } from '../prisma/prisma-model-crud.abstract.service'
 
 type PrismaVideoDelegate = Prisma.VideoDelegate<Prisma.RejectOnNotFound | Prisma.RejectPerOperation | undefined>
 
 @Injectable()
-export class VideosService extends PrismaModelCrudService<PrismaVideoDelegate, VideoDto> {
-  // private logger = new Logger(this.constructor.name)
-
+export class VideosService extends PrismaModelCrudService<
+  PrismaVideoDelegate,
+  VideoDto,
+  CreateVideoDto,
+  UpdateVideoDto
+> {
   constructor(
-    private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
-    private readonly prismaHelperService: PrismaHelperService,
 
     @Inject(forwardRef(() => VideoGroupsService))
     private videoGroupsService: VideoGroupsService,
   ) {
-    super(prisma.video, VideoDto, { delegateSelectClause: videoDtoPrismaSelectClause })
+    super(prisma.video, VideoDto, CreateVideoDto, UpdateVideoDto, { delegateSelectClause: videoDtoPrismaSelectClause })
   }
 
   async findAllByUserAndUuids(user: AuthUser, videoUuids: string[]): Promise<VideoDto[]> {
@@ -56,36 +55,6 @@ export class VideosService extends PrismaModelCrudService<PrismaVideoDelegate, V
     return true
   }
 
-  async getOne(identifier: string | number): Promise<VideoDto> {
-    try {
-      const condition = this.getIdentifierWhereCondition(identifier)
-      const video = await this.prisma.video.findUniqueOrThrow({
-        select: videoDtoPrismaSelectClause,
-        where: condition,
-      })
-
-      return new VideoDto(video)
-    } catch (error: unknown) {
-      throw this.prismaHelperService.handleError(error)
-    }
-  }
-
-  async getOneByUser(user: AuthUser, identifier: string | number): Promise<VideoDto> {
-    try {
-      const condition = this.getIdentifierWhereCondition(identifier)
-
-      const video = await this.prisma.video.findFirstOrThrow({
-        select: videoDtoPrismaSelectClause,
-        where: { userId: user.id, ...condition },
-      })
-
-      return new VideoDto(video)
-    } catch (error: unknown) {
-      throw this.prismaHelperService.handleError(error)
-    }
-  }
-
-  // @todo revise to return only the required response fields (VideoResponse)
   async createByUser(user: AuthUser, dto: CreateVideoDto): Promise<VideoDto> {
     const { groups: videoGroupUuids, ...restDto } = dto
 

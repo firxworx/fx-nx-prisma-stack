@@ -5,7 +5,6 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Logger,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -27,8 +26,6 @@ const CONTROLLER_NAME = 'video-groups'
 @Controller(CONTROLLER_NAME)
 @UseGuards(JwtAuthGuard)
 export class VideoGroupsController {
-  private logger = new Logger(this.constructor.name)
-
   constructor(private readonly videosGroupsService: VideoGroupsService) {}
 
   @Get()

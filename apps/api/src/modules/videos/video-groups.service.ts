@@ -7,7 +7,6 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
 
 import type { AuthUser } from '../auth/types/auth-user.type'
 import { PrismaHelperService } from '../prisma/prisma-helper.service'
@@ -27,7 +26,6 @@ export class VideoGroupsService {
   }
 
   constructor(
-    private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
     private readonly prismaHelperService: PrismaHelperService,
 

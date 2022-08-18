@@ -5,6 +5,8 @@ import { VIDEO_GROUP_MODEL_PUBLIC_FIELDS } from '../constants/video-group-model-
 import type { VideoGroupResponse } from '../types/response.types'
 import { VideoDto } from './video.dto'
 
+export const VIDEO_GROUP_MODEL_NULLABLE_FIELDS: (keyof VideoGroup)[] = ['description']
+
 /**
  * Response DTO for VideoGroup model, compatible with NestJS' `ClassSerializerInterceptor`.
  *
@@ -33,11 +35,9 @@ export class VideoGroupDto implements VideoGroupResponse {
   videos!: VideoDto[]
 
   constructor(partial: Partial<VideoGroup & { videos: { video: Partial<Video> }[] }>) {
-    const VIDEO_GROUP_MODEL_DTO_OPTIONAL_FIELDS: typeof VIDEO_GROUP_MODEL_PUBLIC_FIELDS[number][] = ['description']
-
     const videoGroupFields = VIDEO_GROUP_MODEL_PUBLIC_FIELDS.reduce((acc, fieldName) => {
       if (
-        (!VIDEO_GROUP_MODEL_DTO_OPTIONAL_FIELDS.includes(fieldName) && partial[fieldName] === undefined) ||
+        (!VIDEO_GROUP_MODEL_NULLABLE_FIELDS.includes(fieldName) && partial[fieldName] === undefined) ||
         partial[fieldName] === null
       ) {
         throw new InternalServerErrorException(
@@ -49,7 +49,7 @@ export class VideoGroupDto implements VideoGroupResponse {
         ...acc,
         [fieldName]: partial[fieldName] ?? null,
       }
-    }, {} as Partial<VideoGroup>)
+    }, {} as VideoGroup)
 
     // map prisma's overly-nested query result (due to many-to-many) to response DTO
     const videosField = partial.videos?.map((vg) => new VideoDto(vg.video)) ?? []

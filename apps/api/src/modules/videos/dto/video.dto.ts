@@ -4,6 +4,7 @@ import { VideoPlatform } from '../constants/video-platform.enum'
 import { VideoGroupDto } from './video-group.dto'
 import { InternalServerErrorException } from '@nestjs/common'
 import type { VideoResponse } from '../types/response.types'
+
 /**
  * Response DTO for Video model, compatible with NestJS' `ClassSerializerInterceptor`.
  *

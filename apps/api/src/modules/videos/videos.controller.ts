@@ -26,13 +26,11 @@ const CONTROLLER_NAME = 'videos'
 @Controller(CONTROLLER_NAME)
 @UseGuards(JwtAuthGuard)
 export class VideosController {
-  // private logger = new Logger(this.constructor.name)
-
   constructor(private readonly videosService: VideosService) {}
 
   @Get()
   async getVideos(@GetUser() user: SanitizedUser): Promise<VideoDto[]> {
-    return this.videosService.findAllByUser(user.id)
+    return this.videosService.findAllByUser(user)
   }
 
   @Get(':uuid')
