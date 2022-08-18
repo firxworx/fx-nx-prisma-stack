@@ -28,10 +28,6 @@ export default registerAs('api', (): ApiConfig => {
     meta: {
       projectTag: process.env.API_PROJECT_TAG ?? 'fx',
     },
-    logger: {
-      sync: String(process.env.API_LOGS_SYNC) === 'ON' ? true : process.env.NODE_ENV === 'test' ? true : false, // @todo refactor w/ DRY'd map function that provides validation
-      logLevel: process.env.NODE_ENV === 'production' ? 'info' : 'debug', // @todo add env option for log level config
-    },
     options: mapEnvOptionsToApiConfigOptions(),
   }
 })
