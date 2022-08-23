@@ -19,7 +19,6 @@ const PUBLIC_NAV_LINKS = [{ title: 'Sign-In', href: '/sign-in' }]
 const AUTHENTICATED_NAV_LINKS = [
   { title: 'App', href: '/app' },
   { title: 'Videos', href: '/app/videos' },
-  { title: 'Secret', href: '/secret' },
 ]
 
 const isPublicRoute = (routerPath: string) =>

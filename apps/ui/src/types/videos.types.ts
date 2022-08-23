@@ -1,19 +1,30 @@
 // @temp until refactor to shared project lib
-export interface VideoQueryDto {
+
+export enum VideoPlatform {
+  YOUTUBE = 'YOUTUBE',
+}
+
+export interface VideoDto {
   uuid: string
   name: string
-  platform: string
+  platform: 'YOUTUBE'
   externalId: string
   createdAt: Date
   updatedAt: Date
-  groups: VideoGroupQueryDto[]
+  groups: VideoGroupDto[]
 }
 
-export interface VideoGroupQueryDto {
-  uuid: 'c7b6e226-5978-4986-aea0-1c9bb42aaa35'
-  createdAt: '2022-08-14T20:41:24.195Z'
-  updatedAt: '2022-08-14T20:41:24.198Z'
-  name: 'new video group'
-  description: 'another video group'
-  videos: VideoQueryDto[]
+export interface CreateVideoDto extends Pick<VideoDto, 'name' | 'platform' | 'externalId'> {
+  groups: VideoDto['groups'][number]['uuid'][]
+}
+
+export interface UpdateVideoDto extends Partial<CreateVideoDto> {}
+
+export interface VideoGroupDto {
+  uuid: string
+  createdAt: Date
+  updatedAt: Date // @todo handle dates response
+  name: string
+  description: string
+  videos: VideoDto[]
 }
