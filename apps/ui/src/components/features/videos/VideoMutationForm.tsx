@@ -2,8 +2,8 @@ import { useVideoMutationQuery } from 'apps/ui/src/api/videos'
 import { useIsMounted } from 'apps/ui/src/hooks/useIsMounted'
 import { useCallback } from 'react'
 import { FormProvider, SubmitHandler, useForm } from 'react-hook-form'
-import { FormButton } from '../../forms/FormButton'
-import { FormInput } from '../../forms/FormInput'
+import { FormButton } from '../../elements/forms/FormButton'
+import { FormInput } from '../../elements/forms/FormInput'
 
 export interface VideoMutationFormData {
   name: string

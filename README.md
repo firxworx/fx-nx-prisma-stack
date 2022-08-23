@@ -1,4 +1,4 @@
-# fx-nx-prisma-stack
+# fx-nx-prisma-stack (WIP)
 
 An example full-stack web-app project written in TypeScript and powered by NextJS (UI) + NestJS (API) with data persistence provided via Prisma + Postgres.
 
@@ -6,9 +6,13 @@ The project is organized as a monorepo managed via the [Nx build system](https:/
 
 The React front-end leverages react-query + react-hook-form and is styled using TailwindCSS.
 
+**Work-in-Progress**
+
 > This repo was created as an exercise by the author to build familiarity with Prisma, react-hook-form, react-query, and other libraries that are popular in the TypeScript + NodeJS + React ecosystems. I haven't had the opportunity to substantially work with these libraries yet in professional projects vs. their popular alternatives such as TypeORM, formik, etc.
 
-The code can serve as a full-stack project starter that — at the time of writing — incorporates some of the best-known libraries in the TypeScript ecosystem.
+The code is far enough along that it can serve as a full-stack project starter that — at the time of writing — incorporates some of the best-known libraries in the TypeScript ecosystem.
+
+As of **2022-Q3** this is an active project that is being contributed to on a casual basis. The goal is to realize a viable reusable project boilerplate / 'SaaS starter' that includes several production-grade niceties and is ready to support a broad range of business and product ideas.
 
 ## Development
 
@@ -99,5 +103,8 @@ Run `nx graph` to generate a diagram of the dependencies within the workspace.
 ## Acknowledgements
 
 - Theodorus Clarence for the foundations of reusable form input components compatible with react-hook-form (distributed under MIT license):
+
   - <https://github.com/theodorusclarence/ts-nextjs-tailwind-starter>
   - <https://github.com/theodorusclarence/expansion-pack>
+
+- <https://github.com/algoan/nestjs-components/blob/master/packages/logging-interceptor/src/logging.interceptor.ts>

@@ -1,6 +1,6 @@
 import type { NextPage } from 'next'
-import { SignInForm } from '../components/SignInForm'
-import { SignOutButton } from '../components/SignOutButton'
+import { SignInForm } from '../components/prefabs/SignInForm'
+import { SignOutButton } from '../components/prefabs/SignOutButton'
 import { useSessionContext } from '../context/SessionContextProvider'
 
 export const SignInPage: NextPage = (_props) => {

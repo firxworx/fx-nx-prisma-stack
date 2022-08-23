@@ -1,7 +1,7 @@
 import type { NextPage } from 'next'
 import { useVideoQuery } from '../../../api/videos'
 
-import { Spinner } from '../../../components/elements/Spinner'
+import { Spinner } from '../../../components/elements/feedback/Spinner'
 import { useRouter } from 'next/router'
 import { VideoMutationForm } from '../../../components/features/videos/VideoMutationForm'
 import { useCallback } from 'react'

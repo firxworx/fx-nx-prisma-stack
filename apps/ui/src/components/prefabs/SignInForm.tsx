@@ -2,10 +2,10 @@ import { useRouter } from 'next/router'
 import { useCallback, useEffect } from 'react'
 import { FormProvider, useForm, type SubmitHandler } from 'react-hook-form'
 
-import { useAuthSignIn } from '../api/auth'
-import { useIsMounted } from '../hooks/useIsMounted'
-import { FormButton } from './forms/FormButton'
-import { FormInput } from './forms/FormInput'
+import { useAuthSignIn } from '../../api/auth'
+import { useIsMounted } from '../../hooks/useIsMounted'
+import { FormButton } from '../elements/forms/FormButton'
+import { FormInput } from '../elements/forms/FormInput'
 
 const DEFAULT_SIGN_IN_REDIRECT_PATH = '/app'
 

@@ -1,7 +1,7 @@
 import { HomeIcon } from '@heroicons/react/outline'
 import type { NextPage } from 'next'
-import { SignInForm } from '../components/SignInForm'
-import { SignOutButton } from '../components/SignOutButton'
+import { SignInForm } from '../components/prefabs/SignInForm'
+import { SignOutButton } from '../components/prefabs/SignOutButton'
 import { useAuthSession } from '../context/SessionContextProvider'
 
 export const IndexPage: NextPage = (_props) => {

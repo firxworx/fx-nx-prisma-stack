@@ -2,7 +2,7 @@ import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 
 import { useSessionContext } from '../../context/SessionContextProvider'
-import { Spinner } from '../elements/Spinner'
+import { Spinner } from '../elements/feedback/Spinner'
 
 export const SessionLoadingScreen = () => {
   const { push: routerPush } = useRouter()

@@ -4,7 +4,7 @@ import { useVideosQuery } from 'apps/ui/src/api/videos'
 import type { VideoDto } from 'apps/ui/src/types/videos.types'
 import { AiOutlineYoutube } from 'react-icons/ai'
 import Link from 'next/link'
-import { Spinner } from 'apps/ui/src/components/elements/Spinner'
+import { Spinner } from 'apps/ui/src/components/elements/feedback/Spinner'
 import { PlusIcon } from '@heroicons/react/outline'
 
 export const VideoPlatformLogo: React.FC<{ platform?: VideoDto['platform'] }> = ({ platform }) => {
