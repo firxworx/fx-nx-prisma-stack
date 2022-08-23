@@ -1,6 +1,3 @@
-/**
- * @see PrismaErrorCode
- */
 export enum PrismaMigrationErrorCode {
   /**
    * Failed to create database: `{database_error}`

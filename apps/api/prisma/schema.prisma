@@ -6,8 +6,10 @@
 
 generator client {
   provider        = "prisma-client-js"
-  output          = "../src/generated/prisma-client"
-  previewFeatures = ["referentialIntegrity"]
+  previewFeatures = ["referentialIntegrity", "interactiveTransactions"]
+
+  // note: removed custom output as it confused webpack w/ nx
+  // output          = "../src/generated/prisma-client"
 }
 
 datasource db {
@@ -18,13 +20,74 @@ datasource db {
 }
 
 model User {
-  id           Int       @id @default(autoincrement())
-  uuid         String    @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  createdAt    DateTime  @default(now()) @db.Timestamptz()
-  updatedAt    DateTime  @updatedAt @db.Timestamptz()
-  verifiedAt   DateTime? @db.Timestamptz()
-  email        String    @unique
+  id           Int          @id @default(autoincrement())
+  uuid         String       @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt    DateTime     @default(now()) @db.Timestamptz()
+  updatedAt    DateTime     @updatedAt @db.Timestamptz()
+  verifiedAt   DateTime?    @db.Timestamptz()
+  email        String       @unique
   name         String
   password     String
   refreshToken String?
+  profile      UserProfile?
+
+  videos      Video[]
+  videoGroups VideoGroup[]
+}
+
+model UserProfile {
+  id        Int      @id @default(autoincrement())
+  uuid      String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int      @unique
+
+  bio    String?
+  tz     String  @default("America/Toronto")
+  locale String  @default("en-US")
+}
+
+enum VideoPlatform {
+  YOUTUBE
+}
+
+model Video {
+  id        Int      @id @default(autoincrement())
+  uuid      String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId    Int
+
+  name       String
+  platform   VideoPlatform
+  externalId String
+  groups     VideoGroupsOnVideos[]
+
+  @@unique([userId, platform, externalId])
+}
+
+model VideoGroup {
+  id        Int      @id @default(autoincrement())
+  uuid      String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId    Int
+
+  name        String
+  description String?
+  videos      VideoGroupsOnVideos[]
+
+  @@unique([userId, name])
+}
+
+model VideoGroupsOnVideos {
+  video        Video      @relation(fields: [videoId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  videoId      Int
+  videoGroup   VideoGroup @relation(fields: [videoGroupId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  videoGroupId Int
+
+  @@id([videoId, videoGroupId])
 }

@@ -8,7 +8,7 @@ import { FX_KEY_IS_PUBLIC_ROUTE_HANDLER } from '../decorators/public-route-handl
  * AuthGuard to enforce JWT authentication.
  *
  * This guard implements a conditional override/bypass and will allow unauthenticated (public) requests
- * to any controller route handler that applies the `@PublicRouteHandler()` decorator.
+ * to any controller route handler decorated with the `@PublicRouteHandler()` decorator.
  */
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {

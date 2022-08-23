@@ -1,6 +1,3 @@
-/**
- * @see PrismaErrorCode
- */
 export enum PrismaQueryErrorCode {
   /**
    * The provided value for the column is too long for the column's type. Column: `{column_name}`

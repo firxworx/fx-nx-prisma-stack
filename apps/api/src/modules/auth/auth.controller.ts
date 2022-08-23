@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common'
 import { Response } from 'express'
 
-import { GetUser } from '../../decorators/get-user.decorator'
+import { GetUser } from './decorators/get-user.decorator'
 import { AuthService } from './auth.service'
 import { ChangePasswordDto } from './dto/change-password.dto'
 import { RegisterUserDto } from './dto/register-user.dto'

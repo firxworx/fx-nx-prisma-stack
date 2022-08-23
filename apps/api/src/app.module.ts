@@ -1,21 +1,54 @@
 import { Module } from '@nestjs/common'
-import { ConfigModule } from '@nestjs/config'
+import { ConfigModule, ConfigService } from '@nestjs/config'
+import { LoggerModule } from 'nestjs-pino'
 
+import apiConfig from './config/api.config'
 import authConfig from './config/auth.config'
+import loggerConfig from './config/logger.config'
 
 import { AuthModule } from './modules/auth/auth.module'
 import { PrismaModule } from './modules/prisma/prisma.module'
+import { VideosModule } from './modules/videos/videos.module'
+import { AppConfig } from './config/types/app-config.interface'
+import { APP_INTERCEPTOR } from '@nestjs/core'
+import { LoggingInterceptor } from './interceptors/logging.interceptor'
+import { LoggerConfig } from './config/types/logger-config.interface'
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [authConfig],
+      cache: true, // cache process.env in memory
+      load: [authConfig, apiConfig, loggerConfig],
+    }),
+    LoggerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService<AppConfig>) => {
+        const loggerConfig = configService.get<LoggerConfig>('logger')
+
+        if (!loggerConfig) {
+          throw new Error('Missing expected LoggerConfig')
+        }
+
+        return loggerConfig.nestJsPino
+      },
     }),
     PrismaModule,
     AuthModule,
+    VideosModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    // uncomment to require authentication + protect all routes by default with JwtAuthGuard
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: JwtAuthGuard,
+    // },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: LoggingInterceptor,
+    },
+  ],
 })
 export class AppModule {}

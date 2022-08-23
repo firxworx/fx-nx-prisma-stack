@@ -6,11 +6,12 @@ import {
   UnauthorizedException,
 } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-
 import { JwtService } from '@nestjs/jwt'
-import { AuthConfig } from '../../config/types/auth-config.interface'
 
-import { Prisma, User } from '../../generated/prisma-client'
+import { Prisma, User } from '@prisma/client'
+import type { AppConfig } from '../../config/types/app-config.interface'
+import type { AuthConfig } from '../../config/types/auth-config.interface'
+
 import { PrismaService } from '../prisma/prisma.service'
 import { ChangePasswordDto } from './dto/change-password.dto'
 import { RegisterUserDto } from './dto/register-user.dto'
@@ -31,7 +32,7 @@ export class AuthService {
   }
 
   constructor(
-    private readonly configService: ConfigService,
+    private readonly configService: ConfigService<AppConfig>,
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
     private readonly passwordService: PasswordService,

@@ -1,9 +1,9 @@
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 
-import { useAuthSignOut } from '../api/auth'
-import { useIsMounted } from '../hooks/useIsMounted'
-import { Spinner } from './elements/Spinner'
+import { useAuthSignOut } from '../../api/auth'
+import { useIsMounted } from '../../hooks/useIsMounted'
+import { Spinner } from '../elements/feedback/Spinner'
 
 export interface SignOutButtonProps {
   signOutRedirectPath?: string

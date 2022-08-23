@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import { useFormContext } from 'react-hook-form'
-import { Spinner } from '../elements/Spinner'
+import { Spinner } from '../feedback/Spinner'
 
 export interface FormButtonProps extends React.ComponentPropsWithoutRef<'button'> {
   /** button `type` is explicitly required to protect against corner-cases. */

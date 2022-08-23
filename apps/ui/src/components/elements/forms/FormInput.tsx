@@ -5,7 +5,7 @@ import { type RegisterOptions, useFormContext } from 'react-hook-form'
 
 import { ExclamationCircleIcon } from '@heroicons/react/outline'
 
-import useMergedRef from '../../hooks/useMergedRef'
+import useMergedRef from '../../../hooks/useMergedRef'
 
 export interface FormInputProps extends React.ComponentPropsWithoutRef<'input'> {
   /** provide an explicit id for the input element (otherwise a server-render-friendly id will be generated). */
