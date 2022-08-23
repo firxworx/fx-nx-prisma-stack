@@ -1,11 +1,17 @@
 import { Injectable, OnModuleInit, INestApplication, Logger } from '@nestjs/common'
-import { Prisma, PrismaClient } from '@prisma/client' // '../../generated/prisma-client' // import from custom output path specified in schema.prisma
+import { Prisma, PrismaClient } from '@prisma/client'
 
 /**
  * NestJS service that wraps the Prisma database client.
  *
+ * Note: if you specify a custom output path in `schema.prisma` then import `Prisma` + `PrismaClient` from that
+ * path. The default (`@prisma/client`) which references a path under `node_modules/` presents fewer hassles
+ * with the time-of-writing version of nx because the generated client code can confuse nx's stock webpack config.
+ *
  * @see {@link https://docs.nestjs.com/recipes/prisma}
  * @see {@link https://github.com/prisma/prisma-examples/tree/latest/typescript/rest-nestjs/src}
+ *
+ * @see {@link https://github.com/prisma/prisma/issues/5273} re
  */
 @Injectable()
 export class PrismaService
@@ -32,7 +38,7 @@ export class PrismaService
               { emit: 'stdout', level: 'warn' },
               { emit: 'stdout', level: 'error' },
             ],
-      errorFormat: 'colorless',
+      errorFormat: process.env.NODE_ENV === 'production' ? 'minimal' : 'pretty',
     })
   }
 

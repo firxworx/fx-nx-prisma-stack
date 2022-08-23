@@ -1,6 +1,9 @@
 import { Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common'
 import { Prisma, PrismaPromise } from '@prisma/client'
-import { AuthUser } from '../auth/types/auth-user.type'
+import { NotFoundError, PrismaClientKnownRequestError } from '@prisma/client/runtime'
+
+import type { AuthUser } from '../auth/types/auth-user.type'
+import { PrismaQueryErrorCode } from './constants/prisma-query-error-code.enum'
 
 // eslint-disable-next-line
 type ConstructorType<T> = new (...args: any[]) => T
@@ -17,7 +20,7 @@ export interface PrismaDelegate {
   findMany(data: unknown): PrismaPromise<unknown[]>
   findUnique(data: unknown): PrismaPromise<unknown>
   findUniqueOrThrow(data: unknown): PrismaPromise<unknown>
-  update(data: unknown): PrismaPromise<unknown>
+  update(data: unknown): PrismaPromise<any> // eslint-disable-line  @typescript-eslint/no-explicit-any
   updateMany(data: unknown): PrismaPromise<Prisma.BatchPayload>
   upsert(data: unknown): PrismaPromise<unknown>
   groupBy(data: unknown): PrismaPromise<unknown>
@@ -34,30 +37,34 @@ export interface PrismaDelegate {
  *
  * @wip @experimental
  *
- * @todo create and update (PrismaModelCrudService)
- *
  * @see {@link https://docs.nestjs.com/recipes/prisma}
  * @see {@link https://github.com/prisma/prisma-examples/tree/latest/typescript/rest-nestjs/src}
  */
 @Injectable()
-export abstract class PrismaModelCrudService<D extends PrismaDelegate, DTO> {
+export abstract class PrismaModelCrudService<D extends PrismaDelegate, RES_DTO, C_DTO, U_DTO> {
   private readonly _logger = new Logger(this.constructor.name)
 
-  private _ERROR_MESSAGES = {
+  protected _ERROR_MESSAGES = {
     INTERNAL_SERVER_ERROR: 'Server Error',
   }
 
   protected _modelDelegate: D
-  protected _DtoClass: ConstructorType<DTO>
+  protected _ResponseDtoClass: ConstructorType<RES_DTO>
+  protected _CreateDtoClass: ConstructorType<C_DTO>
+  protected _UpdateDtoClass: ConstructorType<U_DTO>
   protected _options?: { delegateSelectClause?: Record<string, unknown> }
 
   protected constructor(
     modelDelegate: D,
-    DtoClass: ConstructorType<DTO>,
+    ResponseDtoClass: ConstructorType<RES_DTO>,
+    CreateDtoClass: ConstructorType<C_DTO>,
+    UpdateDtoClass: ConstructorType<U_DTO>,
     options?: { delegateSelectClause?: Record<string, unknown> },
   ) {
     this._modelDelegate = modelDelegate
-    this._DtoClass = DtoClass
+    this._ResponseDtoClass = ResponseDtoClass
+    this._CreateDtoClass = CreateDtoClass
+    this._UpdateDtoClass = UpdateDtoClass
     this._options = options
   }
 
@@ -76,24 +83,39 @@ export abstract class PrismaModelCrudService<D extends PrismaDelegate, DTO> {
     }
   }
 
-  async findAll(): Promise<DTO[]> {
+  protected handleError(error: unknown) {
+    // `NotFoundError`: thrown by select queries when configured to throw on not found
+    if (error instanceof NotFoundError) {
+      return new NotFoundException(error.message)
+    }
+
+    // error 'P2001': no record found e.g. from update/delete query
+    if (error instanceof PrismaClientKnownRequestError && error.code === PrismaQueryErrorCode.RecordDoesNotExist) {
+      return new NotFoundException(error.message)
+    }
+
+    this._logger.error(error instanceof Error ? error.message : String(error))
+    return error
+  }
+
+  async findAll(): Promise<RES_DTO[]> {
     const items = await this._modelDelegate.findMany({
       ...(this._options?.delegateSelectClause ? { select: this._options.delegateSelectClause } : {}),
     })
 
-    return items.map((item) => new this._DtoClass(item) as DTO)
+    return items.map((item) => new this._ResponseDtoClass(item) as RES_DTO)
   }
 
-  async findAllByUser(user: AuthUser): Promise<DTO[]> {
+  async findAllByUser(user: AuthUser): Promise<RES_DTO[]> {
     const items = await this._modelDelegate.findMany({
       ...(this._options?.delegateSelectClause ? { select: this._options.delegateSelectClause } : {}),
       where: { user: { id: user.id } },
     })
 
-    return items.map((item) => new this._DtoClass(item) as DTO)
+    return items.map((item) => new this._ResponseDtoClass(item) as RES_DTO)
   }
 
-  async findOne(identifier: string | number): Promise<DTO | undefined> {
+  async findOne(identifier: string | number): Promise<RES_DTO | undefined> {
     const whereCondition = this.getIdentifierWhereCondition(identifier)
 
     const item = await this._modelDelegate.findFirst({
@@ -101,18 +123,94 @@ export abstract class PrismaModelCrudService<D extends PrismaDelegate, DTO> {
       where: whereCondition,
     })
 
-    return item ? (new this._DtoClass(item) as DTO) : undefined
+    return item ? (new this._ResponseDtoClass(item) as RES_DTO) : undefined
   }
 
-  async findOneByUser(user: AuthUser, identifier: string | number): Promise<DTO | undefined> {
-    const condition = this.getIdentifierWhereCondition(identifier)
+  async findOneByUser(user: AuthUser, identifier: string | number): Promise<RES_DTO | undefined> {
+    const whereCondition = this.getIdentifierWhereCondition(identifier)
 
     const item = await this._modelDelegate.findFirst({
       ...(this._options?.delegateSelectClause ? { select: this._options.delegateSelectClause } : {}),
-      where: { userId: user.id, ...condition },
+      where: { userId: user.id, ...whereCondition },
     })
 
-    return item ? (new this._DtoClass(item) as DTO) : undefined
+    return item ? (new this._ResponseDtoClass(item) as RES_DTO) : undefined
+  }
+
+  async getOne(identifier: string | number): Promise<RES_DTO> {
+    try {
+      const condition = this.getIdentifierWhereCondition(identifier)
+      const item = await this._modelDelegate.findUniqueOrThrow({
+        ...(this._options?.delegateSelectClause ? { select: this._options.delegateSelectClause } : {}),
+        where: condition,
+      })
+
+      return new this._ResponseDtoClass(item) as RES_DTO
+    } catch (error: unknown) {
+      throw this.handleError(error)
+    }
+  }
+
+  async getOneByUser(user: AuthUser, identifier: string | number): Promise<RES_DTO> {
+    try {
+      const whereCondition = this.getIdentifierWhereCondition(identifier)
+
+      const item = await this._modelDelegate.findFirstOrThrow({
+        ...(this._options?.delegateSelectClause ? { select: this._options.delegateSelectClause } : {}),
+        where: { userId: user.id, ...whereCondition },
+      })
+
+      return new this._ResponseDtoClass(item) as RES_DTO
+    } catch (error: unknown) {
+      throw this.handleError(error)
+    }
+  }
+
+  async update(identifier: string | number, dto: U_DTO): Promise<RES_DTO> {
+    const whereCondition = this.getIdentifierWhereCondition(identifier)
+
+    // unsure of best way to type this.. one attempt/approach (requires 'any' on the base model delegate type)
+    const item: Awaited<ReturnType<typeof this._modelDelegate['update']>> = await this._modelDelegate.update({
+      ...(this._options?.delegateSelectClause ? { select: this._options.delegateSelectClause } : {}),
+      where: whereCondition,
+      data: {
+        ...dto,
+      },
+    })
+
+    return new this._ResponseDtoClass(item)
+  }
+
+  async createByUser(user: AuthUser, dto: C_DTO): Promise<RES_DTO> {
+    // @todo catch unique constraint violation for videos create
+    // @todo catch if user incorrect - createByUser
+    const item = await this._modelDelegate.create({
+      ...(this._options?.delegateSelectClause ? { select: this._options.delegateSelectClause } : {}),
+      data: {
+        ...dto,
+        user: {
+          connect: {
+            id: user.id,
+          },
+        },
+      },
+    })
+
+    return new this._ResponseDtoClass(item)
+  }
+
+  async updateByUser(user: AuthUser, identifier: string | number, dto: U_DTO): Promise<RES_DTO> {
+    const whereCondition = this.getIdentifierWhereCondition(identifier)
+
+    const item: Awaited<ReturnType<typeof this._modelDelegate['update']>> = await this._modelDelegate.update({
+      ...(this._options?.delegateSelectClause ? { select: this._options.delegateSelectClause } : {}),
+      where: { userId: user.id, ...whereCondition },
+      data: {
+        ...dto,
+      },
+    })
+
+    return new this._ResponseDtoClass(item)
   }
 
   async delete(identifier: string | number): Promise<void> {
@@ -125,6 +223,7 @@ export abstract class PrismaModelCrudService<D extends PrismaDelegate, DTO> {
 
   async deleteByUser(user: AuthUser, identifier: string | number): Promise<void> {
     const owner = await this.findOneByUser(user, identifier)
+
     if (!owner) {
       throw new NotFoundException()
     }
