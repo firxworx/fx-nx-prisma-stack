@@ -1,4 +1,5 @@
 {
-  "WillLuke.nextjs.addTypesOnSave": true,
+  // if addTypesOnSave is `true` a bug will auto-remove the AppProps type from CustomApp
+  "WillLuke.nextjs.addTypesOnSave": false,
   "WillLuke.nextjs.hasPrompted": true
 }
