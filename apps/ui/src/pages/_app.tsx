@@ -9,24 +9,26 @@ import '../styles/tailwind.css'
 import { ErrorBoundary } from '../components/layout/ErrorBoundary'
 import { SessionLoadingScreen } from '../components/layout/SessionLoadingScreen'
 import { AppLayout } from '../components/layout/AppLayout'
-import { ProtectedLayout } from '../components/layout/ProtectedLayout'
+import { AuthenticatedLayout } from '../components/layout/AuthenticatedLayout'
 import { PublicLayout } from '../components/layout/PublicLayout'
 import { SessionContextProvider } from '../context/SessionContextProvider'
 
-const PUBLIC_ROUTES = ['/', '/sign-in'] // all public routes must be whitelisted here
+const PUBLIC_ROUTES_WHITELIST = ['/', '/sign-in']
 
-const PUBLIC_NAVIGATION_LINKS = [{ title: 'Sign-In', href: '/sign-in' }]
-const AUTH_NAVIGATION_LINKS = [
+const PUBLIC_NAV_LINKS = [{ title: 'Sign-In', href: '/sign-in' }]
+const AUTHENTICATED_NAV_LINKS = [
   { title: 'App', href: '/app' },
+  { title: 'Videos', href: '/app/videos' },
   { title: 'Secret', href: '/secret' },
 ]
 
 const isPublicRoute = (routerPath: string) =>
   routerPath === '/'
     ? true
-    : PUBLIC_ROUTES.concat(['/500', '/404']).some((route) => (route === '/' ? false : routerPath.startsWith(route)))
+    : PUBLIC_ROUTES_WHITELIST.concat(['/500', '/404']).some((route) =>
+        route === '/' ? false : routerPath.startsWith(route),
+      )
 
-// prettier-ignore - preserve AppProps typing
 function CustomApp({ Component, pageProps, router }: AppProps) {
   const [queryClient] = useState(() => new QueryClient())
 
@@ -42,23 +44,23 @@ function CustomApp({ Component, pageProps, router }: AppProps) {
         <QueryClientProvider client={queryClient}>
           <SessionContextProvider>
             {(isSessionReady) => (
-              <AppLayout navigationLinks={isSessionReady ? AUTH_NAVIGATION_LINKS : PUBLIC_NAVIGATION_LINKS}>
+              <AppLayout navigationLinks={isSessionReady ? AUTHENTICATED_NAV_LINKS : PUBLIC_NAV_LINKS}>
                 {isPublicRoute(router.asPath) ? (
                   <PublicLayout>
                     <Component {...pageProps} />
                   </PublicLayout>
                 ) : isSessionReady ? (
-                  <ProtectedLayout>
+                  <AuthenticatedLayout>
                     {/* autherrorlistener, sessiontimer, etc */}
                     <Component {...pageProps} />
-                  </ProtectedLayout>
+                  </AuthenticatedLayout>
                 ) : (
                   <SessionLoadingScreen />
                 )}
               </AppLayout>
             )}
           </SessionContextProvider>
-          {/* note: by default ReactQueryDevtools is only included in bundles when NODE_ENV is 'development' */}
+          {/* ReactQueryDevtools is only included in bundles when NODE_ENV === 'development' */}
           <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
       </ErrorBoundary>
