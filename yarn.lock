@@ -8209,6 +8209,7 @@ __metadata:
     react-async-hook: ^4.0.0
     react-dom: 18.2.0
     react-hook-form: ^7.34.0
+    react-icons: ^4.4.0
     react-test-renderer: 18.2.0
     react-use: ^17.4.0
     reflect-metadata: ^0.1.13
@@ -13118,6 +13119,15 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17 || ^18
   checksum: 2b4a6f6ca5b3f729b88aa14a1a8c47ba86405d9c5fef2560b1dc85ac6fe1b105326571b8e1e857f8d8f3449636062d2d6201809918b5bb37f6f8f0b9c6cd6e2c
+  languageName: node
+  linkType: hard
+
+"react-icons@npm:^4.4.0":
+  version: 4.4.0
+  resolution: "react-icons@npm:4.4.0"
+  peerDependencies:
+    react: "*"
+  checksum: dd93a1dcc8ac8a3cf46a2b33e80b586fa967331fa5fcb90d061abf276155a8363a331643e203d67cb9bab4261d00a757da854bcce1fce2c6e4258bf3e33f711b
   languageName: node
   linkType: hard
 
