@@ -54,6 +54,7 @@
     "@tailwindcss/forms": "^0.5.2",
     "@tailwindcss/line-clamp": "^0.4.0",
     "@tailwindcss/typography": "^0.5.4",
+    "@tanstack/match-sorter-utils": "^8.1.1",
     "@tanstack/react-query": "^4.0.10",
     "@tanstack/react-query-devtools": "^4.0.10",
     "@tanstack/react-table": "^8.5.11",
@@ -93,6 +94,7 @@
     "zod": "^3.17.10"
   },
   "devDependencies": {
+    "@faker-js/faker": "^7.4.0",
     "@nestjs/schematics": "9.0.1",
     "@nestjs/testing": "9.0.8",
     "@nrwl/cli": "14.5.4",

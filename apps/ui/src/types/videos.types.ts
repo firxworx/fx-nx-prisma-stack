@@ -2,12 +2,13 @@
 
 export enum VideoPlatform {
   YOUTUBE = 'YOUTUBE',
+  // VIMEO = 'VIMEO',
 }
 
 export interface VideoDto {
   uuid: string
   name: string
-  platform: 'YOUTUBE'
+  platform: VideoPlatform
   externalId: string
   createdAt: Date
   updatedAt: Date
