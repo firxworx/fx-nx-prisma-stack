@@ -16,7 +16,7 @@ export interface VideoDto {
 }
 
 export interface CreateVideoDto extends Pick<VideoDto, 'name' | 'platform' | 'externalId'> {
-  groups: VideoDto['groups'][number]['uuid'][]
+  groups?: VideoDto['groups'][number]['uuid'][]
 }
 
 export interface UpdateVideoDto extends Partial<CreateVideoDto> {}

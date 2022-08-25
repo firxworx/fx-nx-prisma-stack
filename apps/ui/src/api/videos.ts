@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { apiFetch } from './lib/api-fetch'
-import type { VideoGroupDto, VideoDto, CreateVideoDto } from '../types/videos.types'
+import type { VideoGroupDto, VideoDto, CreateVideoDto, UpdateVideoDto } from '../types/videos.types'
 
 export interface MutationQueryArgs {
   onSuccess?: () => void
@@ -63,7 +63,7 @@ export async function createVideo(data: CreateVideoDto): Promise<VideoDto> {
 export async function updateVideo({
   uuid,
   ...restData
-}: { uuid: string | undefined } & Partial<VideoDto>): Promise<VideoDto> {
+}: { uuid: string | undefined } & UpdateVideoDto): Promise<VideoDto> {
   return apiFetch<VideoDto>(`/videos/${uuid}`, {
     method: 'PATCH',
     body: JSON.stringify(restData),
@@ -103,6 +103,7 @@ export function useVideoQuery(uuid: string | undefined) {
       enabled: !!uuid?.length,
     },
   )
+
   return { data, status, error, isLoading, isSuccess, isError }
 }
 

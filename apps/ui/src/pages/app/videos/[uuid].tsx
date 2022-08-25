@@ -12,7 +12,7 @@ export const VideoPage: NextPage = () => {
   const videoUuid = typeof routerQuery?.uuid === 'string' ? routerQuery.uuid : ''
   const { data, isSuccess, isLoading, isError } = useVideoQuery(videoUuid)
 
-  const onMutateSuccessRedirectHandler = useCallback(() => {
+  const onSaveRedirectHandler = useCallback(() => {
     routerPush('/app/videos')
   }, [routerPush])
 
@@ -22,10 +22,9 @@ export const VideoPage: NextPage = () => {
       <div className="mt-4">
         {isError && <p>Error fetching data</p>}
         {isLoading && <Spinner />}
-        {isSuccess && data && <span>{data.name}</span>}
       </div>
       <div className="mt-4">
-        <VideoMutationForm uuid={videoUuid} defaultValues={data} onSuccess={onMutateSuccessRedirectHandler} />
+        {isSuccess && data && <VideoMutationForm uuid={videoUuid} data={data} onSuccess={onSaveRedirectHandler} />}
       </div>
     </div>
   )

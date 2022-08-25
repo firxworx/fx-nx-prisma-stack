@@ -1,26 +1,36 @@
-import { useVideoMutationQuery } from 'apps/ui/src/api/videos'
-import { useIsMounted } from 'apps/ui/src/hooks/useIsMounted'
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
+import { useVideoMutationQuery } from '../../../api/videos'
+import { useIsMounted } from '../../../hooks/useIsMounted'
+import type { UpdateVideoDto, VideoDto } from '../../../types/videos.types'
 import { FormProvider, SubmitHandler, useForm } from 'react-hook-form'
+import { Spinner } from '../../elements/feedback/Spinner'
 import { FormButton } from '../../elements/forms/FormButton'
 import { FormInput } from '../../elements/forms/FormInput'
 
-export interface VideoMutationFormData {
-  name: string
-  externalId: string
-}
+export type VideoMutationFormData = UpdateVideoDto
 
 export interface VideoMutationFormProps {
   uuid?: string
-  defaultValues?: VideoMutationFormData
+  data?: VideoDto
   onSuccess?: () => void | Promise<void>
 }
 
-export const VideoMutationForm: React.FC<VideoMutationFormProps> = ({ uuid, defaultValues, onSuccess }) => {
-  const isMounted = useIsMounted()
-  const { mutateAsync, isLoading } = useVideoMutationQuery({ onSuccess })
+const mapVideoToForm = (video?: VideoDto): UpdateVideoDto | undefined =>
+  video
+    ? {
+        name: video.name,
+        externalId: video.externalId,
+        platform: video.platform,
+        groups: video.groups?.map((vg) => vg.uuid) ?? [],
+      }
+    : undefined
 
-  const form = useForm<VideoMutationFormData>() // { defaultValues }
+export const VideoMutationForm: React.FC<VideoMutationFormProps> = ({ uuid, data, onSuccess }) => {
+  const isMounted = useIsMounted()
+  const { mutateAsync, isLoading, error, isError } = useVideoMutationQuery({ onSuccess })
+  const videoUpdateDto = useMemo(() => mapVideoToForm(data), [data])
+
+  const form = useForm<VideoMutationFormData>({ defaultValues: videoUpdateDto })
   const { handleSubmit } = form
 
   const handleMutationQuery: SubmitHandler<VideoMutationFormData> = useCallback(
@@ -33,6 +43,7 @@ export const VideoMutationForm: React.FC<VideoMutationFormProps> = ({ uuid, defa
         const video = await mutateAsync({
           uuid,
           ...data,
+          groups: Array.isArray(data.groups) ? data.groups : data.groups ? [data.groups] : undefined,
         })
 
         if (process.env.NODE_ENV === 'development') {
@@ -48,8 +59,13 @@ export const VideoMutationForm: React.FC<VideoMutationFormProps> = ({ uuid, defa
     [uuid, isMounted],
   )
 
+  if (!data) {
+    return <Spinner />
+  }
+
   return (
     <FormProvider {...form}>
+      {isError && <div className="font-bold">{String(error)}</div>}
       <form onSubmit={handleSubmit(handleMutationQuery)}>
         <div className="space-y-4 p-4 mt-4">
           <FormInput
@@ -57,17 +73,16 @@ export const VideoMutationForm: React.FC<VideoMutationFormProps> = ({ uuid, defa
             label="Name"
             placeholder="Video Name"
             hideLabel
-            defaultValue={defaultValues?.name}
-            // validationOptions={{ required: true }}
+            validationOptions={{ required: true }}
           />
           <FormInput
             name="externalId"
             label="Share/Embed Code"
-            placeholder="External ID"
+            placeholder="abcd1234"
             hideLabel
-            defaultValue={defaultValues?.externalId}
             validationOptions={{ required: true }}
           />
+          <FormInput name="groups" label="Groups" placeholder="Group UUID's" hideLabel />
           <FormButton type="submit" disabled={isLoading}>
             Save
           </FormButton>
