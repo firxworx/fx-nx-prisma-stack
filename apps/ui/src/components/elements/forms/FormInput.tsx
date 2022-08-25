@@ -64,6 +64,8 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
     const { ref: formRef, ...registerProps } = register(name, validationOptions)
     const mergedRef = useMergedRef(forwardedRef, formRef)
 
+    const isDisabled = restProps.disabled || isSubmitting
+
     return (
       <div>
         {!hideLabel && ( // @todo more a11y-friendly label hide of FormInput
@@ -75,7 +77,7 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
           <input
             id={id}
             ref={mergedRef}
-            disabled={restProps.disabled || isSubmitting}
+            disabled={isDisabled}
             {...registerProps}
             {...restProps}
             type={type}
@@ -86,6 +88,7 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
                 ? 'bg-slate-100 border-slate-300 cursor-not-allowed focus:ring-0 focus:border-slate-300'
                 : 'bg-white focus:ring-2',
               {
+                ['animate-pulse cursor-progress']: isDisabled,
                 // editable field + no error
                 ['border-slate-300 focus:ring-blue-100 focus:border-slate-300']: !readOnly && !errors[name],
                 // editable field + error

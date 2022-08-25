@@ -21,7 +21,7 @@ export const LinkButton: React.FC<PropsWithChildren<LinkButtonProps>> = ({
 }) => {
   return (
     <Link href={href} {...restProps}>
-      <a className={clsx('fx-button', appendClassName)}>{children}</a>
+      <a className={clsx('fx-button bg-button-primary', appendClassName)}>{children}</a>
     </Link>
   )
 }

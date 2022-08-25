@@ -1,10 +1,14 @@
-// const defaultTheme = require('tailwindcss/defaultTheme')
+const colors = require('tailwindcss/colors')
 const plugin = require('tailwindcss/plugin')
+// const defaultTheme = require('tailwindcss/defaultTheme')
 
 module.exports = {
   theme: {
     extend: {
       colors: {
+        button: {
+          primary: colors.sky[700],
+        },
         error: {
           DEFAULT: '#cb4848',
           50: '#fdf3f3',
@@ -29,7 +33,7 @@ module.exports = {
     require('@tailwindcss/line-clamp'),
 
     // add custom styles via inline custom plugin
-    plugin(function ({ addBase }) {
+    plugin(function ({ addBase, addComponents }) {
       const webkitSearchInputXIconTarget =
         'input[type="search"]::-webkit-search-decoration, input[type="search"]::-webkit-search-cancel-button, input[type="search"]::-webkit-search-results-button, input[type="search"]::-webkit-search-results-decoration'
 
@@ -59,6 +63,14 @@ module.exports = {
           display: 'none',
           width: 0,
           height: 0,
+        },
+      })
+      addComponents({
+        '.fx-box': {
+          'p-4 sm:p-6 lg:p-8': {},
+        },
+        '.fx-button': {
+          '@apply inline-flex items-center justify-center px-4 py-2 rounded-md': {},
         },
       })
     }),

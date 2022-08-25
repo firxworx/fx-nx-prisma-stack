@@ -22,7 +22,7 @@ export const FormButton: React.FC<FormButtonProps> = ({ children, ...props }) =>
 
   return (
     <button
-      className={clsx('inline-flex items-center justify-center px-4 py-2 rounded-md bg-sky-700 text-white', {
+      className={clsx('fx-button bg-button-primary text-white', {
         'animate-pulse': isSubmitting,
       })}
       disabled={isDisabled}
