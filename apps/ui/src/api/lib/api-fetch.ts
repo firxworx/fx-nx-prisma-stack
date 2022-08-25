@@ -72,17 +72,22 @@ export async function apiFetch<T>(path: string, options?: RequestInit): Promise<
       throw new Error(`Fetch error (${response.status}): missing expected response data from ${path}`)
     }
 
-    // return rejected promise to bypass catch in 400 errors resulting from POST (forms) and throw all other errors
     if (!response.ok) {
-      if (options?.method === 'POST' && response.status === 400) {
-        if (json?.message) {
-          return Promise.reject(new Error(String(json.message)))
-        }
-        return Promise.reject(new Error('Form submission error'))
-      }
+      // the following block is less relevant with react-query's callbacks for error handling - pulling out for now
+      // @todo elegant form submission error handling + user feedback
+      //
+      // // return rejected promise to bypass catch for 400+422 errors resulting from POST requests (form submission)
+      // // and throw all other errors
+      // if (options?.method === 'POST' && (response.status === 400 || response.status === 422)) {
+      //   console.error(`Fetch error (${response.status}):`, JSON.stringify(json, null, 2))
+      //   if (json?.message) {
+      //     return Promise.reject(new Error(String(json.message)))
+      //   }
+      //   return Promise.reject(new Error('Form submission error'))
+      // }
 
-      console.error(`Fetch error (${response.status}):`, json)
-      throw new Error(`Fetch error!! (${response.status}): ${JSON.stringify(json)}`)
+      console.error(`Fetch error (${response.status}):`, JSON.stringify(json, null, 2))
+      throw new Error(json)
     }
 
     return json as T
