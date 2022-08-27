@@ -99,7 +99,7 @@ module.exports = {
           '@apply bg-sky-700 text-white hover:bg-sky-800': {},
         },
         '.fx-button-solid-primary-disabled': {
-          '@apply bg-slate-300 text-slate-500': {},
+          '@apply bg-slate-200 text-slate-400': {},
         },
         '.fx-input-border': {
           '@apply border border-slate-300 rounded-md': {},

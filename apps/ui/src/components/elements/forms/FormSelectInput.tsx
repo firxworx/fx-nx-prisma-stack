@@ -79,6 +79,7 @@ export const SelectInput = ({
             { 'text-slate-500': value === '' },
           )}
           aria-label={hideLabel ? label : undefined}
+          aria-invalid={errors[name] ? 'true' : 'false'}
         >
           {placeholder && (
             <option value="" disabled hidden>

@@ -97,6 +97,7 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
             )}
             placeholder={placeholder}
             aria-label={hideLabel ? label : undefined}
+            aria-invalid={errors[name] ? 'true' : 'false'}
           />
           {!hideError && errors[name] && (
             <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
