@@ -1,10 +1,14 @@
 const colors = require('tailwindcss/colors')
 const plugin = require('tailwindcss/plugin')
+
 // const defaultTheme = require('tailwindcss/defaultTheme')
 
 module.exports = {
   theme: {
     extend: {
+      spacing: {
+        1.25: '0.3125rem',
+      },
       colors: {
         button: {
           primary: colors.sky[700],
@@ -40,6 +44,9 @@ module.exports = {
       const ieSearchInputXIconTarget =
         'input.hide-clear[type=search]::-ms-clear, input.hide-clear[type=search]::-ms-reveal'
 
+      // this selector matches + overrides the selector used by the @tailwindcss/forms plugin
+      const formInputTargets = `[type='text'], [type='email'], [type='url'], [type='password'], [type='number'], [type='date'], [type='datetime-local'], [type='month'], [type='search'], [type='tel'], [type='time'], [type='week'], [multiple], textarea, select`
+
       addBase({
         // always show scrollbar to avoid horizontal jank on Windows PC's during loading + modals + transitions
         body: {
@@ -64,6 +71,11 @@ module.exports = {
           width: 0,
           height: 0,
         },
+        [formInputTargets]: {
+          '@apply border border-slate-300 rounded-md': {},
+          '@apply focus:outline-none focus-visible:border-slate-300 focus-visible:ring-2 focus-visible:ring-blue-100':
+            {},
+        },
       })
       addComponents({
         '.fx-box': {
@@ -71,6 +83,16 @@ module.exports = {
         },
         '.fx-button': {
           '@apply inline-flex items-center justify-center px-4 py-2 rounded-md': {},
+          '@apply fx-focus-ring': {},
+        },
+        '.fx-palette-button-primary': {
+          '@apply bg-sky-700 text-white hover:bg-sky-800': {},
+        },
+        '.fx-input-border': {
+          '@apply border border-slate-300 rounded-md': {},
+        },
+        '.fx-focus-ring': {
+          '@apply focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-100': {},
         },
       })
     }),
