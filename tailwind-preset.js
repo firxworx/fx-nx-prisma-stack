@@ -10,6 +10,7 @@ module.exports = {
         1.25: '0.3125rem',
       },
       colors: {
+        // palette: {},
         button: {
           primary: colors.sky[700],
         },
@@ -78,15 +79,27 @@ module.exports = {
         },
       })
       addComponents({
+        '.fx-layout-max-width': {
+          '@apply max-w-6xl': {},
+        },
+        '.fx-layout-padding-x': {
+          '@apply px-4 sm:px-6 xl:px-8': {},
+        },
+        '.fx-layout-padding-y': {
+          '@apply pt-4 pb-12 sm:pt-6 sm:pb-16': {},
+        },
         '.fx-box': {
           'p-4 sm:p-6 lg:p-8': {},
         },
-        '.fx-button': {
+        '.fx-button-base': {
           '@apply inline-flex items-center justify-center px-4 py-2 rounded-md': {},
           '@apply fx-focus-ring': {},
         },
-        '.fx-palette-button-primary': {
+        '.fx-button-solid-primary': {
           '@apply bg-sky-700 text-white hover:bg-sky-800': {},
+        },
+        '.fx-button-solid-primary-disabled': {
+          '@apply bg-slate-300 text-slate-500': {},
         },
         '.fx-input-border': {
           '@apply border border-slate-300 rounded-md': {},

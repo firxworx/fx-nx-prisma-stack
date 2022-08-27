@@ -14,8 +14,6 @@ import { UserProfileMenu } from '../menus/UserProfileMenu'
 import { useIsMounted } from '../../../hooks/useIsMounted'
 
 export interface HeaderProps {
-  contentConstraintStyle: string
-  containerXPaddingStyle: string
   navigationLinks: NavigationLink[]
 }
 
@@ -182,7 +180,7 @@ const MobileNavMenu: React.FC<
 /**
  * Header with branding that implements a responsive navigation menu.
  */
-export const Header: React.FC<HeaderProps> = ({ contentConstraintStyle, containerXPaddingStyle, navigationLinks }) => {
+export const Header: React.FC<HeaderProps> = ({ navigationLinks }) => {
   return (
     <Popover as="header" className={clsx('relative border-b-2 bg-slate-100 border-slate-200')}>
       {({ open, close }) => (
@@ -190,8 +188,7 @@ export const Header: React.FC<HeaderProps> = ({ contentConstraintStyle, containe
           <nav
             className={clsx(
               'relative mx-auto flex items-center justify-between py-3',
-              contentConstraintStyle,
-              containerXPaddingStyle,
+              'fx-layout-max-width fx-layout-padding-x',
             )}
             aria-label="Main"
           >
