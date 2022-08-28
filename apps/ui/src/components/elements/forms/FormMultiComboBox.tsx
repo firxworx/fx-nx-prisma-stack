@@ -19,15 +19,18 @@ export interface FormMultiComboBoxOption extends ApiObject {
 export interface FormMultiComboBoxProps extends UseControllerProps {
   label: string
   options: FormMultiComboBoxOption[]
+  disabled?: boolean // currently not part of react-hook-form useController/Controller
 }
 
 export interface ComboBoxItemsButtonProps {
   label: string
   selectedItems: FormMultiComboBoxOption[]
+  disabled?: boolean
   onItemDeselect: (uuid: string) => React.MouseEventHandler
 }
 
 export interface ComboBoxFilterQueryInputButtonProps {
+  disabled?: boolean
   onFilterQueryChange: (event: React.ChangeEvent<HTMLInputElement>) => void
 }
 
@@ -40,29 +43,45 @@ export interface ComboBoxFilterQueryInputButtonProps {
 //   )
 // }
 
-const ComboBoxItemsButton: React.FC<ComboBoxItemsButtonProps> = ({ label, selectedItems, onItemDeselect }) => {
+const ComboBoxItemsButton: React.FC<ComboBoxItemsButtonProps> = ({
+  label,
+  selectedItems,
+  disabled,
+  onItemDeselect,
+}) => {
   return (
     <ComboBox.Button
       as="div"
+      tabIndex={0} // headlessui current version overrides this in the source to -1...
       className={clsx(
-        'relative w-full cursor-default fx-input-border bg-white pl-3 pr-10',
-        'text-left',
-        'focus:outline-none focus-visible:border-blue-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-blue-300',
+        'relative w-full cursor-default pl-3 pr-10',
+        'fx-input-border fx-focus-ring',
+        'text-left bg-white',
+        // 'focus:outline-none focus-visible:border-blue-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-blue-300',
       )}
     >
-      <span className="block truncate">
+      <span className="block">
         {!!selectedItems.length ? (
-          <ul className="inline-flex space-x-2 list-none py-1.5">
+          <ul className={clsx('inline-flex space-x-2 list-none py-1.5', { ['opacity-70']: disabled })}>
             {selectedItems.map((item) => (
               <li key={item.uuid}>
                 <button
                   type="button"
-                  className="group inline-flex items-center text-slate-800 bg-slate-200 hover:text-slate-700 hover:bg-error-200 transition-colors py-1.5 pl-2 leading-none rounded-md text-sm"
+                  className={clsx(
+                    'group inline-flex items-center text-slate-800 bg-slate-200 transition-colors py-1.5 pl-2 leading-none rounded-md text-sm fx-focus-ring',
+                    {
+                      ['hover:text-slate-700 hover:bg-error-200']: !disabled,
+                    },
+                  )}
                   onClick={onItemDeselect(item.uuid)}
+                  disabled={disabled}
                 >
                   <span className="inline-block flex-1">{item.name}</span>
                   <span className="inline-block pl-1.5 pr-2">
-                    <XCircleIcon className="h-4 w-4 text-slate-400 group-hover:text-error" aria-hidden="true" />
+                    <XCircleIcon
+                      className={clsx('h-4 w-4 text-slate-400 pt-0.5', { ['group-hover:text-error']: !disabled })}
+                      aria-hidden="true"
+                    />
                   </span>
                 </button>
               </li>
@@ -79,14 +98,18 @@ const ComboBoxItemsButton: React.FC<ComboBoxItemsButtonProps> = ({ label, select
   )
 }
 
-const ComboBoxFilterQueryInputButton: React.FC<ComboBoxFilterQueryInputButtonProps> = ({ onFilterQueryChange }) => {
+const ComboBoxFilterQueryInputButton: React.FC<ComboBoxFilterQueryInputButtonProps> = ({
+  disabled,
+  onFilterQueryChange,
+}) => {
   return (
     <>
       <ComboBox.Input
-        className="w-full fx-input-border py-2 pl-3 pr-10 text-slate-900"
+        className="w-full fx-input-border fx-focus-ring py-2 pl-3 pr-10 text-slate-900"
         onChange={onFilterQueryChange}
         placeholder="Select Option&hellip;"
-        // displayValue={(items: Thing[]) => items.map((item) => item.name).join(', ')}
+        disabled={disabled}
+        // displayValue={(items: FormMultiComboBoxOption[]) => items.map((item) => item.name).join(', ')}
       />
       <ComboBox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
         <SelectorIcon className="h-5 w-5 text-slate-400" aria-hidden="true" />
@@ -95,8 +118,13 @@ const ComboBoxFilterQueryInputButton: React.FC<ComboBoxFilterQueryInputButtonPro
   )
 }
 
-// @todo even tighter generics + types for FormMultiComboBox
-export const FormMultiComboBox: React.FC<FormMultiComboBoxProps> = ({ label, options, ...restReactHookFormProps }) => {
+// @todo push for even tighter generics + types for FormMultiComboBox
+export const FormMultiComboBox: React.FC<FormMultiComboBoxProps> = ({
+  label,
+  options,
+  disabled,
+  ...restReactHookFormProps
+}) => {
   const [filterQuery, setFilterQuery] = useState<string>('')
   const [stableOptions, setStableOptions] = useState<FormMultiComboBoxOption[]>(options)
 
@@ -147,7 +175,6 @@ export const FormMultiComboBox: React.FC<FormMultiComboBoxProps> = ({ label, opt
       field.onChange(field.value.filter((item: ApiObject) => item.uuid !== uuid))
     }
 
-  console.log('field.value', field.value)
   return (
     <ComboBox
       ref={field.ref} // ref enables react-hook-form to focus on input on error (@todo check if headless indeed forwards to underlying input)
@@ -158,12 +185,17 @@ export const FormMultiComboBox: React.FC<FormMultiComboBoxProps> = ({ label, opt
       value={field.value}
       onChange={field.onChange}
       // defaultValue={field.value}
-      disabled={false}
+      disabled={disabled}
     >
       <div className="relative">
         {/* <SelectedItemsCommaList selectedItems={field.value} /> */}
         <div className="relative w-full cursor-default bg-white text-left text-base">
-          <ComboBoxItemsButton label={label} selectedItems={field.value} onItemDeselect={handleDeselectItem} />
+          <ComboBoxItemsButton
+            label={label}
+            selectedItems={field.value}
+            disabled={disabled}
+            onItemDeselect={handleDeselectItem}
+          />
           {false && ( // alternate style with text input for search filter:
             <ComboBoxFilterQueryInputButton onFilterQueryChange={handleFilterQueryChange} />
           )}
