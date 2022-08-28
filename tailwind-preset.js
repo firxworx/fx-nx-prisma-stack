@@ -9,6 +9,10 @@ module.exports = {
       spacing: {
         1.25: '0.3125rem',
       },
+      minWidth: {
+        '1/4': '25%',
+        '1/2': '50%',
+      },
       colors: {
         // palette: {},
         button: {
@@ -45,8 +49,9 @@ module.exports = {
       const ieSearchInputXIconTarget =
         'input.hide-clear[type=search]::-ms-clear, input.hide-clear[type=search]::-ms-reveal'
 
-      // this selector matches + overrides the selector used by the @tailwindcss/forms plugin
-      const formInputTargets = `[type='text'], [type='email'], [type='url'], [type='password'], [type='number'], [type='date'], [type='datetime-local'], [type='month'], [type='search'], [type='tel'], [type='time'], [type='week'], [multiple], textarea, select`
+      // these selectors match + override the selector used by the @tailwindcss/forms plugin
+      const formInputTargets = `[type='text']:not(.fx-custom-input), [type='email'], [type='url'], [type='password'], [type='number'], [type='date'], [type='datetime-local'], [type='month'], [type='search'], [type='tel'], [type='time'], [type='week'], [multiple], textarea, select`
+      const formInputFocusTargets = `[type='text']:focus:not(.fx-custom-input), [type='email']:focus, [type='url']:focus, [type='password']:focus, [type='number']:focus, [type='date']:focus, [type='datetime-local']:focus, [type='month']:focus, [type='search']:focus, [type='tel']:focus, [type='time']:focus, [type='week']:focus, [multiple]:focus, textarea:focus, select:focus`
 
       addBase({
         // always show scrollbar to avoid horizontal jank on Windows PC's during loading + modals + transitions
@@ -77,6 +82,8 @@ module.exports = {
           '@apply focus:outline-none focus-visible:border-slate-300 focus-visible:ring-2 focus-visible:ring-blue-100':
             {},
         },
+        // [formInputFocusTargets]: {
+        // }
       })
       addComponents({
         '.fx-layout-max-width': {
