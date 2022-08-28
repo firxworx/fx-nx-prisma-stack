@@ -8,6 +8,11 @@ import { PrismaQueryErrorCode } from './constants/prisma-query-error-code.enum'
 // eslint-disable-next-line
 type ConstructorType<T> = new (...args: any[]) => T
 
+export interface PrismaModelCrudServiceOptionProps {
+  delegateSelectClause?: Record<string, unknown>
+  delegateOrderByClause?: Record<string, 'asc' | 'desc'>[] | Record<string, 'asc' | 'desc'>
+}
+
 export interface PrismaDelegate {
   aggregate(data: unknown): PrismaPromise<unknown>
   count(data: unknown): PrismaPromise<unknown>
@@ -52,14 +57,15 @@ export abstract class PrismaModelCrudService<D extends PrismaDelegate, RES_DTO, 
   protected _ResponseDtoClass: ConstructorType<RES_DTO>
   protected _CreateDtoClass: ConstructorType<C_DTO>
   protected _UpdateDtoClass: ConstructorType<U_DTO>
-  protected _options?: { delegateSelectClause?: Record<string, unknown> }
+
+  protected _options?: PrismaModelCrudServiceOptionProps
 
   protected constructor(
     modelDelegate: D,
     ResponseDtoClass: ConstructorType<RES_DTO>,
     CreateDtoClass: ConstructorType<C_DTO>,
     UpdateDtoClass: ConstructorType<U_DTO>,
-    options?: { delegateSelectClause?: Record<string, unknown> },
+    options?: PrismaModelCrudServiceOptionProps,
   ) {
     this._modelDelegate = modelDelegate
     this._ResponseDtoClass = ResponseDtoClass
@@ -101,6 +107,7 @@ export abstract class PrismaModelCrudService<D extends PrismaDelegate, RES_DTO, 
   async findAll(): Promise<RES_DTO[]> {
     const items = await this._modelDelegate.findMany({
       ...(this._options?.delegateSelectClause ? { select: this._options.delegateSelectClause } : {}),
+      ...(this._options?.delegateOrderByClause ? { orderBy: this._options.delegateOrderByClause } : {}),
     })
 
     return items.map((item) => new this._ResponseDtoClass(item) as RES_DTO)
@@ -110,6 +117,7 @@ export abstract class PrismaModelCrudService<D extends PrismaDelegate, RES_DTO, 
     const items = await this._modelDelegate.findMany({
       ...(this._options?.delegateSelectClause ? { select: this._options.delegateSelectClause } : {}),
       where: { user: { id: user.id } },
+      ...(this._options?.delegateOrderByClause ? { orderBy: this._options.delegateOrderByClause } : {}),
     })
 
     return items.map((item) => new this._ResponseDtoClass(item) as RES_DTO)
@@ -169,7 +177,8 @@ export abstract class PrismaModelCrudService<D extends PrismaDelegate, RES_DTO, 
   async update(identifier: string | number, dto: U_DTO): Promise<RES_DTO> {
     const whereCondition = this.getIdentifierWhereCondition(identifier)
 
-    // unsure of best way to type this.. one attempt/approach (requires 'any' on the base model delegate type)
+    // unsure of best way to type this (prisma does not conveniently export all ideal types, such as a base Delegate)...
+    // the following approach requires `any` on the base model delegate type
     const item: Awaited<ReturnType<typeof this._modelDelegate['update']>> = await this._modelDelegate.update({
       ...(this._options?.delegateSelectClause ? { select: this._options.delegateSelectClause } : {}),
       where: whereCondition,

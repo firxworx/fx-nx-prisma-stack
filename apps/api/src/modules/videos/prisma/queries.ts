@@ -30,7 +30,14 @@ export const videoDtoPrismaSelectClause: VideoDtoPrismaSelectClause = {
   groups: { select: { videoGroup: { select: videoGroupPrismaSelectFields } } },
 }
 
+// array e.g. groupBy: [{ name: 'asc' }] is also valid w/ prisma
+export const videoDtoPrismaOrderByClause = Prisma.validator<Prisma.VideoOrderByWithRelationInput>()({ name: 'asc' })
+
 export const videoGroupDtoPrismaSelectClause: VideoGroupDtoPrismaSelectClause = {
   ...videoGroupPrismaSelectFields,
   videos: { select: { video: { select: videoPrismaSelectFields } } },
 }
+
+export const videoGroupDtoPrismaOrderByClause = Prisma.validator<Prisma.VideoGroupOrderByWithRelationInput>()({
+  name: 'asc',
+})

@@ -7,7 +7,7 @@ import type { AuthUser } from '../auth/types/auth-user.type'
 import { PrismaService } from '../prisma/prisma.service'
 import { CreateVideoDto } from './dto/create-video.dto'
 import { UpdateVideoDto } from './dto/update-video.dto'
-import { videoDtoPrismaSelectClause } from './prisma/queries'
+import { videoDtoPrismaOrderByClause, videoDtoPrismaSelectClause } from './prisma/queries'
 import { VideoGroupsService } from './video-groups.service'
 import { VideoDto } from './dto/video.dto'
 
@@ -26,7 +26,10 @@ export class VideosService extends PrismaModelCrudService<
     @Inject(forwardRef(() => VideoGroupsService))
     private videoGroupsService: VideoGroupsService,
   ) {
-    super(prisma.video, VideoDto, CreateVideoDto, UpdateVideoDto, { delegateSelectClause: videoDtoPrismaSelectClause })
+    super(prisma.video, VideoDto, CreateVideoDto, UpdateVideoDto, {
+      delegateSelectClause: videoDtoPrismaSelectClause,
+      delegateOrderByClause: videoDtoPrismaOrderByClause,
+    })
   }
 
   async findAllByUserAndUuids(user: AuthUser, videoUuids: string[]): Promise<VideoDto[]> {
@@ -40,6 +43,7 @@ export class VideosService extends PrismaModelCrudService<
           in: videoUuids,
         },
       },
+      orderBy: videoDtoPrismaOrderByClause,
     })
 
     return videos.map((video) => new VideoDto(video))
