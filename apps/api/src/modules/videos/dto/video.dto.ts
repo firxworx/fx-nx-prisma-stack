@@ -52,7 +52,9 @@ export class VideoDto implements VideoResponse {
     }, {} as Partial<Video>)
 
     // map prisma's overly-nested query result (due to many-to-many) to response DTO
-    const groupsField = partial.groups?.map((vg) => new VideoGroupDto(vg.videoGroup)) ?? []
+    // the sort is because it doesn't appear currently possible to sort nested results w/ select (only via raw sql query)
+    const groupsField =
+      partial.groups?.map((vg) => new VideoGroupDto(vg.videoGroup)).sort((a, b) => a.name.localeCompare(b.name)) ?? []
 
     Object.assign(this, videoFields, {
       groups: groupsField,
