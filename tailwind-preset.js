@@ -52,6 +52,7 @@ module.exports = {
       // these selectors match + override the selector used by the @tailwindcss/forms plugin
       const formInputTargets = `[type='text']:not(.fx-custom-input), [type='email'], [type='url'], [type='password'], [type='number'], [type='date'], [type='datetime-local'], [type='month'], [type='search'], [type='tel'], [type='time'], [type='week'], [multiple], textarea, select`
       const formInputFocusTargets = `[type='text']:focus:not(.fx-custom-input), [type='email']:focus, [type='url']:focus, [type='password']:focus, [type='number']:focus, [type='date']:focus, [type='datetime-local']:focus, [type='month']:focus, [type='search']:focus, [type='tel']:focus, [type='time']:focus, [type='week']:focus, [multiple]:focus, textarea:focus, select:focus`
+      const buttonTargets = `button, [type='button'], [type='reset'], [type='submit']`
 
       addBase({
         // always show scrollbar to avoid horizontal jank on Windows PC's during loading + modals + transitions
@@ -98,17 +99,24 @@ module.exports = {
         '.fx-box': {
           'p-4 sm:p-6 lg:p-8': {},
         },
-        '.fx-button-base': {
+        '.fx-button-base, button.fx-button-base, a.fx-button-base': {
           '@apply inline-flex items-center justify-center px-4 py-2 rounded-md': {},
-          '@apply fx-focus-ring': {},
+          '@apply fx-focus-ring transition-colors': {},
         },
-        '.fx-button-solid-primary': {
-          '@apply bg-sky-700 text-white hover:bg-sky-800': {},
+        'button.fx-button-solid-primary, a.fx-button-solid-primary': {
+          '@apply border border-transparent bg-sky-700 text-white hover:bg-sky-800': {},
         },
-        '.fx-button-solid-primary-disabled': {
-          '@apply bg-slate-200 text-slate-400': {},
+        'button.fx-button-solid-primary-disabled, a.fx-button-solid-primary-disabled': {
+          '@apply border border-transparent bg-slate-200 text-slate-400 cursor-not-allowed': {},
         },
-        '.fx-input-border': {
+        'button.fx-button-outline-primary, a.fx-button-outline-primary': {
+          '@apply border bg-transparent border-sky-700 text-sky-700 hover:bg-sky-100 hover:border-sky-800 hover:text-sky-800':
+            {},
+        },
+        'button.fx-button-outline-primary-disabled, a.fx-button-outline-primary-disabled': {
+          '@apply border bg-transparent border-slate-300 text-slate-400 cursor-not-allowed': {},
+        },
+        '.fx-input-border, input.fx-input-border': {
           '@apply border border-slate-300 rounded-md': {},
         },
         '.fx-focus-ring': {
