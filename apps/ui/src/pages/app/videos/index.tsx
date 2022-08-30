@@ -8,6 +8,7 @@ import { AiOutlineYoutube } from 'react-icons/ai'
 import { useVideosQuery } from '../../../api/videos'
 import type { VideoDto } from '../../../types/videos.types'
 import { Spinner } from '../../../components/elements/feedback/Spinner'
+import { LinkButton } from '../../../components/elements/inputs/LinkButton'
 
 export const VideoPlatformLogo: React.FC<{ platform?: VideoDto['platform'] }> = ({ platform }) => {
   switch (platform) {
@@ -27,12 +28,10 @@ export const VideosPage: NextPage = (_props) => {
     <div>
       <h2 className="text-lg">Videos Page</h2>
       <div className="flex justify-end">
-        <Link href="/app/videos/create">
-          <a className="flex items-center justify-center py-4 px-2 hover:text-slate-800">
-            <PlusIcon className="h-5 w-5 mr-1" />
-            <span>Add Video</span>
-          </a>
-        </Link>
+        <LinkButton href="/app/videos/create" variant="transparent">
+          <PlusIcon className="h-5 w-5 mr-1" />
+          <span>Add Video</span>
+        </LinkButton>
       </div>
       <div>
         {isError && <p>Error fetching data</p>}
