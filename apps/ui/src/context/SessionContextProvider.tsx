@@ -1,6 +1,6 @@
 import React, { useMemo, useContext } from 'react'
 
-import { useApiSession } from '../api/auth'
+import { useAuthSessionQuery } from '../api/auth'
 import { isAuthSessionResult } from '../types/type-guards/auth.type-guards'
 import type { AuthSession } from '../types/session.types'
 import type { SessionStatus } from '../types/enums/session.enums'
@@ -10,7 +10,7 @@ const SessionContext = React.createContext<AuthSession<SessionStatus> | null>(nu
 export const SessionContextProvider: React.FC<{
   children: (isSessionReady: boolean) => React.ReactElement
 }> = ({ children }) => {
-  const { data: profile, refetch, error, status, invalidate, remove } = useApiSession()
+  const { data: profile, refetch, error, status, invalidate, remove } = useAuthSessionQuery()
 
   // memoize to ensure a stable context value
   const contextValue: AuthSession<SessionStatus> | null = useMemo(() => {

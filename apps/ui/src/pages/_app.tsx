@@ -1,17 +1,27 @@
 import { useState } from 'react'
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ErrorBoundary } from 'react-error-boundary'
+import {
+  MutationCache,
+  QueryCache,
+  QueryClient,
+  QueryClientProvider,
+  useQueryErrorResetBoundary,
+} from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 import '../styles/tailwind.css'
 
-import { ErrorBoundary } from '../components/layout/ErrorBoundary'
 import { SessionLoadingScreen } from '../components/layout/SessionLoadingScreen'
 import { AppLayout } from '../components/layout/AppLayout'
 import { AuthenticatedLayout } from '../components/layout/AuthenticatedLayout'
 import { PublicLayout } from '../components/layout/PublicLayout'
 import { SessionContextProvider } from '../context/SessionContextProvider'
+import { AuthError } from '../api/errors/AuthError.class'
+import { useRouter } from 'next/router'
+import { authQueryKeys } from '../api/auth'
+import { ActionButton } from '../components/elements/inputs/ActionButton'
 
 const PUBLIC_ROUTES_WHITELIST = ['/', '/sign-in']
 
@@ -21,6 +31,11 @@ const AUTHENTICATED_NAV_LINKS = [
   { title: 'Videos', href: '/app/videos' },
 ]
 
+const LABELS = {
+  ERROR_BOUNDARY_MESSAGE: 'There was an error',
+  ERROR_BOUNDARY_TRY_AGAIN_ACTION: 'Try again',
+}
+
 const isPublicRoute = (routerPath: string) =>
   routerPath === '/'
     ? true
@@ -29,7 +44,56 @@ const isPublicRoute = (routerPath: string) =>
       )
 
 function CustomApp({ Component, pageProps, router }: AppProps) {
-  const [queryClient] = useState(() => new QueryClient())
+  const { push: routerPush } = useRouter()
+  const { reset } = useQueryErrorResetBoundary()
+
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            suspense: false,
+            // refetchOnWindowFocus: true,
+            // retry: true,
+            // useErrorBoundary: true,
+            useErrorBoundary: (error: unknown) => {
+              return error instanceof AuthError // or e.g. return error.response?.status >= 500
+            },
+          },
+          mutations: {
+            // useErrorBoundary: false
+            useErrorBoundary: (error: unknown) => {
+              return error instanceof AuthError // or e.g. error.response?.status >= 500
+            },
+          },
+        },
+        queryCache: new QueryCache({
+          onError: (error: unknown, query) => {
+            // @todo add notifications/toasts for network errors e.g. toast.error(error.message)
+
+            if (error instanceof AuthError) {
+              console.error(`global query error handler (AuthError) [${error.message}]`, error)
+
+              queryClient.removeQueries(authQueryKeys.session)
+              queryClient.clear()
+
+              if (router.asPath !== '/sign-in') {
+                routerPush('/sign-in')
+              }
+            }
+
+            // // only show toast if there's already data in the cache - this indicates a failed background update
+            // if (query.state.data !== undefined) {
+            //   // toast.error(`Something went wrong: ${error.message}`)
+            // }
+            console.error('global query error handler:', error)
+          },
+        }),
+        mutationCache: new MutationCache({
+          onError: (error: unknown) => console.error('global mutation error handler:', error),
+        }),
+      }),
+  )
 
   return (
     <>
@@ -39,7 +103,15 @@ function CustomApp({ Component, pageProps, router }: AppProps) {
         <meta name="description" content={process.env.NEXT_PUBLIC_SITE_META_DESCRIPTION} key="description" />
         <title>{process.env.NEXT_PUBLIC_SITE_TITLE}</title>
       </Head>
-      <ErrorBoundary>
+      <ErrorBoundary
+        onReset={reset}
+        fallbackRender={({ resetErrorBoundary }) => (
+          <div>
+            <span>{LABELS.ERROR_BOUNDARY_MESSAGE}</span>
+            <ActionButton onClick={() => resetErrorBoundary()}>{LABELS.ERROR_BOUNDARY_TRY_AGAIN_ACTION}</ActionButton>
+          </div>
+        )}
+      >
         <QueryClientProvider client={queryClient}>
           <SessionContextProvider>
             {(isSessionReady) => (
