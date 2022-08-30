@@ -1,5 +1,5 @@
 export class FetchError extends Error {
-  private readonly status: number
+  private readonly _status: number
 
   constructor(status: number, message?: string) {
     // Error will break the prototype chain here (see next line)
@@ -10,10 +10,14 @@ export class FetchError extends Error {
 
     // explicitly set `name` property for stack traces
     this.name = FetchError.name
-    this.status = status
+    this._status = status
   }
 
   getErrorMessage() {
     return `Error fetching data (${this.status}): ${this.message}`
+  }
+
+  get status(): number {
+    return this._status
   }
 }

@@ -56,8 +56,11 @@ function CustomApp({ Component, pageProps, router }: AppProps) {
         defaultOptions: {
           queries: {
             suspense: false,
-            // refetchOnWindowFocus: true,
             // retry: true,
+            // retry: (_count, error) => {
+            //   return !(error instanceof AuthError || (error instanceof FetchError && error.status === 404))
+            // },
+            // refetchOnWindowFocus: true,
             // useErrorBoundary: true,
             useErrorBoundary: (error: unknown) => {
               return error instanceof AuthError // or e.g. return error.response?.status >= 500
