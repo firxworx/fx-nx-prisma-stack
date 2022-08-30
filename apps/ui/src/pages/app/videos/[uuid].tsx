@@ -1,10 +1,10 @@
+import React, { useCallback } from 'react'
 import type { NextPage } from 'next'
-import { useVideoQuery } from '../../../api/videos'
-
-import { Spinner } from '../../../components/elements/feedback/Spinner'
 import { useRouter } from 'next/router'
+
+import { useVideoQuery } from '../../../api/videos'
 import { VideoMutateForm } from '../../../components/features/videos/VideoMutateForm'
-import { useCallback } from 'react'
+import { Spinner } from '../../../components/elements/feedback/Spinner'
 
 export const VideoPage: NextPage = () => {
   const { push: routerPush, query: routerQuery } = useRouter()

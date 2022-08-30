@@ -1,6 +1,7 @@
 import type { NextPage } from 'next'
-import { useVideoGroupsQuery } from 'apps/ui/src/api/videos'
-import { Spinner } from 'apps/ui/src/components/elements/feedback/Spinner'
+
+import { useVideoGroupsQuery } from '../../../api/video-groups'
+import { Spinner } from '../../../components/elements/feedback/Spinner'
 
 export const VideoGroupsPage: NextPage = (_props) => {
   const { data, isSuccess, isLoading, isError } = useVideoGroupsQuery()

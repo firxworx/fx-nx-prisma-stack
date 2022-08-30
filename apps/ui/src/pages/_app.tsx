@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
+import { useRouter } from 'next/router'
 import { ErrorBoundary } from 'react-error-boundary'
 import {
   MutationCache,
@@ -13,14 +14,13 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 import '../styles/tailwind.css'
 
+import { authQueryKeys } from '../api/auth'
+import { AuthError } from '../api/errors/AuthError.class'
 import { SessionLoadingScreen } from '../components/layout/SessionLoadingScreen'
 import { AppLayout } from '../components/layout/AppLayout'
 import { AuthenticatedLayout } from '../components/layout/AuthenticatedLayout'
 import { PublicLayout } from '../components/layout/PublicLayout'
 import { SessionContextProvider } from '../context/SessionContextProvider'
-import { AuthError } from '../api/errors/AuthError.class'
-import { useRouter } from 'next/router'
-import { authQueryKeys } from '../api/auth'
 import { ActionButton } from '../components/elements/inputs/ActionButton'
 
 const PUBLIC_ROUTES_WHITELIST = ['/', '/sign-in']
