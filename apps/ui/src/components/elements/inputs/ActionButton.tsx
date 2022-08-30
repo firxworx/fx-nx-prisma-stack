@@ -2,7 +2,7 @@ import React, { type PropsWithChildren } from 'react'
 import clsx from 'clsx'
 
 export interface ActionButtonProps extends Exclude<React.HTMLAttributes<HTMLButtonElement>, 'type' | 'className'> {
-  variant?: 'solid' | 'outline'
+  variant?: 'solid' | 'outline' | 'transparent'
   disabled?: boolean
   appendClassName?: string
 }
@@ -32,6 +32,8 @@ export const ActionButton: React.FC<PropsWithChildren<ActionButtonProps>> = ({
           ['fx-button-solid-primary-disabled']: variant === 'solid' && disabled,
           ['fx-button-outline-primary']: variant === 'outline' && !disabled,
           ['fx-button-outline-primary-disabled']: variant === 'outline' && disabled,
+          ['fx-button-transparent-primary']: variant === 'transparent' && !disabled,
+          ['fx-button-transparent-primary-disabled']: variant === 'transparent' && disabled,
         },
         appendClassName,
       )}

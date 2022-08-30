@@ -4,7 +4,7 @@ import clsx from 'clsx'
 
 export interface LinkButtonProps extends LinkProps {
   href: string
-  variant?: 'solid' | 'outline'
+  variant?: 'solid' | 'outline' | 'transparent'
   disabled?: boolean
   appendClassName?: string
   // anchorProps: Exclude<React.HTMLAttributes<HTMLAnchorElement>, 'className'>
@@ -35,6 +35,8 @@ export const LinkButton: React.FC<PropsWithChildren<LinkButtonProps>> = ({
             ['fx-button-solid-primary-disabled']: variant === 'solid' && disabled,
             ['fx-button-outline-primary']: variant === 'outline' && !disabled,
             ['fx-button-outline-primary-disabled']: variant === 'outline' && disabled,
+            ['fx-button-transparent-primary']: variant === 'transparent' && !disabled,
+            ['fx-button-transparent-primary-disabled']: variant === 'transparent' && disabled,
           },
           appendClassName,
         )}
