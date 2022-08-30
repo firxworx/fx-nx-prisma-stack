@@ -177,21 +177,43 @@ const MobileNavMenu: React.FC<
   )
 }
 
+const headerClassName = 'relative border-b-2 bg-slate-100 border-slate-200'
+
+const navClassName = clsx(
+  'relative mx-auto flex items-center justify-between py-3',
+  'fx-layout-max-width fx-layout-padding-x',
+)
+
+/**
+ * Non-dynamic placeholder header that corresponds to `Header` component.
+ *
+ * @see Header
+ */
+export const PlaceholderHeader: React.FC = () => {
+  return (
+    <header className={headerClassName}>
+      <nav className={navClassName} aria-label="Main">
+        <div className="flex items-center flex-1">
+          <div className="flex items-center justify-between w-full lg:w-auto">
+            <div className="flex items-center space-x-4">
+              <LogoLink />
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+  )
+}
+
 /**
  * Header with branding that implements a responsive navigation menu.
  */
 export const Header: React.FC<HeaderProps> = ({ navigationLinks }) => {
   return (
-    <Popover as="header" className={clsx('relative border-b-2 bg-slate-100 border-slate-200')}>
+    <Popover as="header" className={headerClassName}>
       {({ open, close }) => (
         <>
-          <nav
-            className={clsx(
-              'relative mx-auto flex items-center justify-between py-3',
-              'fx-layout-max-width fx-layout-padding-x',
-            )}
-            aria-label="Main"
-          >
+          <nav className={navClassName} aria-label="Main">
             <div className="flex items-center flex-1">
               <div className="flex items-center justify-between w-full lg:w-auto">
                 <div className="flex items-center space-x-4">
