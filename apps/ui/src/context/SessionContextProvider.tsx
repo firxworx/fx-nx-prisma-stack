@@ -1,4 +1,4 @@
-import React, { useMemo, useContext, useState } from 'react'
+import React, { useMemo, useContext, useState, useEffect, useCallback } from 'react'
 
 import { useAuthSessionQuery } from '../api/auth'
 import { isAuthSessionResult } from '../types/type-guards/auth.type-guards'
@@ -7,13 +7,35 @@ import type { SessionStatus } from '../types/enums/session.enums'
 
 const SessionContext = React.createContext<AuthSession<SessionStatus> | null>(null)
 
+const LOCAL_STORAGE_SESSION_CTX_FLAG_KEY = 'FX_SESSION_CTX_FLAG'
+
 export const SessionContextProvider: React.FC<{
   children: (isSessionReady: boolean) => React.ReactElement
 }> = ({ children }) => {
-  // @todo fix auth session enabled breaking full page refresh / revisit URL cases
-  // maybe use localStorage or a cookie??
-  const [enabled, setEnabled] = useState<boolean>(false)
-  const { data: profile, refetch, error, status, invalidate, remove } = useAuthSessionQuery(enabled)
+  const [isQueryEnabled, setIsQueryEnabled] = useState<boolean>(false)
+  const { data: profile, refetch, error, status, invalidate, remove } = useAuthSessionQuery(isQueryEnabled)
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const ctxEnabledFlag = window.localStorage.getItem(LOCAL_STORAGE_SESSION_CTX_FLAG_KEY)
+
+      if (ctxEnabledFlag === 'enabled') {
+        setIsQueryEnabled(true)
+      } else {
+        setIsQueryEnabled(false)
+      }
+    }
+  }, [])
+
+  const setEnabled = useCallback(
+    (nextState: boolean) => {
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(LOCAL_STORAGE_SESSION_CTX_FLAG_KEY, nextState ? 'enabled' : 'disabled')
+      }
+      setIsQueryEnabled(nextState)
+    },
+    [setIsQueryEnabled],
+  )
 
   // memoize to ensure a stable context value
   const contextValue: AuthSession<SessionStatus> | null = useMemo(() => {
@@ -35,7 +57,7 @@ export const SessionContextProvider: React.FC<{
 
   // console.debug(`SessionContextProvider: [enabled, ${enabled}], [status, ${status}], [profile, ${!!profile}]`)
 
-  const isSessionReady = enabled && status !== 'loading' && !!profile
+  const isSessionReady = isQueryEnabled && status !== 'loading' && !!profile
   return <SessionContext.Provider value={contextValue}>{children(isSessionReady)}</SessionContext.Provider>
 }
 
