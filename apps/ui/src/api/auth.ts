@@ -1,10 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
 import { useSessionContext } from '../context/SessionContextProvider'
-import { AuthUser } from '../types/auth.types'
+import type { AuthUser } from '../types/auth.types'
 import { apiFetch } from './lib/api-fetch'
 
 // @todo create shared lib with interfaces of api responses
+
+export interface AuthSignInCredentials {
+  email: string
+  password: string
+}
 
 const AUTH_KEY_BASE = 'auth' as const
 
@@ -21,7 +26,7 @@ export async function fetchSession(): Promise<AuthUser> {
   return apiFetch<AuthUser>(`/auth/session`)
 }
 
-export function useApiSession() {
+export function useAuthSessionQuery(enabled: boolean) {
   const queryClient = useQueryClient()
 
   const invalidate = useCallback(async (): Promise<void> => {
@@ -32,16 +37,18 @@ export function useApiSession() {
     queryClient.removeQueries(authQueryKeys.session)
   }, [queryClient])
 
+  const query = useQuery<AuthUser>(authQueryKeys.session, fetchSession, {
+    enabled,
+    retry: false,
+    refetchInterval: 900000,
+    // refetchOnMount: false, // potential consideration for non-auth + auth layout components that call useAuthSession() hook
+  })
+
   return {
-    ...useQuery<AuthUser>(authQueryKeys.session, fetchSession, { retry: false, refetchInterval: 900000 }),
+    ...query,
     invalidate,
     remove,
   }
-}
-
-export interface AuthSignInCredentials {
-  email: string
-  password: string
 }
 
 export async function signIn({ email, password }: AuthSignInCredentials): Promise<void> {
@@ -54,13 +61,22 @@ export async function signIn({ email, password }: AuthSignInCredentials): Promis
   })
 }
 
+/**
+ * Hook that provides facilities to sign in to the back-end API via `AuthSignInCredentials`.
+ * The user's session context is fetched and cached on successful sign in.
+ */
 export function useAuthSignIn() {
   const session = useSessionContext()
 
   const signInMutation = useMutation<void, Error, AuthSignInCredentials>(authQueryKeys.signIn, signIn, {
     retry: false,
     onSuccess: () => {
-      session?.refetch()
+      if (!session) {
+        throw new Error('useAuthSignIn missing expected session (via SessionContextProvider)')
+      }
+
+      session.setEnabled(true)
+      session.refetch()
     },
   })
 
@@ -80,14 +96,21 @@ export async function signOut(): Promise<void> {
 }
 
 /**
- * Hook to request sign out from the back-end API. Clears response cache on successful sign-out.
+ * Hook that provides facilities to sign out from the back-end API.
+ * The query client's response cache is cleared on successful sign-out.
  */
 export function useAuthSignOut() {
   const queryClient = useQueryClient()
+  const session = useSessionContext()
 
   const signOutMutation = useMutation(authQueryKeys.signOut, signOut, {
     retry: false,
     onSuccess: () => {
+      if (!session) {
+        throw new Error('useAuthSignOut missing expected session (via SessionContextProvider)')
+      }
+
+      session.setEnabled(false)
       queryClient.clear()
     },
   })

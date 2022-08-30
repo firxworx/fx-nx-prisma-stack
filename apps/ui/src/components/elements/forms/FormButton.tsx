@@ -3,7 +3,7 @@ import { useFormContext } from 'react-hook-form'
 import { Spinner } from '../feedback/Spinner'
 
 export interface FormButtonProps extends React.ComponentPropsWithoutRef<'button'> {
-  /** button `type` is explicitly required to protect against corner-cases. */
+  /** button `type` is explicitly required to protect against corner-case behavior across browsers. */
   type: React.ComponentPropsWithoutRef<'button'>['type']
 }
 
@@ -18,16 +18,16 @@ export const FormButton: React.FC<FormButtonProps> = ({ children, ...props }) =>
     formState: { isSubmitting },
   } = useFormContext()
 
-  const isDisabled = (props.disabled ?? false) || isSubmitting
-
   return (
     <button
-      className={clsx('fx-button bg-button-primary text-white', {
+      className={clsx('fx-button-base', {
         'animate-pulse': isSubmitting,
+        'fx-button-solid-primary': !props.disabled,
+        'fx-button-solid-primary-disabled': !!props.disabled,
       })}
-      disabled={isDisabled}
+      disabled={!!props.disabled || isSubmitting}
     >
-      {isSubmitting && <Spinner size="sm" appendClassName="mr-1" />}
+      {isSubmitting && <Spinner size="sm" appendClassName="mr-1.5" />}
       {children}
     </button>
   )

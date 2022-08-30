@@ -1,68 +1,43 @@
-import {
-  BadRequestException,
-  forwardRef,
-  Inject,
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common'
+import { BadRequestException, forwardRef, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common'
+import { Prisma } from '@prisma/client'
 
 import type { AuthUser } from '../auth/types/auth-user.type'
-import { PrismaHelperService } from '../prisma/prisma-helper.service'
+import { PrismaModelCrudService } from '../prisma/prisma-model-crud.abstract.service'
 import { PrismaService } from '../prisma/prisma.service'
 import { CreateVideoGroupDto } from './dto/create-video-group.dto'
 import { UpdateVideoGroupDto } from './dto/update-video-group.dto'
 import { VideoGroupDto } from './dto/video-group.dto'
-import { videoGroupDtoPrismaSelectClause } from './prisma/queries'
+import { videoGroupDtoPrismaOrderByClause, videoGroupDtoPrismaSelectClause } from './prisma/queries'
 import { VideosService } from './videos.service'
 
+type PrismaVideoGroupDelegate = Prisma.VideoGroupDelegate<
+  Prisma.RejectOnNotFound | Prisma.RejectPerOperation | undefined
+>
+
 @Injectable()
-export class VideoGroupsService {
+export class VideoGroupsService extends PrismaModelCrudService<
+  PrismaVideoGroupDelegate,
+  VideoGroupDto,
+  CreateVideoGroupDto,
+  UpdateVideoGroupDto
+> {
   private logger = new Logger(this.constructor.name)
 
-  private ERROR_MESSAGES = {
-    INTERNAL_SERVER_ERROR: 'Server Error',
-  }
+  // private ERROR_MESSAGES = {
+  //   INTERNAL_SERVER_ERROR: 'Server Error',
+  // }
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly prismaHelperService: PrismaHelperService,
+    // private readonly prismaHelperService: PrismaHelperService,
 
     @Inject(forwardRef(() => VideosService))
     private videosService: VideosService,
-  ) {}
-
-  private getIdentifierCondition(identifier: string | number): { uuid: string } | { id: number } {
-    switch (typeof identifier) {
-      case 'string': {
-        return { uuid: identifier }
-      }
-      case 'number': {
-        return { id: identifier }
-      }
-      default: {
-        this.logger.log(`Invalid data identifier encountered at runtime: ${identifier}`)
-        throw new InternalServerErrorException(this.ERROR_MESSAGES.INTERNAL_SERVER_ERROR)
-      }
-    }
-  }
-
-  async findAll(): Promise<VideoGroupDto[]> {
-    const videoGroups = await this.prisma.videoGroup.findMany({
-      select: videoGroupDtoPrismaSelectClause,
+  ) {
+    super(prisma.videoGroup, VideoGroupDto, CreateVideoGroupDto, UpdateVideoGroupDto, {
+      delegateSelectClause: videoGroupDtoPrismaSelectClause,
+      delegateOrderByClause: videoGroupDtoPrismaOrderByClause,
     })
-
-    return videoGroups.map((videoGroup) => new VideoGroupDto(videoGroup))
-  }
-
-  async findAllByUser(user: AuthUser): Promise<VideoGroupDto[]> {
-    const videoGroups = await this.prisma.videoGroup.findMany({
-      select: videoGroupDtoPrismaSelectClause,
-      where: { user: { id: user.id } },
-    })
-
-    return videoGroups.map((videoGroup) => new VideoGroupDto(videoGroup))
   }
 
   async findAllByUserAndUuids(user: AuthUser, videoGroupUuids: string[]): Promise<VideoGroupDto[]> {
@@ -90,49 +65,16 @@ export class VideoGroupsService {
     return true
   }
 
-  async findOne(identifier: string | number): Promise<VideoGroupDto | undefined> {
-    const condition = this.getIdentifierCondition(identifier)
-
-    const videoGroup = await this.prisma.videoGroup.findFirst({
-      select: videoGroupDtoPrismaSelectClause,
-      where: condition,
-    })
-
-    return videoGroup ? new VideoGroupDto(videoGroup) : undefined
-  }
-
-  async findOneByUser(user: AuthUser, identifier: string | number): Promise<VideoGroupDto | undefined> {
-    const condition = this.getIdentifierCondition(identifier)
-
-    const videoGroup = await this.prisma.videoGroup.findFirst({
-      select: videoGroupDtoPrismaSelectClause,
-      where: { userId: user.id, ...condition },
-    })
-
-    return videoGroup ? new VideoGroupDto(videoGroup) : undefined
-  }
-
-  async getOneByUser(user: AuthUser, identifier: string | number): Promise<VideoGroupDto> {
-    try {
-      const condition = this.getIdentifierCondition(identifier)
-
-      const videoGroup = await this.prisma.videoGroup.findFirstOrThrow({
-        select: videoGroupDtoPrismaSelectClause,
-        where: { userId: user.id, ...condition },
-      })
-
-      return new VideoGroupDto(videoGroup)
-    } catch (error: unknown) {
-      throw this.prismaHelperService.handleError(error)
-    }
-  }
-
   async createByUser(user: AuthUser, dto: CreateVideoGroupDto): Promise<VideoGroupDto> {
     const { videos: videoUuids, ...restDto } = dto
 
-    // @todo handle adding/updating videos to group (must belong to same user) - need verifyUserOwnershipOrThrow() or let schema handle?
-    // @todo catch unique constraint violation for video groups create
+    // verify the user owns the videos that the new video group should be associated with
+    // @todo confirm if this can be more elegantly handled with prisma e.g. implicitly in one query w/ exception handling for response type
+    if (videoUuids) {
+      await this.videosService.verifyUserOwnershipOrThrow(user, videoUuids)
+    }
 
+    // @todo catch unique constraint violation for video groups create
     const videoGroup = await this.prisma.videoGroup.create({
       select: videoGroupDtoPrismaSelectClause,
       data: {
@@ -158,9 +100,10 @@ export class VideoGroupsService {
   }
 
   async updateByUser(user: AuthUser, identifier: string | number, dto: UpdateVideoGroupDto): Promise<VideoGroupDto> {
-    const videoWhereCondition = this.getIdentifierCondition(identifier)
+    const videoWhereCondition = this.getIdentifierWhereCondition(identifier)
     const { videos: videoUuids, ...restDto } = dto
 
+    // verify the user owns the videos that the new video group should be associated with
     if (videoUuids) {
       await this.videosService.verifyUserOwnershipOrThrow(user, videoUuids)
     }
@@ -211,7 +154,7 @@ export class VideoGroupsService {
   }
 
   async deleteByUser(user: AuthUser, identifier: string | number): Promise<void> {
-    const videoGroupWhereCondition = this.getIdentifierCondition(identifier)
+    const videoGroupWhereCondition = this.getIdentifierWhereCondition(identifier)
 
     const owner = await this.findOneByUser(user, identifier)
     if (!owner) {
@@ -237,17 +180,6 @@ export class VideoGroupsService {
       },
       where: videoGroupWhereCondition,
     })
-
-    //   await this.prisma.user.update({
-    //     where: {
-    //       id: userId,
-    //     },
-    //     data: {
-    //       videoGroups: {
-    //         deleteMany: condition, // confirm cascade deletes the videoGroupVideos associations
-    //       },
-    //     },
-    //   })
 
     await this.prisma.$transaction([deleteVideoGroupVideos, deleteVideoGroup])
     return

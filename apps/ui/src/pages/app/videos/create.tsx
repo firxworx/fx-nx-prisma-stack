@@ -1,7 +1,8 @@
 import type { NextPage } from 'next'
-import { VideoCreateForm } from '../../../components/features/videos/VideoCreateForm'
 import { useRouter } from 'next/router'
 import { useCallback } from 'react'
+
+import { VideoCreateForm } from '../../../components/features/videos/VideoCreateForm'
 
 export const VideoCreatePage: NextPage = () => {
   const { push: routerPush } = useRouter()

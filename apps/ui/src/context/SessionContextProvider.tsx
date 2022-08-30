@@ -1,36 +1,63 @@
-import React, { useMemo, useContext } from 'react'
+import React, { useMemo, useContext, useState, useEffect, useCallback } from 'react'
 
-import { useApiSession } from '../api/auth'
+import { useAuthSessionQuery } from '../api/auth'
 import { isAuthSessionResult } from '../types/type-guards/auth.type-guards'
 import type { AuthSession } from '../types/session.types'
 import type { SessionStatus } from '../types/enums/session.enums'
 
 const SessionContext = React.createContext<AuthSession<SessionStatus> | null>(null)
 
+const LOCAL_STORAGE_SESSION_CTX_FLAG_KEY = 'FX_SESSION_CTX_FLAG'
+
 export const SessionContextProvider: React.FC<{
   children: (isSessionReady: boolean) => React.ReactElement
 }> = ({ children }) => {
-  const { data: profile, refetch, error, status, invalidate, remove } = useApiSession()
+  const [isQueryEnabled, setIsQueryEnabled] = useState<boolean>(false)
+  const { data: profile, refetch, error, status, invalidate, remove } = useAuthSessionQuery(isQueryEnabled)
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const ctxEnabledFlag = window.localStorage.getItem(LOCAL_STORAGE_SESSION_CTX_FLAG_KEY)
+
+      if (ctxEnabledFlag === 'enabled') {
+        setIsQueryEnabled(true)
+      } else {
+        setIsQueryEnabled(false)
+      }
+    }
+  }, [])
+
+  const setEnabled = useCallback(
+    (nextState: boolean) => {
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(LOCAL_STORAGE_SESSION_CTX_FLAG_KEY, nextState ? 'enabled' : 'disabled')
+      }
+      setIsQueryEnabled(nextState)
+    },
+    [setIsQueryEnabled],
+  )
 
   // memoize to ensure a stable context value
   const contextValue: AuthSession<SessionStatus> | null = useMemo(() => {
     const isLoading = status === 'loading'
 
     if (profile) {
-      return { profile, isLoading, refetch, invalidate, remove }
+      return { profile, setEnabled, isLoading, refetch, invalidate, remove }
     }
 
     return {
-      session: undefined,
       error: (error instanceof Error && error) || new Error(`Unexpected error loading session: ${String(error)}`),
+      setEnabled,
       isLoading,
       refetch,
       invalidate,
       remove,
     }
-  }, [profile, status, error, refetch, invalidate, remove])
+  }, [profile, status, error, setEnabled, refetch, invalidate, remove])
 
-  const isSessionReady = status !== 'loading' && !!profile
+  // console.debug(`SessionContextProvider: [enabled, ${enabled}], [status, ${status}], [profile, ${!!profile}]`)
+
+  const isSessionReady = isQueryEnabled && status !== 'loading' && !!profile
   return <SessionContext.Provider value={contextValue}>{children(isSessionReady)}</SessionContext.Provider>
 }
 

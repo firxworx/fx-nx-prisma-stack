@@ -1,16 +1,16 @@
+import React, { useCallback } from 'react'
 import type { NextPage } from 'next'
-import { useVideoQuery } from '../../../api/videos'
-
-import { Spinner } from '../../../components/elements/feedback/Spinner'
 import { useRouter } from 'next/router'
-import { VideoMutationForm } from '../../../components/features/videos/VideoMutationForm'
-import { useCallback } from 'react'
+
+import { useVideoQuery } from '../../../api/videos'
+import { VideoMutateForm } from '../../../components/features/videos/VideoMutateForm'
+import { Spinner } from '../../../components/elements/feedback/Spinner'
 
 export const VideoPage: NextPage = () => {
   const { push: routerPush, query: routerQuery } = useRouter()
 
   const videoUuid = typeof routerQuery?.uuid === 'string' ? routerQuery.uuid : ''
-  const { data, isSuccess, isLoading, isError } = useVideoQuery(videoUuid)
+  const { data: video, isSuccess, isLoading, isError } = useVideoQuery(videoUuid)
 
   const onSaveRedirectHandler = useCallback(() => {
     routerPush('/app/videos')
@@ -24,7 +24,7 @@ export const VideoPage: NextPage = () => {
         {isLoading && <Spinner />}
       </div>
       <div className="mt-4">
-        {isSuccess && data && <VideoMutationForm uuid={videoUuid} data={data} onSuccess={onSaveRedirectHandler} />}
+        {isSuccess && video && <VideoMutateForm uuid={videoUuid} video={video} onSuccess={onSaveRedirectHandler} />}
       </div>
     </div>
   )

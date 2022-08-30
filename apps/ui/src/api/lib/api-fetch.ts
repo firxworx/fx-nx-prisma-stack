@@ -1,3 +1,5 @@
+import { AuthError } from '../errors/AuthError.class'
+
 /** Base URL of the project's back-end API. */
 export const API_BASE_URL = process.env.NEXT_PUBLIC_PROJECT_API_BASE_URL
 
@@ -43,6 +45,8 @@ function getCsrfCookieValue(): string {
 /**
  * Fetch wrapper for making requests to the project's back-end API.
  * Includes credentials and sets appropriate headers for Content-Type and CSRF protection.
+ *
+ * Note react-query error handling requires a rejected promise on fetch error (e.g. axios-like behavior).
  */
 export async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   try {
@@ -59,10 +63,13 @@ export async function apiFetch<T>(path: string, options?: RequestInit): Promise<
     })
 
     if (response.status === 401) {
-      // getApiEvents().emit(EVENT_AUTH_ERROR)
+      // getApiEvents().emit(EVENT_AUTH_ERROR) // @future fire event on auth error
 
       // return rejected promise vs. throw to bypass catch (enables alternative ux flow in the auth failure case)
-      return Promise.reject(new Error('Invalid credentials'))
+      // return Promise.reject(new Error('Invalid credentials'))
+
+      // @see `pages/_app.tsx` for global onError callback and handling of AuthError case
+      throw new AuthError('Invalid or expired credentials')
     }
 
     // parse responses that are not http-204 (no content) as json

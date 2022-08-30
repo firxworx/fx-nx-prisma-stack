@@ -30,13 +30,15 @@ export const SignInForm: React.FC<SignInFormProps> = ({ signInRedirectPath, onSi
 
   useEffect(() => {
     if (isSuccess) {
+      if (!isMounted()) {
+        return
+      }
+
       if (typeof onSignIn === 'function') {
         onSignIn()
       }
 
-      if (isMounted()) {
-        routerPush(signInRedirectPath ?? DEFAULT_SIGN_IN_REDIRECT_PATH)
-      }
+      routerPush(signInRedirectPath ?? DEFAULT_SIGN_IN_REDIRECT_PATH)
     }
   }, [isSuccess, isMounted, routerPush, onSignIn, signInRedirectPath])
 
@@ -54,7 +56,7 @@ export const SignInForm: React.FC<SignInFormProps> = ({ signInRedirectPath, onSi
   return (
     <FormProvider {...form}>
       <form onSubmit={handleSubmit(handleSignInSubmit)}>
-        <div className="space-y-4 p-4 mt-4">
+        <div className="space-y-4">
           <FormInput
             name="email"
             label="Email Address"

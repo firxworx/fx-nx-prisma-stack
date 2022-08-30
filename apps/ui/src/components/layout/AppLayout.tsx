@@ -11,10 +11,6 @@ export interface AppLayoutProps {
   navigationLinks: NavigationLink[]
 }
 
-const contentConstraintStyle = 'max-w-6xl'
-const containerXPaddingStyle = 'px-4 sm:px-6 xl:px-8'
-const containerYPaddingStyle = 'pt-4 pb-12 sm:pt-6 sm:pb-16'
-
 /**
  * Responsive web application UI layout that includes a header with responsive navigation, a main content section,
  * and a footer.
@@ -22,19 +18,9 @@ const containerYPaddingStyle = 'pt-4 pb-12 sm:pt-6 sm:pb-16'
 export const AppLayout: React.FC<PropsWithChildren<AppLayoutProps>> = ({ navigationLinks, children }) => {
   return (
     <Wrapper>
-      <Header
-        navigationLinks={navigationLinks}
-        contentConstraintStyle={contentConstraintStyle}
-        containerXPaddingStyle={containerXPaddingStyle}
-      />
-      <Content
-        contentConstraintStyle={contentConstraintStyle}
-        containerXPaddingStyle={containerXPaddingStyle}
-        containerYPaddingStyle={containerYPaddingStyle}
-      >
-        {children}
-      </Content>
-      <Footer contentConstraintStyle={contentConstraintStyle} containerXPaddingStyle={containerXPaddingStyle} />
+      <Header navigationLinks={navigationLinks} />
+      <Content>{children}</Content>
+      <Footer />
     </Wrapper>
   )
 }

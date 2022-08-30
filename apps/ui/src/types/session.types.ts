@@ -3,6 +3,7 @@ import type { AuthUser } from './auth.types'
 import type { SessionStatus } from './enums/session.enums'
 
 export interface SessionBase {
+  setEnabled: (enabled: boolean) => void
   isLoading: boolean
   refetch: () => Promise<QueryObserverResult<AuthUser, unknown>>
   invalidate: () => Promise<void>

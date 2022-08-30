@@ -1,11 +1,20 @@
 const colors = require('tailwindcss/colors')
 const plugin = require('tailwindcss/plugin')
+
 // const defaultTheme = require('tailwindcss/defaultTheme')
 
 module.exports = {
   theme: {
     extend: {
+      spacing: {
+        1.25: '0.3125rem',
+      },
+      minWidth: {
+        '1/4': '25%',
+        '1/2': '50%',
+      },
       colors: {
+        // palette: {},
         button: {
           primary: colors.sky[700],
         },
@@ -40,6 +49,11 @@ module.exports = {
       const ieSearchInputXIconTarget =
         'input.hide-clear[type=search]::-ms-clear, input.hide-clear[type=search]::-ms-reveal'
 
+      // these selectors match + override the selector used by the @tailwindcss/forms plugin
+      const formInputTargets = `[type='text']:not(.fx-custom-input), [type='email'], [type='url'], [type='password'], [type='number'], [type='date'], [type='datetime-local'], [type='month'], [type='search'], [type='tel'], [type='time'], [type='week'], [multiple], textarea, select`
+      const formInputFocusTargets = `[type='text']:focus:not(.fx-custom-input), [type='email']:focus, [type='url']:focus, [type='password']:focus, [type='number']:focus, [type='date']:focus, [type='datetime-local']:focus, [type='month']:focus, [type='search']:focus, [type='tel']:focus, [type='time']:focus, [type='week']:focus, [multiple]:focus, textarea:focus, select:focus`
+      const buttonTargets = `button, [type='button'], [type='reset'], [type='submit']`
+
       addBase({
         // always show scrollbar to avoid horizontal jank on Windows PC's during loading + modals + transitions
         body: {
@@ -64,13 +78,55 @@ module.exports = {
           width: 0,
           height: 0,
         },
+        [formInputTargets]: {
+          '@apply border border-slate-300 rounded-md': {},
+          '@apply focus:outline-none focus-visible:border-slate-300 focus-visible:ring-2 focus-visible:ring-blue-100':
+            {},
+        },
+        // [formInputFocusTargets]: {
+        // }
       })
       addComponents({
+        '.fx-layout-max-width': {
+          '@apply max-w-6xl': {},
+        },
+        '.fx-layout-padding-x': {
+          '@apply px-4 sm:px-6 xl:px-8': {},
+        },
+        '.fx-layout-padding-y': {
+          '@apply pt-4 pb-12 sm:pt-6 sm:pb-16': {},
+        },
         '.fx-box': {
           'p-4 sm:p-6 lg:p-8': {},
         },
-        '.fx-button': {
+        '.fx-button-base, button.fx-button-base, a.fx-button-base': {
           '@apply inline-flex items-center justify-center px-4 py-2 rounded-md': {},
+          '@apply fx-focus-ring transition-colors': {},
+        },
+        'button.fx-button-solid-primary, a.fx-button-solid-primary': {
+          '@apply border border-transparent bg-sky-800 text-white hover:bg-sky-900': {},
+        },
+        'button.fx-button-solid-primary-disabled, a.fx-button-solid-primary-disabled': {
+          '@apply border border-transparent bg-slate-200 text-slate-400 cursor-not-allowed': {},
+        },
+        'button.fx-button-outline-primary, a.fx-button-outline-primary': {
+          '@apply border bg-transparent border-sky-800 text-sky-800 hover:bg-sky-100 hover:border-sky-900 hover:text-sky-900':
+            {},
+        },
+        'button.fx-button-outline-primary-disabled, a.fx-button-outline-primary-disabled': {
+          '@apply border bg-transparent border-slate-300 text-slate-400 cursor-not-allowed': {},
+        },
+        'button.fx-button-transparent-primary, a.fx-button-transparent-primary': {
+          '@apply border bg-transparent border-transparent text-sky-800 hover:text-sky-900': {},
+        },
+        'button.fx-button-transparent-primary-disabled, a.fx-button-transparent-primary-disabled': {
+          '@apply border bg-transparent border-transparent text-slate-400 cursor-not-allowed': {},
+        },
+        '.fx-input-border, input.fx-input-border': {
+          '@apply border border-slate-300 rounded-md': {},
+        },
+        '.fx-focus-ring': {
+          '@apply focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-100': {},
         },
       })
     }),

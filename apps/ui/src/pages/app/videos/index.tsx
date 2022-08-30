@@ -1,11 +1,14 @@
 import type { NextPage } from 'next'
-import { useVideosQuery } from 'apps/ui/src/api/videos'
-
-import type { VideoDto } from 'apps/ui/src/types/videos.types'
-import { AiOutlineYoutube } from 'react-icons/ai'
 import Link from 'next/link'
-import { Spinner } from 'apps/ui/src/components/elements/feedback/Spinner'
+import clsx from 'clsx'
+
 import { PlusIcon } from '@heroicons/react/outline'
+import { AiOutlineYoutube } from 'react-icons/ai'
+
+import { useVideosQuery } from '../../../api/videos'
+import type { VideoDto } from '../../../types/videos.types'
+import { Spinner } from '../../../components/elements/feedback/Spinner'
+import { LinkButton } from '../../../components/elements/inputs/LinkButton'
 
 export const VideoPlatformLogo: React.FC<{ platform?: VideoDto['platform'] }> = ({ platform }) => {
   switch (platform) {
@@ -25,12 +28,10 @@ export const VideosPage: NextPage = (_props) => {
     <div>
       <h2 className="text-lg">Videos Page</h2>
       <div className="flex justify-end">
-        <Link href="/app/videos/create">
-          <a className="flex items-center justify-center py-4 px-2 hover:text-slate-800">
-            <PlusIcon className="h-5 w-5 mr-1" />
-            <span>Add Video</span>
-          </a>
-        </Link>
+        <LinkButton href="/app/videos/create" variant="transparent">
+          <PlusIcon className="h-5 w-5 mr-1" />
+          <span>Add Video</span>
+        </LinkButton>
       </div>
       <div>
         {isError && <p>Error fetching data</p>}
@@ -40,7 +41,10 @@ export const VideosPage: NextPage = (_props) => {
             {data?.map((video) => (
               <li
                 key={video.uuid}
-                className="flex justify-between items-center border-2 rounded-md transition-colors duration-200 bg-slate-50 hover:bg-slate-100 border-slate-200 hover:border-slate-300"
+                className={clsx(
+                  'flex justify-between items-center border-2 rounded-md',
+                  'transition-colors duration-200 bg-slate-50 hover:bg-slate-100 border-slate-200 hover:border-slate-300',
+                )}
               >
                 <Link href={`/app/videos/${video.uuid}`}>
                   <a className="p-4 flex-1">{video.name}</a>

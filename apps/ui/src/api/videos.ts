@@ -10,7 +10,6 @@ export interface MutationQueryArgs {
 }
 
 const VIDEOS_KEY_BASE = 'videos' as const
-const VIDEO_GROUPS_KEY_BASE = 'videoGroups' as const
 
 /**
  * Query keys for videos API query functions.
@@ -24,13 +23,6 @@ const videoQueryKeys = {
   create: () => [{ ...videoQueryKeys.all[0], operation: 'create' }] as const,
   mutate: () => [{ ...videoQueryKeys.all[0], operation: 'mutate' }] as const,
   delete: () => [{ ...videoQueryKeys.all[0], operation: 'delete' }] as const,
-}
-
-/**
- * Query keys for video groups API query functions.
- */
-const videoGroupQueryKeys = {
-  all: [VIDEO_GROUPS_KEY_BASE] as const,
 }
 
 export async function getVideos(): Promise<VideoDto[]> {
@@ -73,12 +65,6 @@ export async function updateVideo({
 export async function deleteVideo({ uuid }: { uuid: string | undefined }): Promise<void> {
   await apiFetch<void>(`/videos/${uuid}`, {
     method: 'DELETE',
-  })
-}
-
-export async function getVideoGroups(): Promise<VideoGroupDto[]> {
-  return apiFetch<VideoGroupDto[]>(`/video-groups`, {
-    method: 'GET',
   })
 }
 
@@ -198,9 +184,4 @@ export function useVideoDeleteQuery(queryArgs?: MutationQueryArgs) {
   )
 
   return { mutate, mutateAsync, reset, error, isSuccess, isLoading, isError }
-}
-
-export function useVideoGroupsQuery() {
-  const { data, status, error, isLoading, isSuccess, isError } = useQuery(videoGroupQueryKeys.all, getVideoGroups)
-  return { data, status, error, isLoading, isSuccess, isError }
 }
