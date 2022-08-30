@@ -26,7 +26,7 @@ export async function fetchSession(): Promise<AuthUser> {
   return apiFetch<AuthUser>(`/auth/session`)
 }
 
-export function useAuthSessionQuery() {
+export function useAuthSessionQuery(enabled: boolean) {
   const queryClient = useQueryClient()
 
   const invalidate = useCallback(async (): Promise<void> => {
@@ -37,12 +37,15 @@ export function useAuthSessionQuery() {
     queryClient.removeQueries(authQueryKeys.session)
   }, [queryClient])
 
+  const query = useQuery<AuthUser>(authQueryKeys.session, fetchSession, {
+    enabled,
+    retry: false,
+    refetchInterval: 900000,
+    // refetchOnMount: false, // potential consideration for non-auth + auth layout components that call useAuthSession() hook
+  })
+
   return {
-    ...useQuery<AuthUser>(authQueryKeys.session, fetchSession, {
-      retry: false,
-      refetchInterval: 900000,
-      // refetchOnMount: false, // potential consideration for non-auth + auth layout components that call useAuthSession() hook
-    }),
+    ...query,
     invalidate,
     remove,
   }
@@ -68,7 +71,12 @@ export function useAuthSignIn() {
   const signInMutation = useMutation<void, Error, AuthSignInCredentials>(authQueryKeys.signIn, signIn, {
     retry: false,
     onSuccess: () => {
-      session?.refetch()
+      if (!session) {
+        throw new Error('useAuthSignIn missing expected session (via SessionContextProvider)')
+      }
+
+      session.setEnabled(true)
+      session.refetch()
     },
   })
 
@@ -93,10 +101,16 @@ export async function signOut(): Promise<void> {
  */
 export function useAuthSignOut() {
   const queryClient = useQueryClient()
+  const session = useSessionContext()
 
   const signOutMutation = useMutation(authQueryKeys.signOut, signOut, {
     retry: false,
     onSuccess: () => {
+      if (!session) {
+        throw new Error('useAuthSignOut missing expected session (via SessionContextProvider)')
+      }
+
+      session.setEnabled(false)
       queryClient.clear()
     },
   })

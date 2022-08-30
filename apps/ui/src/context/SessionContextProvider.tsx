@@ -1,4 +1,4 @@
-import React, { useMemo, useContext } from 'react'
+import React, { useMemo, useContext, useState } from 'react'
 
 import { useAuthSessionQuery } from '../api/auth'
 import { isAuthSessionResult } from '../types/type-guards/auth.type-guards'
@@ -10,27 +10,32 @@ const SessionContext = React.createContext<AuthSession<SessionStatus> | null>(nu
 export const SessionContextProvider: React.FC<{
   children: (isSessionReady: boolean) => React.ReactElement
 }> = ({ children }) => {
-  const { data: profile, refetch, error, status, invalidate, remove } = useAuthSessionQuery()
+  // @todo fix auth session enabled breaking full page refresh / revisit URL cases
+  // maybe use localStorage or a cookie??
+  const [enabled, setEnabled] = useState<boolean>(false)
+  const { data: profile, refetch, error, status, invalidate, remove } = useAuthSessionQuery(enabled)
 
   // memoize to ensure a stable context value
   const contextValue: AuthSession<SessionStatus> | null = useMemo(() => {
     const isLoading = status === 'loading'
 
     if (profile) {
-      return { profile, isLoading, refetch, invalidate, remove }
+      return { profile, setEnabled, isLoading, refetch, invalidate, remove }
     }
 
     return {
-      session: undefined,
       error: (error instanceof Error && error) || new Error(`Unexpected error loading session: ${String(error)}`),
+      setEnabled,
       isLoading,
       refetch,
       invalidate,
       remove,
     }
-  }, [profile, status, error, refetch, invalidate, remove])
+  }, [profile, status, error, setEnabled, refetch, invalidate, remove])
 
-  const isSessionReady = status !== 'loading' && !!profile
+  // console.debug(`SessionContextProvider: [enabled, ${enabled}], [status, ${status}], [profile, ${!!profile}]`)
+
+  const isSessionReady = enabled && status !== 'loading' && !!profile
   return <SessionContext.Provider value={contextValue}>{children(isSessionReady)}</SessionContext.Provider>
 }
 
