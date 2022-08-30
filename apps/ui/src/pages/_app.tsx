@@ -22,10 +22,13 @@ import { AuthenticatedLayout } from '../components/layout/AuthenticatedLayout'
 import { PublicLayout } from '../components/layout/PublicLayout'
 import { SessionContextProvider } from '../context/SessionContextProvider'
 import { ActionButton } from '../components/elements/inputs/ActionButton'
+import { PlaceholderLayout } from '../components/layout/PlaceholderLayout'
 
-const PUBLIC_ROUTES_WHITELIST = ['/', '/sign-in']
+export const SIGN_IN_ROUTE = '/sign-in'
 
-const PUBLIC_NAV_LINKS = [{ title: 'Sign-In', href: '/sign-in' }]
+const PUBLIC_ROUTES_WHITELIST = ['/', SIGN_IN_ROUTE, '/about']
+
+const PUBLIC_NAV_LINKS = [{ title: 'Sign-In', href: SIGN_IN_ROUTE }]
 const AUTHENTICATED_NAV_LINKS = [
   { title: 'App', href: '/app' },
   { title: 'Videos', href: '/app/videos' },
@@ -68,7 +71,7 @@ function CustomApp({ Component, pageProps, router }: AppProps) {
           },
         },
         queryCache: new QueryCache({
-          onError: (error: unknown, query) => {
+          onError: (error: unknown, _query) => {
             // @todo add notifications/toasts for network errors e.g. toast.error(error.message)
 
             if (error instanceof AuthError) {
@@ -77,8 +80,8 @@ function CustomApp({ Component, pageProps, router }: AppProps) {
               queryClient.removeQueries(authQueryKeys.session)
               queryClient.clear()
 
-              if (router.asPath !== '/sign-in') {
-                routerPush('/sign-in')
+              if (router.asPath !== SIGN_IN_ROUTE) {
+                routerPush(SIGN_IN_ROUTE)
               }
             }
 
@@ -86,7 +89,7 @@ function CustomApp({ Component, pageProps, router }: AppProps) {
             // if (query.state.data !== undefined) {
             //   // toast.error(`Something went wrong: ${error.message}`)
             // }
-            console.error('global query error handler:', error)
+            console.error('global query error handler:', error instanceof Error ? error.message : String(error))
           },
         }),
         mutationCache: new MutationCache({
@@ -115,22 +118,29 @@ function CustomApp({ Component, pageProps, router }: AppProps) {
         <QueryClientProvider client={queryClient}>
           <SessionContextProvider>
             {(isSessionReady) => (
-              <AppLayout navigationLinks={isSessionReady ? AUTHENTICATED_NAV_LINKS : PUBLIC_NAV_LINKS}>
+              <>
                 {isPublicRoute(router.asPath) ? (
-                  <PublicLayout>
-                    <Component {...pageProps} />
-                  </PublicLayout>
+                  <AppLayout navigationLinks={isSessionReady ? AUTHENTICATED_NAV_LINKS : PUBLIC_NAV_LINKS}>
+                    <PublicLayout>
+                      <Component {...pageProps} />
+                    </PublicLayout>
+                  </AppLayout>
                 ) : isSessionReady ? (
-                  <AuthenticatedLayout>
-                    {/* autherrorlistener, sessiontimer, etc */}
-                    <Component {...pageProps} />
-                  </AuthenticatedLayout>
+                  <AppLayout navigationLinks={isSessionReady ? AUTHENTICATED_NAV_LINKS : PUBLIC_NAV_LINKS}>
+                    <AuthenticatedLayout>
+                      {/* autherrorlistener, sessiontimer, etc */}
+                      <Component {...pageProps} />
+                    </AuthenticatedLayout>
+                  </AppLayout>
                 ) : (
-                  <SessionLoadingScreen />
+                  <PlaceholderLayout>
+                    <SessionLoadingScreen />
+                  </PlaceholderLayout>
                 )}
-              </AppLayout>
+              </>
             )}
           </SessionContextProvider>
+
           {/* ReactQueryDevtools is only included in bundles when NODE_ENV === 'development' */}
           <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
