@@ -16,7 +16,7 @@ export interface SessionResult extends SessionBase {
 }
 
 export interface SessionError extends SessionBase {
-  profile: undefined | null
+  profile: undefined
   error: Error
 }
 
