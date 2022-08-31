@@ -11,7 +11,7 @@
         "main": "apps/infra/src/main.ts",
         "tsConfig": "apps/infra/tsconfig.app.json",
         "assets": ["apps/infra/src/assets"],
-        "generatePackageJson": false
+        "generatePackageJson": true
       },
       "configurations": {
         "production": {
