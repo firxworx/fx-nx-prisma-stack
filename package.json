@@ -17,6 +17,7 @@
     "build": "yarn build:all",
     "build:all": "nx run-many --target=build --projects=ui,api --parallel",
     "build:all:prod": "nx run-many --target=build --projects=ui,api --parallel --prod",
+    "build:infra": "nx run-many --target=build --projects=infra",
     "test:all": "nx run-many --target=test --all --parallel",
     "test:affected": "nx affected:test --all --codeCoverage --skip-nx-cache",
     "test:ui": "nx test ui",

@@ -1,0 +1,7 @@
+# aws-cdk generated .npmignore specifies the following 2x (uncommented)
+# *.ts
+# !*.d.ts
+
+# aws-cdk asset staging and output paths
+.cdk.staging
+cdk.out
