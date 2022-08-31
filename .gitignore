@@ -26,6 +26,10 @@
 /apps/**/src/generated
 /libs/**/src/generated
 
+# aws-cdk asset staging directory + output path
+.cdk.staging
+cdk.out
+
 # process
 /notes
 /.draft

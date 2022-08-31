@@ -3,6 +3,11 @@ const plugin = require('tailwindcss/plugin')
 
 // const defaultTheme = require('tailwindcss/defaultTheme')
 
+// const Color = require('color')
+// const alpha = (c, val) => Color(c).alpha(val).rgb().string()
+// const lighen = (c, val) => Color(c).lighten(val).rgb().string()
+// const darken = (c, val) => Color(c).darken(val).rgb().string()
+
 module.exports = {
   theme: {
     extend: {
@@ -12,7 +17,19 @@ module.exports = {
       minWidth: {
         '1/4': '25%',
         '1/2': '50%',
+        '3/4': '75%',
       },
+      fontSize: {
+        xxs: '.625rem',
+      },
+      opacity: {
+        5: '0.05',
+      },
+      // add zIndex values from 60-100 in steps of 10
+      zIndex: Array.from({ length: 5 }, (_, i) => (6 + i) * 10).reduce(
+        (acc, curr) => ({ ...acc, [curr]: String(curr) }),
+        {},
+      ),
       colors: {
         // palette: {},
         button: {
@@ -127,6 +144,15 @@ module.exports = {
         },
         '.fx-focus-ring': {
           '@apply focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-100': {},
+        },
+        '.fx-link': {
+          '@apply text-sky-800 transition-colors duration-150': {},
+          '&:hover': {
+            '@apply text-sky-900 underline': {},
+          },
+          '&:active': {
+            '@apply text-sky-700': {},
+          },
         },
       })
     }),

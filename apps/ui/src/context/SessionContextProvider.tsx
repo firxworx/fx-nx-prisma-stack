@@ -5,7 +5,7 @@ import { isAuthSessionResult } from '../types/type-guards/auth.type-guards'
 import type { AuthSession } from '../types/session.types'
 import type { SessionStatus } from '../types/enums/session.enums'
 
-const SessionContext = React.createContext<AuthSession<SessionStatus> | null>(null)
+const SessionContext = React.createContext<AuthSession<SessionStatus> | undefined>(undefined)
 
 const LOCAL_STORAGE_SESSION_CTX_FLAG_KEY = 'FX_SESSION_CTX_FLAG'
 
@@ -38,7 +38,7 @@ export const SessionContextProvider: React.FC<{
   )
 
   // memoize to ensure a stable context value
-  const contextValue: AuthSession<SessionStatus> | null = useMemo(() => {
+  const contextValue: AuthSession<SessionStatus> | undefined = useMemo(() => {
     const isLoading = status === 'loading'
 
     if (profile) {
@@ -61,7 +61,7 @@ export const SessionContextProvider: React.FC<{
   return <SessionContext.Provider value={contextValue}>{children(isSessionReady)}</SessionContext.Provider>
 }
 
-export function useSessionContext(): AuthSession<SessionStatus> | null {
+export function useSessionContext(): AuthSession<SessionStatus> | undefined {
   const ctx = useContext(SessionContext)
   return ctx
 }

@@ -28,7 +28,7 @@ export const VideosPage: NextPage = (_props) => {
     <div>
       <h2 className="text-lg">Videos Page</h2>
       <div className="flex justify-end">
-        <LinkButton href="/app/videos/create" variant="transparent">
+        <LinkButton href="/app/videos/create" variant="outline" appendClassName="mb-2">
           <PlusIcon className="h-5 w-5 mr-1" />
           <span>Add Video</span>
         </LinkButton>
