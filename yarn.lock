@@ -1482,6 +1482,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@balena/dockerignore@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "@balena/dockerignore@npm:1.0.2"
+  checksum: 0d39f8fbcfd1a983a44bced54508471ab81aaaa40e2c62b46a9f97eac9d6b265790799f16919216db486331dedaacdde6ecbd6b7abe285d39bc50de111991699
+  languageName: node
+  linkType: hard
+
 "@bcoe/v8-coverage@npm:^0.2.3":
   version: 0.2.3
   resolution: "@bcoe/v8-coverage@npm:0.2.3"
@@ -2492,6 +2499,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@nrwl/cli@npm:14.5.10":
+  version: 14.5.10
+  resolution: "@nrwl/cli@npm:14.5.10"
+  dependencies:
+    nx: 14.5.10
+  checksum: 1f9c66f6e70c203d748f5d8e7faeedb3172d8064d3009b37d8af66deb1b9965c3c8e3eccbdaf5d60122b983603db750ecbe29f6db7a95f2f4b5ce51be0ef2120
+  languageName: node
+  linkType: hard
+
 "@nrwl/cli@npm:14.5.4":
   version: 14.5.4
   resolution: "@nrwl/cli@npm:14.5.4"
@@ -2533,6 +2549,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@nrwl/devkit@npm:14.5.10":
+  version: 14.5.10
+  resolution: "@nrwl/devkit@npm:14.5.10"
+  dependencies:
+    "@phenomnomnominal/tsquery": 4.1.1
+    ejs: ^3.1.7
+    ignore: ^5.0.4
+    semver: 7.3.4
+    tslib: ^2.3.0
+  peerDependencies:
+    nx: ">= 13.10 <= 15"
+  checksum: f46e58c033d494e34ed339d706e0158ea2e12951a41c036c2c582fbed3f68fcc0a291301100673cdb81797b8827eaf1c7fd8129b1842d4ea0c71e03aa233ddb4
+  languageName: node
+  linkType: hard
+
 "@nrwl/devkit@npm:14.5.4":
   version: 14.5.4
   resolution: "@nrwl/devkit@npm:14.5.4"
@@ -2567,6 +2598,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@nrwl/jest@npm:14.5.10":
+  version: 14.5.10
+  resolution: "@nrwl/jest@npm:14.5.10"
+  dependencies:
+    "@jest/reporters": 27.5.1
+    "@jest/test-result": 27.5.1
+    "@nrwl/devkit": 14.5.10
+    "@phenomnomnominal/tsquery": 4.1.1
+    chalk: 4.1.0
+    dotenv: ~10.0.0
+    identity-obj-proxy: 3.0.0
+    jest-config: 27.5.1
+    jest-resolve: 27.5.1
+    jest-util: 27.5.1
+    resolve.exports: 1.1.0
+    rxjs: ^6.5.4
+    tslib: ^2.3.0
+  checksum: 79dab015fe9f853fa8748adb913d4d1fd1704d1d24281779451388dfcb4b73f767e025b941bd7a9a8ca3c5ab2ee0dfa2a974c167d2c0e468d8c81d916ec91b97
+  languageName: node
+  linkType: hard
+
 "@nrwl/jest@npm:14.5.4":
   version: 14.5.4
   resolution: "@nrwl/jest@npm:14.5.4"
@@ -2588,6 +2640,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@nrwl/js@npm:14.5.10":
+  version: 14.5.10
+  resolution: "@nrwl/js@npm:14.5.10"
+  dependencies:
+    "@nrwl/devkit": 14.5.10
+    "@nrwl/jest": 14.5.10
+    "@nrwl/linter": 14.5.10
+    "@nrwl/workspace": 14.5.10
+    "@parcel/watcher": 2.0.4
+    chalk: 4.1.0
+    fast-glob: 3.2.7
+    fs-extra: ^10.1.0
+    ignore: ^5.0.4
+    js-tokens: ^4.0.0
+    minimatch: 3.0.5
+    source-map-support: 0.5.19
+    tree-kill: 1.2.2
+  checksum: 38766d650da707c99b1704107c6174edeb0f1a9b36c95c6e5a27d73d88ca50eefee48556c22ed2e830cc3328cd89993fb1b2dffb70d2936e9395803bd43ce58f
+  languageName: node
+  linkType: hard
+
 "@nrwl/js@npm:14.5.4":
   version: 14.5.4
   resolution: "@nrwl/js@npm:14.5.4"
@@ -2606,6 +2679,25 @@ __metadata:
     source-map-support: 0.5.19
     tree-kill: 1.2.2
   checksum: d1c80eb452b467191ec410743f726b54f35f20e68407152417626a2cf3169f0e09b0468384f8cd4d73c6d784ae9d7c6605540b51a4fbb1c736498812e4ca06d7
+  languageName: node
+  linkType: hard
+
+"@nrwl/linter@npm:14.5.10":
+  version: 14.5.10
+  resolution: "@nrwl/linter@npm:14.5.10"
+  dependencies:
+    "@nrwl/devkit": 14.5.10
+    "@nrwl/jest": 14.5.10
+    "@phenomnomnominal/tsquery": 4.1.1
+    nx: 14.5.10
+    tmp: ~0.2.1
+    tslib: ^2.3.0
+  peerDependencies:
+    eslint: ^8.0.0
+  peerDependenciesMeta:
+    eslint:
+      optional: true
+  checksum: a763ee301e22b50775533a256c8b12ab31a99a9b5235c30df87905d9f6a30168470b81e550da85d0b0ff67b779fae9712ea06e000929eb394aabdddc09c97f45
   languageName: node
   linkType: hard
 
@@ -2703,6 +2795,39 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@nrwl/node@npm:^14.5.10":
+  version: 14.5.10
+  resolution: "@nrwl/node@npm:14.5.10"
+  dependencies:
+    "@nrwl/devkit": 14.5.10
+    "@nrwl/jest": 14.5.10
+    "@nrwl/js": 14.5.10
+    "@nrwl/linter": 14.5.10
+    "@nrwl/workspace": 14.5.10
+    chalk: 4.1.0
+    copy-webpack-plugin: ^10.2.4
+    dotenv: ~10.0.0
+    enhanced-resolve: ^5.8.3
+    fork-ts-checker-webpack-plugin: 7.2.13
+    fs-extra: ^10.1.0
+    glob: 7.1.4
+    license-webpack-plugin: ^4.0.2
+    rxjs: ^6.5.4
+    source-map-support: 0.5.19
+    terser-webpack-plugin: ^5.3.3
+    tree-kill: 1.2.2
+    ts-loader: ^9.3.1
+    ts-node: 10.9.1
+    tsconfig-paths: ^3.9.0
+    tsconfig-paths-webpack-plugin: 3.5.2
+    tslib: ^2.3.0
+    webpack: ^5.58.1
+    webpack-merge: ^5.8.0
+    webpack-node-externals: ^3.0.0
+  checksum: 8c91547970ce2cddcea7ed8478b4734d7710202b6acefbb7cd6223316995c29ce548caf5b936db2aba459cfcaf9775df147fa045f5bcac77885717ba7f19025a
+  languageName: node
+  linkType: hard
+
 "@nrwl/react@npm:14.5.4":
   version: 14.5.4
   resolution: "@nrwl/react@npm:14.5.4"
@@ -2747,6 +2872,17 @@ __metadata:
     ts-loader: ^9.2.6
     tsconfig-paths-webpack-plugin: 3.5.2
   checksum: 81490862df17600d75c38802ae6f33a6206dd9abdc9710d80bc9b239fefb445722089ecdf64978c30290af79be55ae264f0b946667b6dea4caa4b74dd08a8524
+  languageName: node
+  linkType: hard
+
+"@nrwl/tao@npm:14.5.10":
+  version: 14.5.10
+  resolution: "@nrwl/tao@npm:14.5.10"
+  dependencies:
+    nx: 14.5.10
+  bin:
+    tao: index.js
+  checksum: 7d4402c788054579a737379edfdac8bf45df83864c81ff974764fd4f2353a084adbef265d5a33f27940044ec5ea533d1770973a8b98bee5708d46096fd56a25e
   languageName: node
   linkType: hard
 
@@ -2845,6 +2981,44 @@ __metadata:
     webpack-sources: ^3.2.3
     webpack-subresource-integrity: ^5.1.0
   checksum: c93bd1af937db660a99473394a46b1c35db6308099e69ebfa1f13bb30b99c8e05601fe9e00b61a9b610db1c548d1c4471ec45756f691aa0f94e39aa86ba71a54
+  languageName: node
+  linkType: hard
+
+"@nrwl/workspace@npm:14.5.10":
+  version: 14.5.10
+  resolution: "@nrwl/workspace@npm:14.5.10"
+  dependencies:
+    "@nrwl/devkit": 14.5.10
+    "@nrwl/jest": 14.5.10
+    "@nrwl/linter": 14.5.10
+    "@parcel/watcher": 2.0.4
+    chalk: 4.1.0
+    chokidar: ^3.5.1
+    cli-cursor: 3.1.0
+    cli-spinners: 2.6.1
+    dotenv: ~10.0.0
+    enquirer: ~2.3.6
+    figures: 3.2.0
+    flat: ^5.0.2
+    fs-extra: ^10.1.0
+    glob: 7.1.4
+    ignore: ^5.0.4
+    minimatch: 3.0.5
+    npm-run-path: ^4.0.1
+    nx: 14.5.10
+    open: ^8.4.0
+    rxjs: ^6.5.4
+    semver: 7.3.4
+    tmp: ~0.2.1
+    tslib: ^2.3.0
+    yargs: ^17.4.0
+    yargs-parser: 21.0.1
+  peerDependencies:
+    prettier: ^2.6.2
+  peerDependenciesMeta:
+    prettier:
+      optional: true
+  checksum: c29935ed10a993d90860f66e4cfc3a4c2044b204bd4bfc0c17bac467ad17a5f28065e2fbf92695765eb86910b88f29ee36e43949a4d70b47165e27849e550773
   languageName: node
   linkType: hard
 
@@ -3891,7 +4065,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/prettier@npm:^2.1.5":
+"@types/prettier@npm:^2.1.5, @types/prettier@npm:^2.7.0":
   version: 2.7.0
   resolution: "@types/prettier@npm:2.7.0"
   checksum: bf5d0c7c1270909b39399539ac106d20ddaa85fe92eb1d59922dc99159604b4f8d5e41b0045fb29c8011585cf5bca2350b7441ef3d9816c08bd0e10ebd4b31d4
@@ -4001,6 +4175,15 @@ __metadata:
   dependencies:
     "@types/node": "*"
   checksum: b9bbb2b5c5ead2fb884bb019f61a014e37410bddd295de28184e1b2e71ee6b04120c5ba7b9954617f0bdf962c13d06249ce65004490889c747c80d3f628ea842
+  languageName: node
+  linkType: hard
+
+"@types/source-map-support@npm:^0":
+  version: 0.5.6
+  resolution: "@types/source-map-support@npm:0.5.6"
+  dependencies:
+    source-map: ^0.6.0
+  checksum: b2b52b3e4901e52df30ebd23056885a352462c0d6fd73418e793684665a7602168e7c337241f0391562e8c1051ff37cbcb9b7d775990ee1f2a0d8a6ffa2cb22a
   languageName: node
   linkType: hard
 
@@ -4911,6 +5094,39 @@ __metadata:
   languageName: node
   linkType: hard
 
+"aws-cdk-lib@npm:^2.39.1":
+  version: 2.39.1
+  resolution: "aws-cdk-lib@npm:2.39.1"
+  dependencies:
+    "@balena/dockerignore": ^1.0.2
+    case: 1.6.3
+    fs-extra: ^9.1.0
+    ignore: ^5.2.0
+    jsonschema: ^1.4.1
+    minimatch: ^3.1.2
+    punycode: ^2.1.1
+    semver: ^7.3.7
+    yaml: 1.10.2
+  peerDependencies:
+    constructs: ^10.0.0
+  checksum: d1fadda1cd4ffeb4d2253170a5c9783865a96cdc3d79b38cde7c522ad82bb046096f4ad5780574dba3b22df58f399e276c71e9988e2af6bdeb77de8d019fa320
+  languageName: node
+  linkType: hard
+
+"aws-cdk@npm:^2.39.1":
+  version: 2.39.1
+  resolution: "aws-cdk@npm:2.39.1"
+  dependencies:
+    fsevents: 2.3.2
+  dependenciesMeta:
+    fsevents:
+      optional: true
+  bin:
+    cdk: bin/cdk
+  checksum: aa6bbf7867c35f6f4e29bf94ba6e73c210db8925cb4c18bedf15febae49a0f8586db35b2949f5dcc816c8be73cc66865eb34630c3c8c6284e40ae51d0563f99a
+  languageName: node
+  linkType: hard
+
 "aws-sign2@npm:~0.7.0":
   version: 0.7.0
   resolution: "aws-sign2@npm:0.7.0"
@@ -5499,6 +5715,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"case@npm:1.6.3":
+  version: 1.6.3
+  resolution: "case@npm:1.6.3"
+  checksum: febe73278f910b0d28aab7efd6f51c235f9aa9e296148edb56dfb83fd58faa88308c30ce9a0122b6e53e0362c44f4407105bd5ef89c46860fc2b184e540fd68d
+  languageName: node
+  linkType: hard
+
 "caseless@npm:~0.12.0":
   version: 0.12.0
   resolution: "caseless@npm:0.12.0"
@@ -5915,6 +6138,13 @@ __metadata:
   version: 1.1.0
   resolution: "console-control-strings@npm:1.1.0"
   checksum: 8755d76787f94e6cf79ce4666f0c5519906d7f5b02d4b884cf41e11dcd759ed69c57da0670afd9236d229a46e0f9cf519db0cd829c6dca820bb5a5c3def584ed
+  languageName: node
+  linkType: hard
+
+"constructs@npm:^10.1.92":
+  version: 10.1.92
+  resolution: "constructs@npm:10.1.92"
+  checksum: 02ef08f3dd09f00900004fae134273877f77bfc393a6fcad6414e77bf20e33664d67b46485210e4b8f7a3edd37db0a2516e4ad147c2e1bf8c66b5f44f6c6e014
   languageName: node
   linkType: hard
 
@@ -8100,7 +8330,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fsevents@npm:^2.3.2, fsevents@npm:~2.3.2":
+"fsevents@npm:2.3.2, fsevents@npm:^2.3.2, fsevents@npm:~2.3.2":
   version: 2.3.2
   resolution: "fsevents@npm:2.3.2"
   dependencies:
@@ -8110,7 +8340,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fsevents@patch:fsevents@^2.3.2#~builtin<compat/fsevents>, fsevents@patch:fsevents@~2.3.2#~builtin<compat/fsevents>":
+"fsevents@patch:fsevents@2.3.2#~builtin<compat/fsevents>, fsevents@patch:fsevents@^2.3.2#~builtin<compat/fsevents>, fsevents@patch:fsevents@~2.3.2#~builtin<compat/fsevents>":
   version: 2.3.2
   resolution: "fsevents@patch:fsevents@npm%3A2.3.2#~builtin<compat/fsevents>::version=2.3.2&hash=18f3a7"
   dependencies:
@@ -8176,7 +8406,7 @@ __metadata:
     "@nrwl/linter": 14.5.4
     "@nrwl/nest": 14.5.4
     "@nrwl/next": 14.5.4
-    "@nrwl/node": 14.5.4
+    "@nrwl/node": ^14.5.10
     "@nrwl/react": 14.5.4
     "@nrwl/web": 14.5.4
     "@nrwl/workspace": 14.5.4
@@ -8200,19 +8430,24 @@ __metadata:
     "@types/node": 18.6.3
     "@types/passport-jwt": ^3.0.6
     "@types/passport-local": ^1.0.34
+    "@types/prettier": ^2.7.0
     "@types/react": 18.0.15
     "@types/react-dom": 18.0.6
+    "@types/source-map-support": ^0
     "@types/supertest": ^2.0.12
     "@typescript-eslint/eslint-plugin": ~5.32.0
     "@typescript-eslint/parser": ~5.32.0
     add: ^2.0.6
     argon2: ^0.28.7
     autoprefixer: 10.4.8
+    aws-cdk: ^2.39.1
+    aws-cdk-lib: ^2.39.1
     babel-jest: 28.1.3
     class-transformer: ^0.5.1
     class-validator: ^0.13.2
     clsx: ^1.2.1
     compression: ^1.7.4
+    constructs: ^10.1.92
     cookie-parser: ^1.4.6
     core-js: ^3.24.1
     csurf: ^1.11.0
@@ -8254,6 +8489,7 @@ __metadata:
     reflect-metadata: ^0.1.13
     regenerator-runtime: 0.13.9
     rxjs: ^7.5.6
+    source-map-support: ^0.5.21
     supertest: ^6.2.4
     tailwindcss: 3.1.7
     ts-jest: 28.0.7
@@ -10522,6 +10758,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"jsonschema@npm:^1.4.1":
+  version: 1.4.1
+  resolution: "jsonschema@npm:1.4.1"
+  checksum: 1ef02a6cd9bc32241ec86bbf1300bdbc3b5f2d8df6eb795517cf7d1cd9909e7beba1e54fdf73990fd66be98a182bda9add9607296b0cb00b1348212988e424b2
+  languageName: node
+  linkType: hard
+
 "jsonwebtoken@npm:8.5.1, jsonwebtoken@npm:^8.2.0":
   version: 8.5.1
   resolution: "jsonwebtoken@npm:8.5.1"
@@ -11666,6 +11909,54 @@ __metadata:
   version: 2.2.1
   resolution: "nwsapi@npm:2.2.1"
   checksum: 6c21fcb6950538012516b39137ed9b53ed56843e521362e977282c781169f229e7bca8ec6e207165b19912550f360806b222f77b6c9202bb8d66818456875c3d
+  languageName: node
+  linkType: hard
+
+"nx@npm:14.5.10":
+  version: 14.5.10
+  resolution: "nx@npm:14.5.10"
+  dependencies:
+    "@nrwl/cli": 14.5.10
+    "@nrwl/tao": 14.5.10
+    "@parcel/watcher": 2.0.4
+    chalk: 4.1.0
+    chokidar: ^3.5.1
+    cli-cursor: 3.1.0
+    cli-spinners: 2.6.1
+    cliui: ^7.0.2
+    dotenv: ~10.0.0
+    enquirer: ~2.3.6
+    fast-glob: 3.2.7
+    figures: 3.2.0
+    flat: ^5.0.2
+    fs-extra: ^10.1.0
+    glob: 7.1.4
+    ignore: ^5.0.4
+    js-yaml: 4.1.0
+    jsonc-parser: 3.0.0
+    minimatch: 3.0.5
+    npm-run-path: ^4.0.1
+    open: ^8.4.0
+    semver: 7.3.4
+    string-width: ^4.2.3
+    tar-stream: ~2.2.0
+    tmp: ~0.2.1
+    tsconfig-paths: ^3.9.0
+    tslib: ^2.3.0
+    v8-compile-cache: 2.3.0
+    yargs: ^17.4.0
+    yargs-parser: 21.0.1
+  peerDependencies:
+    "@swc-node/register": ^1.4.2
+    "@swc/core": ^1.2.173
+  peerDependenciesMeta:
+    "@swc-node/register":
+      optional: true
+    "@swc/core":
+      optional: true
+  bin:
+    nx: bin/nx.js
+  checksum: 84c86de5290a9d6a896e1298a3bdcf010a3b3e9f1a907f6150ba24105192d7fe56582b44e85d465b569a79bb01aa7633db066fb6d03548476bdf566edf1ad245
   languageName: node
   linkType: hard
 
@@ -14224,7 +14515,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"source-map-support@npm:^0.5.6, source-map-support@npm:~0.5.20":
+"source-map-support@npm:^0.5.21, source-map-support@npm:^0.5.6, source-map-support@npm:~0.5.20":
   version: 0.5.21
   resolution: "source-map-support@npm:0.5.21"
   dependencies:
@@ -15050,7 +15341,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-loader@npm:^9.2.6":
+"ts-loader@npm:^9.2.6, ts-loader@npm:^9.3.1":
   version: 9.3.1
   resolution: "ts-loader@npm:9.3.1"
   dependencies:
@@ -15062,6 +15353,44 @@ __metadata:
     typescript: "*"
     webpack: ^5.0.0
   checksum: 462a8ac315017cf4961dafd2be29d5abe7c3af63c4515e325269f79b9d0212b35c59184d7fd01fc378749c88454752e1599301d2190eb6844ea5fe332de5f695
+  languageName: node
+  linkType: hard
+
+"ts-node@npm:10.9.1, ts-node@npm:~10.9.1":
+  version: 10.9.1
+  resolution: "ts-node@npm:10.9.1"
+  dependencies:
+    "@cspotcode/source-map-support": ^0.8.0
+    "@tsconfig/node10": ^1.0.7
+    "@tsconfig/node12": ^1.0.7
+    "@tsconfig/node14": ^1.0.0
+    "@tsconfig/node16": ^1.0.2
+    acorn: ^8.4.1
+    acorn-walk: ^8.1.1
+    arg: ^4.1.0
+    create-require: ^1.1.0
+    diff: ^4.0.1
+    make-error: ^1.1.1
+    v8-compile-cache-lib: ^3.0.1
+    yn: 3.1.1
+  peerDependencies:
+    "@swc/core": ">=1.2.50"
+    "@swc/wasm": ">=1.2.50"
+    "@types/node": "*"
+    typescript: ">=2.7"
+  peerDependenciesMeta:
+    "@swc/core":
+      optional: true
+    "@swc/wasm":
+      optional: true
+  bin:
+    ts-node: dist/bin.js
+    ts-node-cwd: dist/bin-cwd.js
+    ts-node-esm: dist/bin-esm.js
+    ts-node-script: dist/bin-script.js
+    ts-node-transpile-only: dist/bin-transpile.js
+    ts-script: dist/bin-script-deprecated.js
+  checksum: 090adff1302ab20bd3486e6b4799e90f97726ed39e02b39e566f8ab674fd5bd5f727f43615debbfc580d33c6d9d1c6b1b3ce7d8e3cca3e20530a145ffa232c35
   languageName: node
   linkType: hard
 
@@ -15100,44 +15429,6 @@ __metadata:
     ts-node-transpile-only: dist/bin-transpile.js
     ts-script: dist/bin-script-deprecated.js
   checksum: 1eede939beed9f4db35bcc88d78ef803815b99dcdbed1ecac728d861d74dc694918a7f0f437aa08d026193743a31e7e00e2ee34f875f909b5879981c1808e2a7
-  languageName: node
-  linkType: hard
-
-"ts-node@npm:~10.9.1":
-  version: 10.9.1
-  resolution: "ts-node@npm:10.9.1"
-  dependencies:
-    "@cspotcode/source-map-support": ^0.8.0
-    "@tsconfig/node10": ^1.0.7
-    "@tsconfig/node12": ^1.0.7
-    "@tsconfig/node14": ^1.0.0
-    "@tsconfig/node16": ^1.0.2
-    acorn: ^8.4.1
-    acorn-walk: ^8.1.1
-    arg: ^4.1.0
-    create-require: ^1.1.0
-    diff: ^4.0.1
-    make-error: ^1.1.1
-    v8-compile-cache-lib: ^3.0.1
-    yn: 3.1.1
-  peerDependencies:
-    "@swc/core": ">=1.2.50"
-    "@swc/wasm": ">=1.2.50"
-    "@types/node": "*"
-    typescript: ">=2.7"
-  peerDependenciesMeta:
-    "@swc/core":
-      optional: true
-    "@swc/wasm":
-      optional: true
-  bin:
-    ts-node: dist/bin.js
-    ts-node-cwd: dist/bin-cwd.js
-    ts-node-esm: dist/bin-esm.js
-    ts-node-script: dist/bin-script.js
-    ts-node-transpile-only: dist/bin-transpile.js
-    ts-script: dist/bin-script-deprecated.js
-  checksum: 090adff1302ab20bd3486e6b4799e90f97726ed39e02b39e566f8ab674fd5bd5f727f43615debbfc580d33c6d9d1c6b1b3ce7d8e3cca3e20530a145ffa232c35
   languageName: node
   linkType: hard
 
@@ -16001,7 +16292,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yaml@npm:^1.10.0, yaml@npm:^1.10.2, yaml@npm:^1.7.2":
+"yaml@npm:1.10.2, yaml@npm:^1.10.0, yaml@npm:^1.10.2, yaml@npm:^1.7.2":
   version: 1.10.2
   resolution: "yaml@npm:1.10.2"
   checksum: ce4ada136e8a78a0b08dc10b4b900936912d15de59905b2bf415b4d33c63df1d555d23acb2a41b23cf9fb5da41c256441afca3d6509de7247daa062fd2c5ea5f
