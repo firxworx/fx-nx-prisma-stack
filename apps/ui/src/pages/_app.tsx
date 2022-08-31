@@ -28,10 +28,14 @@ export const SIGN_IN_ROUTE = '/sign-in'
 
 const PUBLIC_ROUTES_WHITELIST = ['/', SIGN_IN_ROUTE, '/about']
 
-const PUBLIC_NAV_LINKS = [{ title: 'Sign-In', href: SIGN_IN_ROUTE }]
+const PUBLIC_NAV_LINKS = [
+  { title: 'About', href: '/about' },
+  { title: 'Sign-In', href: SIGN_IN_ROUTE },
+]
 const AUTHENTICATED_NAV_LINKS = [
   { title: 'App', href: '/app' },
   { title: 'Videos', href: '/app/videos' },
+  { title: 'About', href: '/about' },
 ]
 
 const LABELS = {
