@@ -30,6 +30,10 @@
 .cdk.staging
 cdk.out
 
+# aws-cdk cdk.context.json - excluding due to public/open-source repo
+# note: it is a reco'd practice per aws to commit this file when committing to a private repo
+cdk.context.json
+
 # process
 /notes
 /.draft
