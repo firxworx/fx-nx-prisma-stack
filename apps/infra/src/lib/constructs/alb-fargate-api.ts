@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { CfnOutput, Duration, Stack } from 'aws-cdk-lib'
+import { CfnOutput, Duration } from 'aws-cdk-lib'
 
 import * as iam from 'aws-cdk-lib/aws-iam'
 import * as route53 from 'aws-cdk-lib/aws-route53'
@@ -11,27 +11,28 @@ import * as ecr from 'aws-cdk-lib/aws-ecr'
 import * as ecsPatterns from 'aws-cdk-lib/aws-ecs-patterns'
 
 import { FxBaseConstruct, FxBaseConstructProps } from '../abstract/fx-base.abstract.construct'
+import { FxBaseStack } from '../abstract/fx-base.abstract.stack'
 
 export interface AlbFargateApiProps extends FxBaseConstructProps {
   cluster: ecs.ICluster
   ecrRepository: ecr.IRepository
   ecs: {
     container: {
-      environment: Record<string, string>
-      secrets: Record<string, ecs.Secret>
+      environment?: Record<string, string>
+      secrets?: Record<string, ecs.Secret>
       port: number
-      executionRole: iam.Role | undefined
+      executionRole?: iam.Role
     }
-    service: {
-      securityGroups: ec2.ISecurityGroup[] | undefined
+    service?: {
+      securityGroups?: ec2.ISecurityGroup[]
     }
-    task: {
-      taskRole: iam.Role | undefined
-      memoryLimit: ecsPatterns.ApplicationLoadBalancedFargateServiceProps['memoryLimitMiB'] | undefined
-      cpuLimit: ecsPatterns.ApplicationLoadBalancedFargateServiceProps['cpu'] | undefined
+    task?: {
+      taskRole?: iam.Role
+      memoryLimit?: ecsPatterns.ApplicationLoadBalancedFargateServiceProps['memoryLimitMiB']
+      cpuLimit?: ecsPatterns.ApplicationLoadBalancedFargateServiceProps['cpu']
       desiredCount?: number
     }
-    logs: {
+    logs?: {
       logDriver: ecs.LogDriver
     }
     scaling?: {
@@ -64,46 +65,47 @@ export class AlbFargateApi extends FxBaseConstruct {
     taskCount: ecs.ScalableTaskCount
   }
 
-  constructor(parent: Stack, id: string, props: AlbFargateApiProps) {
+  constructor(parent: FxBaseStack, id: string, props: AlbFargateApiProps) {
     super(parent, id, props)
 
     this.assertValidProps(props)
 
+    // reminder: be careful about modifying albfs values on production deployments to avoid hangs
     this.albfs = new ecsPatterns.ApplicationLoadBalancedFargateService(this, 'ALBFS', {
-      serviceName: `${this.getProjectTag()}-api-service-${this.getDeployStageTag()}`,
+      serviceName: `${parent.getProjectTag()}-${parent.getDeployStageTag()}`,
       cluster: props.cluster,
-      // taskSubnets:
       publicLoadBalancer: true,
       assignPublicIp: false,
-      // taskDefinition:
+      // taskSubnets: ...
+      // taskDefinition: ... // alternative to specifying taskImageOptions
       taskImageOptions: {
-        containerName: `${this.getProjectTag()}-api-container-${this.getDeployStageTag()}`,
+        containerName: `${parent.getProjectTag()}-${parent.getDeployStageTag()}-api`,
         image: ecs.ContainerImage.fromEcrRepository(props.ecrRepository),
         containerPort: props.ecs.container.port,
         environment: props.ecs.container.environment,
         secrets: props.ecs.container.secrets,
         enableLogging: true,
-        logDriver: props.ecs.logs.logDriver,
-        taskRole: props.ecs.task.taskRole,
+        logDriver: props.ecs.logs?.logDriver,
+        taskRole: props.ecs.task?.taskRole,
         executionRole: props.ecs.container.executionRole,
       },
-      memoryLimitMiB: props.ecs.task.memoryLimit,
-      cpu: props.ecs.task.cpuLimit,
+      memoryLimitMiB: props.ecs.task?.memoryLimit ?? 512,
+      cpu: props.ecs.task?.cpuLimit ?? 256,
 
       certificate: props.certificate,
       domainZone: props.zone,
       domainName: props.domainName,
       redirectHTTP: true,
 
-      circuitBreaker: { rollback: true },
+      circuitBreaker: parent.isProduction() ? { rollback: true } : undefined,
 
       deploymentController: {
         type: ecs.DeploymentControllerType.ECS,
       },
 
       propagateTags: ecs.PropagatedTagSource.SERVICE,
-      securityGroups: props.ecs.service.securityGroups,
-      desiredCount: props.ecs.task.desiredCount,
+      securityGroups: props.ecs.service?.securityGroups,
+      desiredCount: props.ecs.task?.desiredCount,
 
       // maxHealthyPercent: 200,
       // minHealthyPercent: 50,
