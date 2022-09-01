@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
-import { CfnOutput, Duration, RemovalPolicy, Stack } from 'aws-cdk-lib'
+import { CfnOutput, Duration, RemovalPolicy } from 'aws-cdk-lib'
 import * as ec2 from 'aws-cdk-lib/aws-ec2'
 import * as rds from 'aws-cdk-lib/aws-rds'
 import * as secretsManager from 'aws-cdk-lib/aws-secretsmanager'
 
 import { FxBaseConstruct, type FxBaseConstructProps } from '../abstract/fx-base.abstract.construct'
-import { DatabaseProxy } from 'aws-cdk-lib/aws-rds'
+import { FxBaseStack } from '../abstract/fx-base.abstract.stack'
 
 export interface RdsPostgresInstanceProps extends FxBaseConstructProps {
   vpc: ec2.Vpc
@@ -17,8 +17,8 @@ export interface RdsPostgresInstanceProps extends FxBaseConstructProps {
   instanceIdentifier?: string
 
   /**
-   * Optional Secrets Manager secret as a json object specifying a `username` and `password` to use as credentials
-   * for this RDS instance. A new secret will be generated if none is provided.
+   * Optional Secrets Manager secret (as json object) specifying `username` and `password` credentials
+   * for this RDS instance. A new secret will be generated if none is provided with 'postgres' as the username.
    */
   secret?: secretsManager.ISecret
 
@@ -43,7 +43,7 @@ export interface RdsPostgresInstanceProps extends FxBaseConstructProps {
  */
 export class RdsPostgresInstance extends FxBaseConstruct {
   readonly instance: rds.DatabaseInstance
-  readonly proxy: DatabaseProxy
+  readonly proxy: rds.DatabaseProxy
   readonly parameterGroup: rds.ParameterGroup
 
   readonly credentials: {
@@ -51,7 +51,7 @@ export class RdsPostgresInstance extends FxBaseConstruct {
     // ssm: { secretArn: ssm.StringParameter; }
   }
 
-  constructor(parent: Stack, id: string, props: RdsPostgresInstanceProps) {
+  constructor(parent: FxBaseStack, id: string, props: RdsPostgresInstanceProps) {
     super(parent, id, props)
 
     const port = 5432
@@ -80,12 +80,12 @@ export class RdsPostgresInstance extends FxBaseConstruct {
         subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
       },
       securityGroups: props.securityGroups,
-      multiAz: props.multiAz ?? this.isProduction(),
+      multiAz: props.multiAz ?? parent.isProduction(),
 
       deletionProtection: false, // this.isProduction(),
-      removalPolicy: this.isProduction() ? RemovalPolicy.SNAPSHOT : RemovalPolicy.DESTROY,
-      deleteAutomatedBackups: !this.isProduction(),
-      backupRetention: props.backupRetention ?? (this.isProduction() ? Duration.days(7) : Duration.days(0)),
+      removalPolicy: parent.isProduction() ? RemovalPolicy.SNAPSHOT : RemovalPolicy.DESTROY,
+      deleteAutomatedBackups: !parent.isProduction(),
+      backupRetention: props.backupRetention ?? (parent.isProduction() ? Duration.days(7) : Duration.days(0)),
 
       databaseName,
       instanceIdentifier: props.instanceIdentifier ?? this.getProjectTag(),
@@ -97,7 +97,7 @@ export class RdsPostgresInstance extends FxBaseConstruct {
       engine: dbEngine,
 
       autoMinorVersionUpgrade: true,
-      allocatedStorage: props.allocatedStorage ?? this.isProduction() ? undefined : 10, // current default is 100
+      allocatedStorage: props.allocatedStorage ?? parent.isProduction() ? undefined : 10, // current default is 100
 
       // storageEncrypted: true,
       // backupRetention: Duration.days(1),
@@ -106,7 +106,7 @@ export class RdsPostgresInstance extends FxBaseConstruct {
     this.proxy = this.instance.addProxy('RdsProxy', {
       vpc: props.vpc,
       secrets: [this.credentials.secret],
-      debugLogging: this.isDevelopment(),
+      debugLogging: parent.isDevelopment(),
       borrowTimeout: Duration.seconds(60),
       securityGroups: props.securityGroups,
     })

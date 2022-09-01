@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { CfnOutput, RemovalPolicy, Stack } from 'aws-cdk-lib'
+import { CfnOutput, RemovalPolicy } from 'aws-cdk-lib'
 
 import * as iam from 'aws-cdk-lib/aws-iam'
 import * as route53 from 'aws-cdk-lib/aws-route53'
@@ -11,6 +11,7 @@ import * as s3Deployment from 'aws-cdk-lib/aws-s3-deployment'
 import * as targets from 'aws-cdk-lib/aws-route53-targets'
 import * as cloudfrontOrigins from 'aws-cdk-lib/aws-cloudfront-origins'
 import { FxBaseConstruct, FxBaseConstructProps } from '../abstract/fx-base.abstract.construct'
+import { FxBaseStack } from '../abstract/fx-base.abstract.stack'
 
 export interface StaticUiProps extends FxBaseConstructProps {
   /**
@@ -86,7 +87,7 @@ export class StaticUi extends FxBaseConstruct {
 
   // readonly originRequestPolicy: cloudfront.OriginRequestPolicy
 
-  constructor(parent: Stack, id: string, props: StaticUiProps) {
+  constructor(parent: FxBaseStack, id: string, props: StaticUiProps) {
     super(parent, id, props)
 
     this.uri = props.uri.subdomain ? `${props.uri.subdomain}.${props.uri.domain}` : props.uri.domain
@@ -100,25 +101,25 @@ export class StaticUi extends FxBaseConstruct {
     this.zone = route53.HostedZone.fromLookup(this, 'Zone', { domainName: props.uri.domain })
 
     const cloudfrontOAI = new cloudfront.OriginAccessIdentity(this, 'CloudFrontOAI', {
-      comment: `OAI for ${name} (${this.uri})`,
+      comment: `OAI for ${this.getProjectTag()} ${this.getDeployStageTag()} (${this.uri})`,
     })
 
     const assetsBucket = new s3.Bucket(this, 'AssetsBucket', {
       bucketName: this.uri, // the bucket name should match uri in s3 hosting scenarios
       publicReadAccess: false,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-      removalPolicy: this.isProduction() ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
-      autoDeleteObjects: !this.isProduction(),
+      removalPolicy: parent.isProduction() ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
+      autoDeleteObjects: !parent.isProduction(),
 
       // to enable bucket versioning for production --
-      // versioned: this.isProduction(),
+      // versioned: parent.isProduction(),
     })
 
     const logsBucket = new s3.Bucket(this, 'LogsBucket', {
       publicReadAccess: false,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-      removalPolicy: this.isProduction() ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
-      autoDeleteObjects: !this.isProduction(),
+      removalPolicy: parent.isProduction() ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
+      autoDeleteObjects: !parent.isProduction(),
     })
 
     this.buckets = {
@@ -158,7 +159,7 @@ export class StaticUi extends FxBaseConstruct {
         allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         cachePolicy:
-          this.isDevelopment() && !!props.options?.disableCloudFrontCacheInDevelopment
+          parent.isDevelopment() && !!props.options?.disableCloudFrontCacheInDevelopment
             ? cloudfront.CachePolicy.CACHING_DISABLED
             : cloudfront.CachePolicy.CACHING_OPTIMIZED,
       },

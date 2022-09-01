@@ -1,64 +1,29 @@
-import { Stack } from 'aws-cdk-lib'
 import { Construct } from 'constructs'
 
-import { DeployStage } from '../../constants/deploy-stage.enum'
-import type { BaseProps } from '../../types/props.types'
-import { getDeployStageTag } from './common'
+import { FxBaseStack } from './fx-base.abstract.stack'
 
-export interface FxBaseConstructProps extends BaseProps {}
+export interface FxBaseConstructProps {}
 
 export abstract class FxBaseConstruct extends Construct {
-  protected readonly project: Readonly<BaseProps['project']>
-  protected readonly deploy: Readonly<BaseProps['deploy']>
-  protected readonly meta: Readonly<BaseProps['meta']>
+  protected readonly _parent: Readonly<FxBaseStack>
+  protected projectTag: string
 
-  constructor(parent: Stack, name: string, props: FxBaseConstructProps) {
+  constructor(parent: FxBaseStack, name: string, _props: FxBaseConstructProps) {
     super(parent, name)
 
-    this.project = {
-      ...props.project,
-    }
-
-    this.deploy = {
-      ...props.deploy,
-    }
-
-    this.meta = {
-      ...props.meta,
-    }
+    this._parent = parent
+    this.projectTag = parent.getProjectTag()
   }
 
-  // @future could refactor to introduce a TS mixin to DRY these common methods between abstract construct + stack
-
-  getDeployStage(): DeployStage {
-    return this.deploy.stage
+  protected getProjectTag() {
+    return this._parent.getProjectTag()
   }
 
-  getDeployStageTag(): ReturnType<typeof getDeployStageTag> {
-    return getDeployStageTag(this.deploy.stage)
+  protected getDeployStage() {
+    return this._parent.getDeployStage()
   }
 
-  getProjectTag(): string {
-    return this.project.tag
-  }
-
-  isProduction(): boolean {
-    return this.deploy.stage === DeployStage.PRODUCTION
-  }
-
-  isStaging(): boolean {
-    return this.deploy.stage === DeployStage.STAGING
-  }
-
-  isProductionLike(): boolean {
-    return this.isStaging() || this.isProduction()
-  }
-
-  isDevelopment(): boolean {
-    return this.deploy.stage === DeployStage.DEV
-  }
-
-  isQA(): boolean {
-    return this.deploy.stage === DeployStage.QA
+  protected getDeployStageTag() {
+    return this._parent.getDeployStageTag()
   }
 }
