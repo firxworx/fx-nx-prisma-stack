@@ -41,28 +41,53 @@ export abstract class FxBaseStack extends cdk.Stack {
     return getDeployStageTag(this.deploy.stage)
   }
 
+  getProjectTag(): string {
+    return this.project.tag
+  }
+
+  /**
+   * Returns `true` if the current infra deploy stage is `PRODUCTION`,
+   * unless overridden by the `useNonProductionDefaults` deploy option.
+   */
   isProduction(): boolean {
+    if (!this.deploy.options?.useNonProductionDefaults) {
+      return false
+    }
+
     return this.deploy.stage === DeployStage.PRODUCTION
   }
 
+  /**
+   * Returns `true` if the current infra deploy stage is `STAGING`.
+   */
   isStaging(): boolean {
     return this.deploy.stage === DeployStage.STAGING
   }
 
+  /**
+   * Returns `true` if the current infra deploy stage is `PRODUCTION` or `STAGING`,
+   * unless overridden by the `useNonProductionDefaults` deploy option.
+   */
   isProductionLike(): boolean {
+    if (!this.deploy.options?.useNonProductionDefaults) {
+      return false
+    }
+
     return this.isStaging() || this.isProduction()
   }
 
+  /**
+   * Returns `true` if the current infra deploy stage is `DEV`.
+   */
   isDevelopment(): boolean {
     return this.deploy.stage === DeployStage.DEV
   }
 
+  /**
+   * Returns `true` if the current infra deploy stage is `QA`.
+   */
   isQA(): boolean {
     return this.deploy.stage === DeployStage.QA
-  }
-
-  getProjectTag(): string {
-    return this.project.tag
   }
 
   protected getBaseProps(): BaseProps {

@@ -8,6 +8,9 @@ export interface BaseProps {
   deploy: {
     stage: DeployStage
     domain: string
+    options?: {
+      useNonProductionDefaults?: boolean
+    }
   }
   meta: {
     owner: string
