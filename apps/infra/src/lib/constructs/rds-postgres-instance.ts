@@ -87,18 +87,14 @@ export class RdsPostgresInstance extends FxBaseConstruct {
       deleteAutomatedBackups: !this.isProduction(),
       backupRetention: props.backupRetention ?? (this.isProduction() ? Duration.days(7) : Duration.days(0)),
 
-      databaseName: props.databaseName ?? this.getProjectTag(),
+      databaseName,
       instanceIdentifier: props.instanceIdentifier ?? this.getProjectTag(),
-      port: 5432,
+      port,
+      credentials: rds.Credentials.fromSecret(this.credentials.secret),
 
       parameterGroup: this.parameterGroup,
       instanceType: props.instanceType ?? ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.MICRO), // db.t4g.micro?
       engine: dbEngine,
-
-      credentials: {
-        username: this.credentials.secret.secretValueFromJson('username').toString(),
-        password: this.credentials.secret.secretValueFromJson('password'),
-      },
 
       autoMinorVersionUpgrade: true,
       allocatedStorage: props.allocatedStorage ?? this.isProduction() ? undefined : 10, // current default is 100
@@ -118,16 +114,7 @@ export class RdsPostgresInstance extends FxBaseConstruct {
     this.printOutputs()
   }
 
-  public getConnectionUri(secret: secretsManager.ISecret): string {
-    const getSecret = (secret: secretsManager.ISecret, field: string) => secret.secretValueFromJson(field).toString()
-
-    return `postgres://${getSecret(secret, 'username')}:${getSecret(secret, 'password')}@${getSecret(
-      secret,
-      'host',
-    )}:${getSecret(secret, 'port')}/${getSecret(secret, 'dbname')}`
-  }
-
-  private generateDatabaseSecret(port: number, databaseName: string): typeof this.credentials {
+  private generateDatabaseSecret(port?: number, databaseName?: string): typeof this.credentials {
     const secret = new secretsManager.Secret(this, 'RdsSecret', {
       secretName: `${this.getProjectTag()}/${this.getDeployStage()}/db`,
       generateSecretString: {

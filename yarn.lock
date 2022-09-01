@@ -3531,6 +3531,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/aws-lambda@npm:^8.10.102":
+  version: 8.10.102
+  resolution: "@types/aws-lambda@npm:8.10.102"
+  checksum: 71095334a700f24c88918890d2f31782583511d61c0fe4bfe1adcc17b314d4fcbccdb76de47507fd1a6ece1676a3b0ddecb8816808a541a2bca6fface1879b8d
+  languageName: node
+  linkType: hard
+
 "@types/babel__core@npm:^7.0.0, @types/babel__core@npm:^7.1.14":
   version: 7.1.19
   resolution: "@types/babel__core@npm:7.1.19"
@@ -8267,6 +8274,7 @@ __metadata:
     "@tanstack/react-query-devtools": ^4.0.10
     "@tanstack/react-table": ^8.5.11
     "@testing-library/react": 13.3.0
+    "@types/aws-lambda": ^8.10.102
     "@types/compression": ^1.7.2
     "@types/cookie-parser": ^1.4.3
     "@types/csurf": ^1.11.2

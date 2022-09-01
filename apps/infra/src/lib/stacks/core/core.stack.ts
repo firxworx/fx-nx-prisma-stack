@@ -31,12 +31,12 @@ export class CoreStack extends FxBaseStack {
       enableDnsHostnames: true,
       enableDnsSupport: true,
       subnetConfiguration: [
-        ...this.generateSubnetConfigurations(1, 'active', ec2.SubnetType.PUBLIC, 19),
-        ...this.generateSubnetConfigurations(2, 'reserved', ec2.SubnetType.PUBLIC, 19),
-        ...this.generateSubnetConfigurations(1, 'active', ec2.SubnetType.PRIVATE_WITH_NAT, 19),
-        ...this.generateSubnetConfigurations(2, 'reserved', ec2.SubnetType.PRIVATE_WITH_NAT, 19),
-        ...this.generateSubnetConfigurations(1, 'active', ec2.SubnetType.PRIVATE_ISOLATED, 19),
-        ...this.generateSubnetConfigurations(2, 'reserved', ec2.SubnetType.PRIVATE_ISOLATED, 19),
+        ...this.generateSubnetConfigurations(1, 'active', ec2.SubnetType.PUBLIC, 24),
+        ...this.generateSubnetConfigurations(2, 'reserved', ec2.SubnetType.PUBLIC, 24),
+        ...this.generateSubnetConfigurations(1, 'active', ec2.SubnetType.PRIVATE_WITH_NAT, 24),
+        ...this.generateSubnetConfigurations(2, 'reserved', ec2.SubnetType.PRIVATE_WITH_NAT, 24),
+        ...this.generateSubnetConfigurations(1, 'active', ec2.SubnetType.PRIVATE_ISOLATED, 24),
+        ...this.generateSubnetConfigurations(2, 'reserved', ec2.SubnetType.PRIVATE_ISOLATED, 24),
       ],
       natGatewayProvider: this.isProduction()
         ? ec2.NatProvider.gateway()
