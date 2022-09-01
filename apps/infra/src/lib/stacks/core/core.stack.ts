@@ -15,11 +15,17 @@ export interface CoreStackProps extends FxBaseStackProps {
  * Core (base) infrastructure stack including a VPC.
  *
  * The default configuration uses NAT instances vs. NAT gateways in non-production stages.
+ *
+ * @see {@link https://aws.amazon.com/blogs/architecture/choosing-your-vpc-endpoint-strategy-for-amazon-s3/}
  */
 export class CoreStack extends FxBaseStack {
   readonly vpc: ec2.Vpc
-
   readonly roles: Record<'ec2', iam.Role>
+
+  readonly gatewayEndpoints?: Partial<Record<keyof typeof ec2.GatewayVpcEndpointAwsService, ec2.GatewayVpcEndpoint>>
+  readonly interfaceEndpoints?: Partial<
+    Record<keyof typeof ec2.InterfaceVpcEndpointAwsService, ec2.InterfaceVpcEndpoint>
+  >
 
   constructor(scope: Construct, id: string, props: CoreStackProps) {
     super(scope, id, props)
@@ -31,48 +37,47 @@ export class CoreStack extends FxBaseStack {
       enableDnsHostnames: true,
       enableDnsSupport: true,
       subnetConfiguration: [
-        ...this.generateSubnetConfigurations(1, 'active', ec2.SubnetType.PUBLIC, 24),
-        ...this.generateSubnetConfigurations(2, 'reserved', ec2.SubnetType.PUBLIC, 24),
-        ...this.generateSubnetConfigurations(1, 'active', ec2.SubnetType.PRIVATE_WITH_NAT, 24),
-        ...this.generateSubnetConfigurations(2, 'reserved', ec2.SubnetType.PRIVATE_WITH_NAT, 24),
-        ...this.generateSubnetConfigurations(1, 'active', ec2.SubnetType.PRIVATE_ISOLATED, 24),
-        ...this.generateSubnetConfigurations(2, 'reserved', ec2.SubnetType.PRIVATE_ISOLATED, 24),
+        ...this.buildSubnetConfigurations(1, 'active', ec2.SubnetType.PUBLIC, 24),
+        ...this.buildSubnetConfigurations(2, 'reserved', ec2.SubnetType.PUBLIC, 24),
+        ...this.buildSubnetConfigurations(1, 'active', ec2.SubnetType.PRIVATE_WITH_NAT, 24),
+        ...this.buildSubnetConfigurations(2, 'reserved', ec2.SubnetType.PRIVATE_WITH_NAT, 24),
+        ...this.buildSubnetConfigurations(1, 'active', ec2.SubnetType.PRIVATE_ISOLATED, 24),
+        ...this.buildSubnetConfigurations(2, 'reserved', ec2.SubnetType.PRIVATE_ISOLATED, 24),
       ],
       natGatewayProvider: this.isProduction()
         ? ec2.NatProvider.gateway()
         : ec2.NatProvider.instance({
-            // new ec2.InstanceType('t2.micro'),
-            instanceType: ec2.InstanceType.of(ec2.InstanceClass.T4G, ec2.InstanceSize.NANO),
+            // current nat gateway ami requires 'x86_64' architecture
+            instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3A, ec2.InstanceSize.NANO),
           }),
-      gatewayEndpoints: {
-        // enable containers to pull image layers without using the nat gateway
-        S3: { service: ec2.GatewayVpcEndpointAwsService.S3 },
-      },
     })
 
-    this.vpc.addInterfaceEndpoint('EcrDockerEndpoint', {
-      service: ec2.InterfaceVpcEndpointAwsService.ECR_DOCKER,
-    })
+    // S3 gw endpoints enable containers to pull assets e.g. image layers w/o consuming nat gateway resources
+    this.gatewayEndpoints = {
+      S3: this.vpc.addGatewayEndpoint('S3', {
+        service: ec2.GatewayVpcEndpointAwsService.S3,
+      }),
+    }
 
-    this.vpc.addInterfaceEndpoint('EcrApiEndpoint', {
-      service: ec2.InterfaceVpcEndpointAwsService.ECR,
-    })
+    // consider other services to access via AWS PrivateLink / endpoint services
+    // e.g. EC2, CLOUDWATCH, CLOUDWATCH_LOGS, CLOUDWATCH_EVENTS, SECRETS_MANAGER, LAMBDA
+    //
+    // note interface endpoints are subject to both nominal hourly + bandwidth charges
+    // @see <https://docs.aws.amazon.com/AmazonECR/latest/userguide/vpc-endpoints.html>
 
-    this.vpc.addInterfaceEndpoint('SecretsManagerEndpoint', {
-      service: ec2.InterfaceVpcEndpointAwsService.SECRETS_MANAGER,
-    })
-
-    /*
-    consider other potentially useful services to access via VPC interface endpoints:
-    @see <https://docs.aws.amazon.com/AmazonECR/latest/userguide/vpc-endpoints.html>
-
-    ec2.InterfaceVpcEndpointAwsService.EC2
-    ec2.InterfaceVpcEndpointAwsService.CLOUDWATCH
-    ec2.InterfaceVpcEndpointAwsService.CLOUDWATCH_LOGS
-    ec2.InterfaceVpcEndpointAwsService.CLOUDWATCH_EVENTS
-    ec2.InterfaceVpcEndpointAwsService.SECRETS_MANAGER
-    ec2.InterfaceVpcEndpointAwsService.LAMBDA
-    */
+    if (this.isProduction()) {
+      this.interfaceEndpoints = {
+        ECR_DOCKER: this.vpc.addInterfaceEndpoint('EcrDockerEndpoint', {
+          service: ec2.InterfaceVpcEndpointAwsService.ECR_DOCKER,
+        }),
+        ECR: this.vpc.addInterfaceEndpoint('EcrDockerEndpoint', {
+          service: ec2.InterfaceVpcEndpointAwsService.ECR_DOCKER,
+        }),
+        SECRETS_MANAGER: this.vpc.addInterfaceEndpoint('SecretsManagerEndpoint', {
+          service: ec2.InterfaceVpcEndpointAwsService.SECRETS_MANAGER,
+        }),
+      }
+    }
 
     this.roles = {
       ec2: new iam.Role(this, 'Ec2Role', {
@@ -92,11 +97,11 @@ export class CoreStack extends FxBaseStack {
     new cdk.CfnOutput(this, 'VPCId', {
       value: this.vpc.vpcId,
       description: `VPC ID - ${this.getProjectTag()}`,
-      exportName: `${this.getProjectTag()}CoreStack:vpcId`,
+      exportName: `${this.getProjectTag()}CoreStack${this.getDeployStageTag()}:vpcId`,
     })
   }
 
-  private generateSubnetConfigurations(
+  private buildSubnetConfigurations(
     count: number,
     status: 'active' | 'reserved',
     subnetType: ec2.SubnetType,
