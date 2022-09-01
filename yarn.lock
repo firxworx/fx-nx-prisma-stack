@@ -3004,10 +3004,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@prisma/prisma-fmt-wasm@npm:4.1.0-12.09f9659a3d73d5ed2aac8298e2856b8be910cd66":
-  version: 4.1.0-12.09f9659a3d73d5ed2aac8298e2856b8be910cd66
-  resolution: "@prisma/prisma-fmt-wasm@npm:4.1.0-12.09f9659a3d73d5ed2aac8298e2856b8be910cd66"
-  checksum: f3226582bada9f3951ae2501305210abf952274dc636948db92dbc4e490519e59100a9aa6a22b839138856e3b24d33960a38b67852284442a6eaed9fbfb44732
+"@prisma/prisma-fmt-wasm@npm:4.2.0-33.2920a97877e12e055c1333079b8d19cee7f33826":
+  version: 4.2.0-33.2920a97877e12e055c1333079b8d19cee7f33826
+  resolution: "@prisma/prisma-fmt-wasm@npm:4.2.0-33.2920a97877e12e055c1333079b8d19cee7f33826"
+  checksum: 26bd36b1d5292099af6dcef6c914fa189ca2198daf36c999cedb612a50881c1c94c2c1ca86f01188c0d496c16565fcdee062387b705ae66051dc60249ad37b06
   languageName: node
   linkType: hard
 
@@ -8411,8 +8411,8 @@ __metadata:
     pino-http: ^8.2.0
     pino-pretty: ^9.0.0
     postcss: 8.4.16
-    prettier: ^2.6.2
-    prettier-plugin-prisma: ^4.1.0
+    prettier: ^2.7.1
+    prettier-plugin-prisma: ^4.2.0
     prisma: ^4.1.1
     react: 18.2.0
     react-async-hook: ^4.0.0
@@ -13200,18 +13200,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier-plugin-prisma@npm:^4.1.0":
-  version: 4.1.0
-  resolution: "prettier-plugin-prisma@npm:4.1.0"
+"prettier-plugin-prisma@npm:^4.2.0":
+  version: 4.2.0
+  resolution: "prettier-plugin-prisma@npm:4.2.0"
   dependencies:
-    "@prisma/prisma-fmt-wasm": 4.1.0-12.09f9659a3d73d5ed2aac8298e2856b8be910cd66
+    "@prisma/prisma-fmt-wasm": 4.2.0-33.2920a97877e12e055c1333079b8d19cee7f33826
   peerDependencies:
     prettier: ">=2"
-  checksum: 8496f40613f97b5e1edd64611855b2cdc2b4551c1e3a698024475a12017f39579f28bda1f68bed99675de899e0a8cef52b4030f80c7f9f1fb3ea681773a1e03b
+  checksum: 5bdd467db703fb777dca467b9badd4324964700162e278791daef855c8388223d1caa7522acd367f7fb0dcc107f567c3da0115b912ef2c600415e11172fbc4af
   languageName: node
   linkType: hard
 
-"prettier@npm:^2.6.2":
+"prettier@npm:^2.7.1":
   version: 2.7.1
   resolution: "prettier@npm:2.7.1"
   bin:
