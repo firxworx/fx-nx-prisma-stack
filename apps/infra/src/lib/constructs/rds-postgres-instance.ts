@@ -3,7 +3,9 @@
 import { CfnOutput, Duration, RemovalPolicy } from 'aws-cdk-lib'
 import * as ec2 from 'aws-cdk-lib/aws-ec2'
 import * as rds from 'aws-cdk-lib/aws-rds'
+import * as logs from 'aws-cdk-lib/aws-logs'
 import * as secretsManager from 'aws-cdk-lib/aws-secretsmanager'
+// import * as cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
 
 import { FxBaseConstruct, type FxBaseConstructProps } from '../abstract/fx-base.abstract.construct'
 import { FxBaseStack } from '../abstract/fx-base.abstract.stack'
@@ -27,6 +29,8 @@ export interface RdsPostgresInstanceProps extends FxBaseConstructProps {
   multiAz?: boolean
   allocatedStorage?: number
   backupRetention?: Duration
+  logsRetention?: logs.RetentionDays
+  deletionProtection?: boolean
 }
 
 /**
@@ -70,6 +74,8 @@ export class RdsPostgresInstance extends FxBaseConstruct {
         // ... for example:
         // 'rds.logical_replication': '1',
         // wal_sender_timeout: '0',
+        // ...
+        // shared_preload_libraries: 'auto_explain,pg_stat_statements,pg_hint_plan,pgaudit',
       },
     })
 
@@ -81,11 +87,23 @@ export class RdsPostgresInstance extends FxBaseConstruct {
       },
       securityGroups: props.securityGroups,
       multiAz: props.multiAz ?? parent.isProduction(),
+      // storageType: rds.StorageType...
 
-      deletionProtection: false, // this.isProduction(),
+      deletionProtection: props.deletionProtection,
       removalPolicy: parent.isProduction() ? RemovalPolicy.SNAPSHOT : RemovalPolicy.DESTROY,
-      deleteAutomatedBackups: !parent.isProduction(),
+
       backupRetention: props.backupRetention ?? (parent.isProduction() ? Duration.days(7) : Duration.days(0)),
+      deleteAutomatedBackups: !parent.isProduction(),
+
+      // enablePerformanceInsights: true,
+      // monitoringInterval: Duration.minutes(1),
+      // performanceInsightEncryptionKey: ...
+      // performanceInsightRetention: ...
+
+      // cloudwatch logs configuration (note: default logs retention is infinity / never expires)
+      cloudwatchLogsExports: parent.isProductionLike() ? ['audit'] : undefined,
+      cloudwatchLogsRetention:
+        props.logsRetention ?? (parent.isProduction() ? logs.RetentionDays.ONE_MONTH : logs.RetentionDays.ONE_WEEK),
 
       databaseName,
       instanceIdentifier: props.instanceIdentifier ?? this.getProjectTag(),
@@ -111,6 +129,21 @@ export class RdsPostgresInstance extends FxBaseConstruct {
       securityGroups: props.securityGroups,
     })
 
+    // @future - add option to also build a read replica instance
+    // this.readReplica = new rds.DatabaseInstanceReadReplica(this, 'ReadReplica', {
+    //   instanceIdentifier: `${this.getProjectTag()}-${this.getDeployStageTag()}-read`,
+    //   instanceType: ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.MICRO),
+    //   sourceDatabaseInstance: this.instance,
+    //   vpc: props.vpc,
+    //   vpcSubnets: {
+    //     subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
+    //   },
+    //   deleteAutomatedBackups: true,
+    //   removalPolicy: RemovalPolicy.DESTROY,
+    //   deletionProtection: false,
+    // })
+    // this.readReplica.connections.allowDefaultPortFromAnyIpv4()
+
     this.printOutputs()
   }
 
@@ -135,11 +168,53 @@ export class RdsPostgresInstance extends FxBaseConstruct {
     //   stringValue: secret.secretArn,
     // })
 
+    // @future - password rotation
+    // this.instance.addRotationSingleUser()
+
     return {
       secret,
       // ssm: { secretArn },
     }
   }
+
+  // @future add cloudwatch metrics + alarms with notification topic
+  //
+  // private buildCloudWatchResources() {
+  //   // create sns resource (aws-sns)
+  //   const topic = new sns.Topic(this, 'SnsTopic', {
+  //     displayName: 'cdk-rds-postgres-sns',
+  //     // topicName: 'cdk-rds-postgres'
+  //   })
+
+  //   // subscribe to sns topic (aws-sns-subscriptions)
+  //   topic.addSubscription(new subs.EmailSubscription('email@example.com'))
+
+  //   // create rds cloudwatch cpu metric
+  //   const cpuMetric = this.instance.metric('CPUUtilization')
+
+  //   // create cpu cloudwatch alarm
+  //   const cpuAlarm = new cloudwatch.Alarm(this, 'CpuAlarm', {
+  //     evaluationPeriods: 2,
+  //     metric: cpuMetric,
+  //     threshold: 75,
+  //   })
+
+  //   // add rds cpu alarm to sns topic (aws-cloudwatch-actions)
+  //   cpuAlarm.addAlarmAction(new cloudwatchActions.SnsAction(topic))
+
+  //   // create rds cloudwatch iopsWrite metric
+  //   const iopsMetric = this.instance.metric('WriteIOPS')
+
+  //   // create iops cloudwatch alarm
+  //   const iopsAlarm = new cloudwatch.Alarm(this, 'IopsAlarm', {
+  //     evaluationPeriods: 2,
+  //     metric: iopsMetric,
+  //     threshold: 7000,
+  //   })
+
+  //   // add rds iops alarm to sns topic
+  //   iopsAlarm.addAlarmAction(new cloudwatchActions.SnsAction(topic))
+  // }
 
   private printOutputs(): void {}
 }

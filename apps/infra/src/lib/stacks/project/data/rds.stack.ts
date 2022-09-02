@@ -26,7 +26,6 @@ export class RdsStack extends FxBaseStack {
 
     const rdsPostgresInstance = new RdsPostgresInstance(this, 'Db', {
       vpc,
-      ...this.getBaseProps(),
     })
 
     const { instance, proxy, parameterGroup, credentials } = rdsPostgresInstance
