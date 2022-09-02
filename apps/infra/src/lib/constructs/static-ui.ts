@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import * as path from 'path'
 import { CfnOutput, RemovalPolicy } from 'aws-cdk-lib'
 
 import * as iam from 'aws-cdk-lib/aws-iam'
@@ -14,18 +15,20 @@ import { FxBaseConstruct, FxBaseConstructProps } from '../abstract/fx-base.abstr
 import { FxBaseStack } from '../abstract/fx-base.abstract.stack'
 
 export interface StaticUiProps extends FxBaseConstructProps {
-  /**
-   * Provide the URI details for the TLS certificate and CloudFront to host the client UI at.
-   * If the `subdomain` prop is not provided, the deployment is assumed to be for the apex domain.
-   */
-  uri: {
-    subdomain?: string
-    domain: string
-  }
+  // /**
+  //  * Provide the URI details for the TLS certificate and CloudFront to host the client UI at.
+  //  * If the `subdomain` prop is not provided, the deployment is assumed to be for the apex domain.
+  //  */
+  // uri: {
+  //   subdomain?: string
+  //   domain: string
+  // }
+
+  uri: string
 
   /**
-   * Configure CloudFront to reverse-proxy requests to the /api/* path to a back-end
-   * API by providing optional details via this prop.
+   * Optionally configure CloudFront to reverse-proxy requests to the /api/* path to the back-end
+   * API at the specified uri.
    */
   api?: {
     uri: string
@@ -43,6 +46,9 @@ export interface StaticUiProps extends FxBaseConstructProps {
      */
     isSinglePageApp?: boolean
     disableCloudFrontCacheInDevelopment?: boolean
+    cloudFront?: {
+      priceClass?: cloudfront.PriceClass
+    }
   }
 }
 
@@ -90,7 +96,7 @@ export class StaticUi extends FxBaseConstruct {
   constructor(parent: FxBaseStack, id: string, props: StaticUiProps) {
     super(parent, id, props)
 
-    this.uri = props.uri.subdomain ? `${props.uri.subdomain}.${props.uri.domain}` : props.uri.domain
+    this.uri = props.uri // @temp props.uri.subdomain ? `${props.uri.subdomain}.${props.uri.domain}` : props.uri.domain
     this.api = props.api
       ? {
           uri: props.api.uri,
@@ -98,14 +104,15 @@ export class StaticUi extends FxBaseConstruct {
       : undefined
 
     // @todo establish convention of project tag
-    this.zone = route53.HostedZone.fromLookup(this, 'Zone', { domainName: props.uri.domain })
+    this.zone = route53.HostedZone.fromLookup(this, 'Zone', { domainName: props.uri })
 
     const cloudfrontOAI = new cloudfront.OriginAccessIdentity(this, 'CloudFrontOAI', {
-      comment: `OAI for ${this.getProjectTag()} ${this.getDeployStageTag()} (${this.uri})`,
+      comment: `[${this.getProjectTag()}]-${this.getDeployStageTag()} ORI for ${this.uri}`,
     })
 
+    // s3 bucket for site assets - note the bucket name should match uri in s3 hosting scenarios
     const assetsBucket = new s3.Bucket(this, 'AssetsBucket', {
-      bucketName: this.uri, // the bucket name should match uri in s3 hosting scenarios
+      bucketName: this.uri,
       publicReadAccess: false,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       removalPolicy: parent.isProduction() ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
@@ -138,13 +145,13 @@ export class StaticUi extends FxBaseConstruct {
     this.certificate = new acm.DnsValidatedCertificate(this, 'UiCertificate', {
       domainName: this.uri,
       hostedZone: this.zone,
-      region: 'us-east-1', // us-east-1 is required by CloudFront
+      region: 'us-east-1', // CloudFront requires us-east-1 region
     })
 
     // this.certificate = acm.Certificate.fromCertificateArn(
     //   this,
     //   'Certificate',
-    //   getWildcardDeployCertificateArn(deployStage),
+    //   getWildcardDeployCertificateArn(this.getDeployStage()),
     // )
 
     const distribution = new cloudfront.Distribution(this, 'UiDistribution', {
@@ -152,6 +159,7 @@ export class StaticUi extends FxBaseConstruct {
       defaultRootObject: 'index.html',
       domainNames: [this.uri],
       minimumProtocolVersion: cloudfront.SecurityPolicyProtocol.TLS_V1_2_2021,
+      priceClass: props.options?.cloudFront?.priceClass ?? cloudfront.PriceClass.PRICE_CLASS_100,
 
       defaultBehavior: {
         origin: new cloudfrontOrigins.S3Origin(assetsBucket, { originAccessIdentity: cloudfrontOAI }),
@@ -159,7 +167,7 @@ export class StaticUi extends FxBaseConstruct {
         allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         cachePolicy:
-          parent.isDevelopment() && !!props.options?.disableCloudFrontCacheInDevelopment
+          parent.isDevelopment() && !props.options?.disableCloudFrontCacheInDevelopment
             ? cloudfront.CachePolicy.CACHING_DISABLED
             : cloudfront.CachePolicy.CACHING_OPTIMIZED,
       },
@@ -200,7 +208,7 @@ export class StaticUi extends FxBaseConstruct {
     })
 
     this.deployment = new s3Deployment.BucketDeployment(this, 'S3DeployWithInvalidation', {
-      sources: [s3Deployment.Source.asset('./site-contents')],
+      sources: [s3Deployment.Source.asset(path.join(process.cwd(), 'dist/apps/ui/exported'))],
       destinationBucket: this.buckets.assets,
       distribution: this.cloudfront.distribution,
       distributionPaths: ['/*'],
@@ -210,9 +218,9 @@ export class StaticUi extends FxBaseConstruct {
   }
 
   private printOutputs(): void {
-    new CfnOutput(this, 'SiteUrl', { value: `https://${this.uri}` })
-    new CfnOutput(this, 'AssetsBucket', { value: this.buckets.assets.bucketName })
-    new CfnOutput(this, 'LogsBucket', { value: this.buckets.logs.bucketName })
+    new CfnOutput(this, 'DeployUrl', { value: `https://${this.uri}` })
+    new CfnOutput(this, 'S3AssetsBucket', { value: this.buckets.assets.bucketName })
+    new CfnOutput(this, 'S3LogsBucket', { value: this.buckets.logs.bucketName })
     new CfnOutput(this, 'CertificateArn', { value: this.certificate.certificateArn })
     new CfnOutput(this, 'CloudFrontDistributionId', { value: this.cloudfront.distribution.distributionId })
   }

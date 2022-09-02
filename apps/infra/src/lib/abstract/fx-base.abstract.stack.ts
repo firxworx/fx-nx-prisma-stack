@@ -28,7 +28,7 @@ export abstract class FxBaseStack extends cdk.Stack {
       ...props.meta,
     }
 
-    this._applyTags()
+    this.applyTags()
   }
 
   // @future could refactor to introduce a TS mixin to DRY these common methods between abstract construct + stack
@@ -100,8 +100,10 @@ export abstract class FxBaseStack extends cdk.Stack {
 
   /**
    * Apply a standard set of AWS resource tags to the stack.
+   *
+   * @see {@link https://docs.aws.amazon.com/general/latest/gr/aws_tagging.html#tag-categories}
    */
-  private _applyTags(): void {
+  private applyTags(): void {
     const prefix = 'Fx' // namespace prefix for each AWS resource tag
 
     const tagTuples = [
