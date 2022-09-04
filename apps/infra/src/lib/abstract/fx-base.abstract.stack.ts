@@ -50,7 +50,7 @@ export abstract class FxBaseStack extends cdk.Stack {
    * unless overridden by the `useNonProductionDefaults` deploy option.
    */
   isProduction(): boolean {
-    if (!this.deploy.options?.useNonProductionDefaults) {
+    if (this.deploy.options?.useNonProductionDefaults) {
       return false
     }
 
@@ -69,7 +69,7 @@ export abstract class FxBaseStack extends cdk.Stack {
    * unless overridden by the `useNonProductionDefaults` deploy option.
    */
   isProductionLike(): boolean {
-    if (!this.deploy.options?.useNonProductionDefaults) {
+    if (this.deploy.options?.useNonProductionDefaults) {
       return false
     }
 
