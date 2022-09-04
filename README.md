@@ -69,6 +69,44 @@ The build outputs to the `dist/` folder.
 
 The nx config `project.json` for each of the `api` + `ui` apps includes the `generatePackageJson: true` flag to produce an app-specific `package.json` in the corresponding app dist folders.
 
+## Infra / Deployment with AWS CDK
+
+The 'infra' app (`apps/infra`) is an Infrastructure-as-Code (IaC) solution implemented in AWS CDK for the deployment of this project to AWS.
+
+The CDK project is integrated with the Nx project monorepo so it must be built prior to running any cdk commands:
+
+```sh
+yarn build:infra
+```
+
+You can then run cdk commands directly, via `npx`, or via the convenience script targets in `package.json`:
+
+- `yarn cdk:synth [STACK_NAME]`
+- `yarn cdk:deploy [STACK_NAME]`
+- `yarn cdk:destroy [STACK_NAME]`
+
+After deploying changes, you may need to invalidate the CloudFront cache to see the latest. Be sure to rule out cache issues before investing time in debugging issues with the app itself.
+
+```sh
+aws cloudfront create-invalidation --distribution-id [CLOUDFRONT_DISTRIBUTION_ID]
+```
+
+Refer to the docs for flags that can add more nuance and specificity to the cache invalidation request. For example, you may only wish to invalidate the cache for certain paths:
+
+```sh
+aws cloudfront create-invalidation --distribution-id [CLOUDFRONT_DISTRIBUTION_ID] --paths "/example/*"
+```
+
+### Infra Prerequisites
+
+You must have a valid AWS account and the AWS CLI installed and configured with a profile for your AWS account.
+
+> If you have multiple AWS account profiles: add the `--profile PROFILE_NAME` flag to any `cdk` commands (similar to the aws cli) to specify a different profile than your default.
+
+You must also ensure CDK has been bootstrapped in both your preferred AWS region (e.g. ca-central-1) and us-east-1. The us-east-1 region is required for certain resources including CloudFront, Edge Lambdas, etc.
+
+Refer to the docs for CDK to learn how to bootstrap an AWS environment.
+
 ## Nx Workspace
 
 Nx supports many plugins that add tools and capabilities for developing different types of applications. Capabilities include generating applications, libraries, etc as well as the devtools to test, and build projects as well.
