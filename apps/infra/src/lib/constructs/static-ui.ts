@@ -134,13 +134,28 @@ export class StaticUi extends FxBaseConstruct {
       logs: logsBucket,
     }
 
-    const policyStatement = new iam.PolicyStatement({
+    const cloudfrontPolicyStatement = new iam.PolicyStatement({
       actions: ['s3:GetObject'],
       resources: [assetsBucket.arnForObjects('*')],
       principals: [new iam.CanonicalUserPrincipal(cloudfrontOAI.cloudFrontOriginAccessIdentityS3CanonicalUserId)],
     })
 
-    this.buckets.assets.addToResourcePolicy(policyStatement)
+    this.buckets.assets.addToResourcePolicy(cloudfrontPolicyStatement)
+
+    const httpsOnlyPolicyStatement = new iam.PolicyStatement({
+      sid: 'HttpsOnly',
+      resources: [`${this.buckets.assets.bucketArn}/*`],
+      actions: ['*'],
+      principals: [new iam.AnyPrincipal()],
+      effect: iam.Effect.DENY,
+      conditions: {
+        Bool: {
+          'aws:SecureTransport': 'false',
+        },
+      },
+    })
+
+    this.buckets.assets.addToResourcePolicy(httpsOnlyPolicyStatement)
 
     this.certificate = new acm.DnsValidatedCertificate(this, 'UiCertificate', {
       domainName: this.uri,
