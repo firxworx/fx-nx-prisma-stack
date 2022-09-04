@@ -13,6 +13,7 @@ import * as targets from 'aws-cdk-lib/aws-route53-targets'
 import * as cloudfrontOrigins from 'aws-cdk-lib/aws-cloudfront-origins'
 import { FxBaseConstruct, FxBaseConstructProps } from '../abstract/fx-base.abstract.construct'
 import { FxBaseStack } from '../abstract/fx-base.abstract.stack'
+import { EdgeRewriteProxy } from './edge-lambda/edge-rewrite-proxy'
 
 export interface StaticUiProps extends FxBaseConstructProps {
   // /**
@@ -169,6 +170,8 @@ export class StaticUi extends FxBaseConstruct {
     //   getWildcardDeployCertificateArn(this.getDeployStage()),
     // )
 
+    const rewriteProxyEdgeLambda = new EdgeRewriteProxy(parent, 'EdgeRewrite', {})
+
     const distribution = new cloudfront.Distribution(this, 'UiDistribution', {
       certificate: this.certificate,
       defaultRootObject: 'index.html',
@@ -185,6 +188,12 @@ export class StaticUi extends FxBaseConstruct {
           parent.isDevelopment() && !props.options?.disableCloudFrontCacheInDevelopment
             ? cloudfront.CachePolicy.CACHING_DISABLED
             : cloudfront.CachePolicy.CACHING_OPTIMIZED,
+        edgeLambdas: [
+          {
+            functionVersion: rewriteProxyEdgeLambda.lambda.currentVersion,
+            eventType: cloudfront.LambdaEdgeEventType.ORIGIN_REQUEST,
+          },
+        ],
       },
 
       ...(!!props.api ? { additionalBehaviors: this.getDistributionAdditionalBehaviorsForApi() } : {}),
