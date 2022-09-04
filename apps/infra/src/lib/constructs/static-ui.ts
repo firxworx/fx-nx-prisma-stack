@@ -135,10 +135,11 @@ export class StaticUi extends FxBaseConstruct {
       logs: logsBucket,
     }
 
+    // this.buckets.logs.grantRead(cloudfrontOAI.grantPrincipal)
     const cloudfrontPolicyStatement = new iam.PolicyStatement({
       actions: ['s3:GetObject'],
       resources: [assetsBucket.arnForObjects('*')],
-      principals: [new iam.CanonicalUserPrincipal(cloudfrontOAI.cloudFrontOriginAccessIdentityS3CanonicalUserId)],
+      principals: [new iam.CanonicalUserPrincipal(cloudfrontOAI.cloudFrontOriginAccessIdentityS3CanonicalUserId)], // [cloudfrontOAI.grantPrincipal]
     })
 
     this.buckets.assets.addToResourcePolicy(cloudfrontPolicyStatement)
@@ -173,17 +174,24 @@ export class StaticUi extends FxBaseConstruct {
     const rewriteProxyEdgeLambda = new EdgeRewriteProxy(parent, 'EdgeRewrite', {})
 
     const distribution = new cloudfront.Distribution(this, 'UiDistribution', {
+      // warning: do not set defaultRootObject when using the rewrite proxy edge lambda and/or /api/* behaviors
+
       certificate: this.certificate,
-      defaultRootObject: 'index.html',
       domainNames: [this.uri],
       minimumProtocolVersion: cloudfront.SecurityPolicyProtocol.TLS_V1_2_2021,
       priceClass: props.options?.cloudFront?.priceClass ?? cloudfront.PriceClass.PRICE_CLASS_100,
+
+      enableLogging: true,
+      logBucket: this.buckets.logs,
+      logFilePrefix: `${this.getProjectTag()}-${this.getDeployStageTag()}-`,
+      logIncludesCookies: true,
 
       defaultBehavior: {
         origin: new cloudfrontOrigins.S3Origin(assetsBucket, { originAccessIdentity: cloudfrontOAI }),
         compress: true,
         allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
-        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER, // all query strings, headers, etc vs. CORS_CUSTOM_ORIGIN
+        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS, // vs. HTTPS_ONLY
         cachePolicy:
           parent.isDevelopment() && !props.options?.disableCloudFrontCacheInDevelopment
             ? cloudfront.CachePolicy.CACHING_DISABLED
@@ -236,6 +244,9 @@ export class StaticUi extends FxBaseConstruct {
       destinationBucket: this.buckets.assets,
       distribution: this.cloudfront.distribution,
       distributionPaths: ['/*'],
+
+      // @see https://github.com/aws/aws-cdk/tree/main/packages/%40aws-cdk/aws-s3-deployment#retain-on-delete
+      retainOnDelete: !parent.isProduction(),
     })
 
     this.printOutputs()
