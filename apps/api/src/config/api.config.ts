@@ -7,11 +7,17 @@ const requiredEnvsKeyMap: Record<string, keyof ApiConfig['options']> = {
   API_OPT_CSRF_PROTECTION: 'csrfProtection',
 }
 
+/**
+ * Support and conditionally remove any leading slash from the given base path: it is frequently
+ * required in infra/IaC scenarios however must be omitted when specifying the global prefix for nestjs.
+ */
+const normalizeBasePath = (input: string) => input.replace(/^\/+/, '')
+
 export default registerAs('api', (): ApiConfig => {
   return {
     origin: process.env.ORIGIN || 'http://localhost:3333',
     port: process.env.PORT ? Number(process.env.PORT) : 3333,
-    globalPrefix: `${process.env.BASE_PATH ?? 'api'}/${process.env.API_VERSION ?? 'v1'}`,
+    globalPrefix: `${normalizeBasePath(String(process.env.BASE_PATH)) ?? 'api'}/${process.env.API_VERSION ?? 'v1'}`,
     meta: {
       projectTag: process.env.API_PROJECT_TAG ?? 'fx',
     },
