@@ -94,10 +94,10 @@ export class CoreStack extends FxBaseStack {
   }
 
   private printOutputs() {
-    new cdk.CfnOutput(this, 'VPCId', {
+    new cdk.CfnOutput(this, 'VpcId', {
       value: this.vpc.vpcId,
-      description: `VPC ID - ${this.getProjectTag()}`,
-      exportName: `${this.getProjectTag()}CoreStack${this.getDeployStageTag()}:vpcId`,
+      description: `[${this.getProjectTag()}] [${this.getDeployStageTag()}] VPC ID`,
+      exportName: `${this.getProjectTag()}:${this.getDeployStageTag()}:${this.stackName}:vpcId`,
     })
   }
 

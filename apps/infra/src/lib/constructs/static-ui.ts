@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import * as path from 'path'
-import { CfnOutput, RemovalPolicy } from 'aws-cdk-lib'
+import { CfnOutput, Duration, RemovalPolicy } from 'aws-cdk-lib'
 
 import * as iam from 'aws-cdk-lib/aws-iam'
 import * as route53 from 'aws-cdk-lib/aws-route53'
@@ -107,6 +107,8 @@ export class StaticUi extends FxBaseConstruct {
     // @todo establish convention of project tag
     this.zone = route53.HostedZone.fromLookup(this, 'Zone', { domainName: props.uri })
 
+    // there is an updated means for cloudfront+s3 - origin access control however it is not supported in cdk yet
+    // @see https://github.com/aws/aws-cdk/issues/21771
     const cloudfrontOAI = new cloudfront.OriginAccessIdentity(this, 'CloudFrontOAI', {
       comment: `[${this.getProjectTag()}]-${this.getDeployStageTag()} ORI for ${this.uri}`,
     })
@@ -124,6 +126,7 @@ export class StaticUi extends FxBaseConstruct {
     })
 
     const logsBucket = new s3.Bucket(this, 'LogsBucket', {
+      accessControl: s3.BucketAccessControl.PRIVATE,
       publicReadAccess: false,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       removalPolicy: parent.isProduction() ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
@@ -135,7 +138,7 @@ export class StaticUi extends FxBaseConstruct {
       logs: logsBucket,
     }
 
-    // this.buckets.logs.grantRead(cloudfrontOAI.grantPrincipal)
+    // this.buckets.assets.grantRead(cloudfrontOAI.grantPrincipal)
     const cloudfrontPolicyStatement = new iam.PolicyStatement({
       actions: ['s3:GetObject'],
       resources: [assetsBucket.arnForObjects('*')],
@@ -159,38 +162,32 @@ export class StaticUi extends FxBaseConstruct {
 
     this.buckets.assets.addToResourcePolicy(httpsOnlyPolicyStatement)
 
-    this.certificate = new acm.DnsValidatedCertificate(this, 'UiCertificate', {
+    this.certificate = new acm.DnsValidatedCertificate(this, 'Certificate', {
       domainName: this.uri,
       hostedZone: this.zone,
       region: 'us-east-1', // CloudFront requires us-east-1 region
     })
 
-    // this.certificate = acm.Certificate.fromCertificateArn(
-    //   this,
-    //   'Certificate',
-    //   getWildcardDeployCertificateArn(this.getDeployStage()),
-    // )
-
     const rewriteProxyEdgeLambda = new EdgeRewriteProxy(parent, 'EdgeRewrite', {})
 
-    const distribution = new cloudfront.Distribution(this, 'UiDistribution', {
+    const distribution = new cloudfront.Distribution(this, 'Distribution', {
       // warning: do not set defaultRootObject when using the rewrite proxy edge lambda and/or /api/* behaviors
+      // warning: be careful setting a defaultBehavior.originRequestPolicy as it can cause signatures to not match vs s3
 
       certificate: this.certificate,
       domainNames: [this.uri],
       minimumProtocolVersion: cloudfront.SecurityPolicyProtocol.TLS_V1_2_2021,
-      priceClass: props.options?.cloudFront?.priceClass ?? cloudfront.PriceClass.PRICE_CLASS_100,
+      priceClass: props.options?.cloudFront?.priceClass ?? cloudfront.PriceClass.PRICE_CLASS_100, // 100 = US, CA, EU, IS
 
       enableLogging: true,
-      logBucket: this.buckets.logs,
-      logFilePrefix: `${this.getProjectTag()}-${this.getDeployStageTag()}-`,
       logIncludesCookies: true,
+      // logBucket: this.buckets.logs,
+      // logFilePrefix: `${this.getProjectTag()}-${this.getDeployStageTag()}-edge/`,
 
       defaultBehavior: {
         origin: new cloudfrontOrigins.S3Origin(assetsBucket, { originAccessIdentity: cloudfrontOAI }),
         compress: true,
         allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
-        originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER, // all query strings, headers, etc vs. CORS_CUSTOM_ORIGIN
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS, // vs. HTTPS_ONLY
         cachePolicy:
           parent.isDevelopment() && !props.options?.disableCloudFrontCacheInDevelopment
@@ -204,6 +201,7 @@ export class StaticUi extends FxBaseConstruct {
         ],
       },
 
+      // conditionally include additional behaviors for `api/*` route that forwards requests to back-end api
       ...(!!props.api ? { additionalBehaviors: this.getDistributionAdditionalBehaviorsForApi() } : {}),
 
       // redirect unknown routes back to index.html if configuration is for an SPA
@@ -213,20 +211,20 @@ export class StaticUi extends FxBaseConstruct {
               httpStatus,
               responseHttpStatus: 200,
               responsePagePath: '/index.html',
+              ttl: Duration.minutes(5),
             })),
           }
-        : {}),
-
-      // example of error response where there may be a dedicated error page
-      // errorResponses: [
-      //   {
-      //     httpStatus: 403,
-      //     responseHttpStatus: 403,
-      //     responsePagePath: '/error.html',
-      //     ttl: Duration.minutes(30),
-      //   },
-      // ],
+        : {
+            errorResponses: [404, 500].map((httpStatus) => ({
+              httpStatus,
+              responseHttpStatus: httpStatus,
+              responsePagePath: `/${httpStatus}/index.html`,
+              ttl: Duration.minutes(5),
+            })),
+          }),
     })
+
+    // this.buckets.logs.grantPutAcl(...)
 
     this.cloudfront = {
       oai: cloudfrontOAI,
@@ -261,7 +259,7 @@ export class StaticUi extends FxBaseConstruct {
   }
 
   private getDistributionAdditionalBehaviorsForApi() {
-    if (!this.api) {
+    if (!this.api || !this.api.uri) {
       throw new Error(
         'Precondition failed: getDistributionAdditionalBehaviorsForApi() requires a valid api prop to be defined',
       )
@@ -271,23 +269,24 @@ export class StaticUi extends FxBaseConstruct {
       'api/*': {
         // `${httpApi.httpApiId}.execute-api.${this.region}.${this.urlSuffix}`
         origin: new cloudfrontOrigins.HttpOrigin(this.api.uri, {
-          originPath: `/${this.getProjectTag()}`, // an ALB should have /projectTag/api/* per project convention
+          // ALB will receive requests at path /{projectTag}/api/*
+          originPath: `/${this.getProjectTag()}`,
           protocolPolicy: cloudfront.OriginProtocolPolicy.HTTPS_ONLY,
           httpsPort: 443,
-          // @todo security customHeaders for ALB (if going with ALB) -- secret header to identify requests from cloudfront
+          // @todo for security - customHeaders: ... (secret header to identify requests from cloudfront)
           // keepAliveTimeout
         }),
         allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
-        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.HTTPS_ONLY, // vs. REDIRECT_TO_HTTPS,
-        cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED, // cloudfront should not cache api routes
+        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.HTTPS_ONLY,
         originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER, // include all query strings, headers, etc
+        cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED, // do not cache api paths w/ cloudfront
 
-        // example of a more specific cache policy:
+        // examples of more specific cache + origin request policies:
+        //
         // cachePolicy: new cloudfront.CachePolicy(this, 'CachePolicy', {
         //   headerBehavior: cloudfront.CacheHeaderBehavior.allowList('Authorization'),
         // }),
-
-        // example of a more specific origin request policy with specific cookie behavior:
+        //
         // originRequestPolicy: new cloudfront.OriginRequestPolicy(this, 'OriginRequestPolicy', {
         //   cookieBehavior: cloudfront.OriginRequestCookieBehavior.allowList(
         //     'CloudFront-Policy',
