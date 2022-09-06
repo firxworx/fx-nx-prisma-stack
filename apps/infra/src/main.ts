@@ -8,6 +8,7 @@ import { CoreStack } from './lib/stacks/core/core.stack'
 import { RdsStack } from './lib/stacks/project/data/rds.stack'
 import { EcrStack } from './lib/stacks/project/images/ecr.stack'
 import { ProjectStack } from './lib/stacks/project/project.stack'
+import { EcsStack } from './lib/stacks/core/ecs.stack'
 
 const account = process.env.CDK_DEPLOY_ACCOUNT || process.env.CDK_DEFAULT_ACCOUNT
 const region = process.env.CDK_DEPLOY_REGION || process.env.CDK_DEFAULT_REGION
@@ -51,6 +52,13 @@ const ecrStackProd = new EcrStack(app, 'EcrStackProd', {
   ...getBaseProps(DeployStage.PRODUCTION, PROJECT_DOMAIN),
 })
 
+const ecsStackProd = new EcsStack(app, 'EcsStackProd', {
+  env,
+  description: `[${PROJECT_TAG}] - ECS Container Stack`,
+  vpc: coreStackProd.vpc,
+  ...getBaseProps(DeployStage.PRODUCTION, PROJECT_DOMAIN),
+})
+
 const rdsStackProd = new RdsStack(app, 'RdsStackProd', {
   env,
   description: `[${PROJECT_TAG}] - RDS Postgres Stack`,
@@ -62,9 +70,17 @@ const projectStackProd = new ProjectStack(app, 'ProjectStackProd', {
   env,
   description: `[${PROJECT_TAG}] - App/Project Stack`,
   vpc: coreStackProd.vpc,
-  // api: {
-  //   repository: ecrStackProd.repository.repositoryName
-  // }
+  cluster: ecsStackProd.cluster,
+  database: {
+    instance: rdsStackProd.instance,
+    proxy: rdsStackProd.proxy,
+    credentials: {
+      secret: rdsStackProd.credentials.secret,
+    },
+  },
+  api: {
+    repositoryName: ecrStackProd.repository.repositoryName,
+  },
   ...getBaseProps(DeployStage.PRODUCTION, PROJECT_DOMAIN),
 })
 
