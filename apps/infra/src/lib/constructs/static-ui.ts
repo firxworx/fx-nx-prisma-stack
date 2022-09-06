@@ -32,7 +32,20 @@ export interface StaticUiProps extends FxBaseConstructProps {
    * API at the specified uri.
    */
   api?: {
-    uri: string
+    /**
+     * Base path of the API at the target e.g. load balancer.
+     *
+     * The given value must have a leading slash. The project convention is to use `/{PROJECT_TAG}`.
+     *
+     * This value is used to set the CloudFront originPath for the 'api/*' route such that the target will
+     * receive forwarded requests for public-facing /api route as `{basePath}/api/*`.
+     *
+     * The convention of using a base path in this way supports sharing a load balancer across multiple projects
+     * where per convention each project has a unique project tag.
+     *
+     * The CloudFront default originPath is '/'.
+     */
+    basePath?: string
   }
 
   options?: {
@@ -100,7 +113,7 @@ export class StaticUi extends FxBaseConstruct {
     this.uri = props.uri // @temp props.uri.subdomain ? `${props.uri.subdomain}.${props.uri.domain}` : props.uri.domain
     this.api = props.api
       ? {
-          uri: props.api.uri,
+          uri: `${this.uri}${props.api.basePath}/api`,
         }
       : undefined
 
