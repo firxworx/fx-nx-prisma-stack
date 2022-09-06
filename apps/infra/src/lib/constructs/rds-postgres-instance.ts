@@ -64,7 +64,10 @@ export class RdsPostgresInstance extends FxBaseConstruct {
     this.credentials = props.secret ? { secret: props.secret } : this.generateDatabaseSecret(port, databaseName)
 
     const dbEngine = rds.DatabaseInstanceEngine.postgres({
-      version: props.version ?? rds.PostgresEngineVersion.VER_14_3,
+      // RDS proxy does not support v14 yet
+      // @see <https://aws.amazon.com/about-aws/whats-new/2022/04/amazon-rds-proxy-supports-postgresql-major-version-13/>
+      // version: props.version ?? rds.PostgresEngineVersion.VER_14_3,
+      version: props.version ?? rds.PostgresEngineVersion.VER_13_7,
     })
 
     this.parameterGroup = new rds.ParameterGroup(this, 'ParameterGroup', {
