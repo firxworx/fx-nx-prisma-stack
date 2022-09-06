@@ -10,6 +10,7 @@ import * as ec2 from 'aws-cdk-lib/aws-ec2'
 import * as ecs from 'aws-cdk-lib/aws-ecs'
 import * as ecr from 'aws-cdk-lib/aws-ecr'
 import * as ecsPatterns from 'aws-cdk-lib/aws-ecs-patterns'
+import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2'
 
 import { FxBaseConstruct, FxBaseConstructProps } from '../abstract/fx-base.abstract.construct'
 import { FxBaseStack } from '../abstract/fx-base.abstract.stack'
@@ -170,11 +171,13 @@ export class AlbFargateApi extends FxBaseConstruct {
       scaleOutCooldown: props.ecs.scaling?.taskCpuThreshold?.scaleOutCooldown ?? Duration.seconds(120),
     })
 
-    // EC2 Target groups
+    // refer to EC2 > Target groups in the AWS Console UI
     if (props.alb.targetGroup?.healthcheck) {
       this.albfs.targetGroup.configureHealthCheck({
-        path: props.alb.targetGroup?.healthcheck.path, // `${props.api.basePath}/${props.api.version}`, // leading slash required
-        healthyHttpCodes: props.alb.targetGroup?.healthcheck.healthyHttpCodes, // '200-299',
+        // e.g. path `${props.api.basePath}/${props.api.version}` -- note leading slash is required
+        path: props.alb.targetGroup?.healthcheck.path,
+        healthyHttpCodes: props.alb.targetGroup?.healthcheck.healthyHttpCodes, // e.g. '200-299',
+        protocol: elbv2.Protocol.HTTPS,
       })
     }
 
