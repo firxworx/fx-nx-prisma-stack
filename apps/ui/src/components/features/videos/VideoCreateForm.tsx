@@ -1,8 +1,9 @@
-import { useVideoCreateQuery } from 'apps/ui/src/api/videos'
-import { useIsMounted } from 'apps/ui/src/hooks/useIsMounted'
-import { VideoPlatform } from 'apps/ui/src/types/videos.types'
 import { useCallback } from 'react'
 import { FormProvider, SubmitHandler, useForm } from 'react-hook-form'
+
+import { useVideoCreateQuery } from '../../../api/videos'
+import { useIsMounted } from '../../../hooks/useIsMounted'
+import { VideoPlatform } from '../../../types/videos.types'
 import { FormButton } from '../../elements/forms/FormButton'
 import { FormInput } from '../../elements/forms/FormInput'
 
