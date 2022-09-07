@@ -14,6 +14,7 @@ import * as cloudfrontOrigins from 'aws-cdk-lib/aws-cloudfront-origins'
 import { FxBaseConstruct, FxBaseConstructProps } from '../abstract/fx-base.abstract.construct'
 import { FxBaseStack } from '../abstract/fx-base.abstract.stack'
 import { EdgeRewriteProxy } from './edge-lambda/edge-rewrite-proxy'
+// import { apexDomain } from 'aws-cdk-lib/aws-certificatemanager'
 
 export interface StaticUiProps extends FxBaseConstructProps {
   // /**
@@ -25,6 +26,8 @@ export interface StaticUiProps extends FxBaseConstructProps {
   //   domain: string
   // }
 
+  apexDomain: string
+
   uri: string
 
   /**
@@ -32,6 +35,11 @@ export interface StaticUiProps extends FxBaseConstructProps {
    * API at the specified uri.
    */
   api?: {
+    /**
+     * Domain/subdomain name of the target resource e.g. application load balancer.
+     */
+    targetDomainName: string
+
     /**
      * Base path of the API at the target e.g. load balancer.
      *
@@ -83,17 +91,6 @@ export class StaticUi extends FxBaseConstruct {
 
   readonly uri: string
 
-  readonly api:
-    | {
-        uri: string
-      }
-    | undefined
-
-  // readonly urls: {
-  //   ui: string
-  //   api: string
-  // }
-
   readonly certificate: acm.ICertificate
   readonly zone: route53.IHostedZone
   readonly record: route53.ARecord
@@ -111,11 +108,11 @@ export class StaticUi extends FxBaseConstruct {
     super(parent, id, props)
 
     this.uri = props.uri // @temp props.uri.subdomain ? `${props.uri.subdomain}.${props.uri.domain}` : props.uri.domain
-    this.api = props.api
-      ? {
-          uri: `${this.uri}${props.api.basePath}/api`,
-        }
-      : undefined
+    // this.api = props.api
+    //   ? {
+    //       uri: `${this.uri}${props.api.basePath}/api`,
+    //     }
+    //   : undefined
 
     // @todo establish convention of project tag
     this.zone = route53.HostedZone.fromLookup(this, 'Zone', { domainName: props.uri })
@@ -133,8 +130,12 @@ export class StaticUi extends FxBaseConstruct {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       removalPolicy: parent.isProduction() ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
       autoDeleteObjects: !parent.isProduction(),
+      lifecycleRules: [
+        { abortIncompleteMultipartUploadAfter: Duration.days(7) },
+        // { noncurrentVersionExpiration: Duration.days(7) },
+      ],
 
-      // to enable bucket versioning for production --
+      // to enable bucket versioning for production:
       // versioned: parent.isProduction(),
     })
 
@@ -151,11 +152,11 @@ export class StaticUi extends FxBaseConstruct {
       logs: logsBucket,
     }
 
-    // this.buckets.assets.grantRead(cloudfrontOAI.grantPrincipal)
+    // this.buckets.assets.grantRead(cloudfrontOAI.grantPrincipal) // principals: [cloudfrontOAI.grantPrincipal]
     const cloudfrontPolicyStatement = new iam.PolicyStatement({
       actions: ['s3:GetObject'],
       resources: [assetsBucket.arnForObjects('*')],
-      principals: [new iam.CanonicalUserPrincipal(cloudfrontOAI.cloudFrontOriginAccessIdentityS3CanonicalUserId)], // [cloudfrontOAI.grantPrincipal]
+      principals: [new iam.CanonicalUserPrincipal(cloudfrontOAI.cloudFrontOriginAccessIdentityS3CanonicalUserId)],
     })
 
     this.buckets.assets.addToResourcePolicy(cloudfrontPolicyStatement)
@@ -201,7 +202,10 @@ export class StaticUi extends FxBaseConstruct {
         origin: new cloudfrontOrigins.S3Origin(assetsBucket, { originAccessIdentity: cloudfrontOAI }),
         compress: true,
         allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
-        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS, // vs. HTTPS_ONLY
+        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        // cachedMethods:
+        // originRequestPolicy
+        // responseHeadersPolicy
         cachePolicy:
           parent.isDevelopment() && !props.options?.disableCloudFrontCacheInDevelopment
             ? cloudfront.CachePolicy.CACHING_DISABLED
@@ -215,7 +219,9 @@ export class StaticUi extends FxBaseConstruct {
       },
 
       // conditionally include additional behaviors for `api/*` route that forwards requests to back-end api
-      ...(!!props.api ? { additionalBehaviors: this.getDistributionAdditionalBehaviorsForApi() } : {}),
+      ...(!!props.api
+        ? { additionalBehaviors: this.getDistributionAdditionalBehaviorsForApi(props.api.targetDomainName) }
+        : {}),
 
       // redirect unknown routes back to index.html if configuration is for an SPA
       ...(!!props.options?.isSinglePageApp
@@ -255,6 +261,7 @@ export class StaticUi extends FxBaseConstruct {
       destinationBucket: this.buckets.assets,
       distribution: this.cloudfront.distribution,
       distributionPaths: ['/*'],
+      memoryLimit: parent.isProduction() ? 256 : undefined, // increase to support larger files (default 128MiB)
 
       // @see https://github.com/aws/aws-cdk/tree/main/packages/%40aws-cdk/aws-s3-deployment#retain-on-delete
       retainOnDelete: !parent.isProduction(),
@@ -271,17 +278,16 @@ export class StaticUi extends FxBaseConstruct {
     new CfnOutput(this, 'CloudFrontDistributionId', { value: this.cloudfront.distribution.distributionId })
   }
 
-  private getDistributionAdditionalBehaviorsForApi() {
-    if (!this.api || !this.api.uri) {
-      throw new Error(
-        'Precondition failed: getDistributionAdditionalBehaviorsForApi() requires a valid api prop to be defined',
-      )
-    }
-
+  /**
+   * @see https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/distribution-web-values-specify.html#DownloadDistValuesForwardCookies
+   */
+  private getDistributionAdditionalBehaviorsForApi(
+    targetDomainName: string,
+  ): Record<string, cloudfront.BehaviorOptions> {
     return {
       'api/*': {
         // `${httpApi.httpApiId}.execute-api.${this.region}.${this.urlSuffix}`
-        origin: new cloudfrontOrigins.HttpOrigin(this.api.uri, {
+        origin: new cloudfrontOrigins.HttpOrigin(targetDomainName, {
           // ALB will receive requests at path /{projectTag}/api/*
           originPath: `/${this.getProjectTag()}`,
           protocolPolicy: cloudfront.OriginProtocolPolicy.HTTPS_ONLY,
@@ -291,8 +297,11 @@ export class StaticUi extends FxBaseConstruct {
         }),
         allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.HTTPS_ONLY,
-        originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER, // include all query strings, headers, etc
+        originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER, // include all query strings, headers, cookies, etc
         cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED, // do not cache api paths w/ cloudfront
+        // responseHeadersPolicy: cloudfront.ResponseHeadersPolicy
+
+        // compress: false,
 
         // examples of more specific cache + origin request policies:
         //
@@ -311,3 +320,53 @@ export class StaticUi extends FxBaseConstruct {
     }
   }
 }
+
+// examples of expanded policy definitions for cases where the shortcuts e.g. ALL_VIEWER, CACHING_DISABLED, etc
+// are not suitable and a more nuanced configuration is required:
+//
+// const originRequestPolicy = new cloudfront.OriginRequestPolicy(this, 'OriginRequestPolicy', {
+//   originRequestPolicyName: 'example-origin-request-policy',
+//   // specify all(), none(), or allowList(...)
+//   cookieBehavior: cloudfront.OriginRequestCookieBehavior.all(),
+//   headerBehavior: cloudfront.OriginRequestHeaderBehavior.all(),
+//   queryStringBehavior: cloudfront.OriginRequestQueryStringBehavior.all(),
+// })
+
+// const cachePolicy = new cloudfront.CachePolicy(this, 'ApiCachePolicy', {
+//   comment: '...',
+//   cookieBehavior: cloudfront.CacheCookieBehavior.all(),
+//   headerBehavior: cloudfront.CacheHeaderBehavior.allowList('Authorization', 'Origin', 'X-Api-Key'),
+//   queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
+//   minTtl: cdk.Duration.seconds(0),
+//   maxTtl: cdk.Duration.seconds(0),
+//   defaultTtl: cdk.Duration.seconds(0),
+//   enableAcceptEncodingBrotli: true,
+//   enableAcceptEncodingGzip: true,
+// })
+
+// @see https://www.invicti.com/blog/web-security/content-security-policy/ for article on CSP
+// const responseHeadersPolicy = new cloudfront.ResponseHeadersPolicy(this, 'ResponseHeadersPolicy', {
+//   // comment: '',
+//   // corsBehavior: ...
+//   // customHeadersBehavior: ...
+//   // responseHeadersPolicyName: ...
+//   securityHeadersBehavior: {
+//     contentSecurityPolicy: {
+//       contentSecurityPolicy: `default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors *.${apexDomain}.com;`,
+//       override: true,
+//     },
+//     contentTypeOptions: { override: true },
+//     frameOptions: { frameOption: cloudfront.HeadersFrameOption.DENY, override: true },
+//     referrerPolicy: { referrerPolicy: cloudfront.HeadersReferrerPolicy.NO_REFERRER, override: true },
+//     strictTransportSecurity: {
+//       accessControlMaxAge: Duration.seconds(63072000),
+//       includeSubdomains: true,
+//       override: true,
+//     },
+//     xssProtection: {
+//       protection: true,
+//       modeBlock: true,
+//       override: true,
+//     },
+//   },
+// })
