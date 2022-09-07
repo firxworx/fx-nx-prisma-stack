@@ -27,6 +27,11 @@ export class CoreStack extends FxBaseStack {
     Record<keyof typeof ec2.InterfaceVpcEndpointAwsService, ec2.InterfaceVpcEndpoint>
   >
 
+  readonly bastion: {
+    securityGroup: ec2.SecurityGroup
+    instance: ec2.BastionHostLinux
+  }
+
   constructor(scope: Construct, id: string, props: CoreStackProps) {
     super(scope, id, props)
 
@@ -89,6 +94,34 @@ export class CoreStack extends FxBaseStack {
         description: 'Allow EC2 instances to call AWS services on your behalf + support CloudWatch agent',
       }),
     }
+
+    const bastionSecurityGroup = new ec2.SecurityGroup(this, 'BastionSecurityGroup', {
+      vpc: this.vpc,
+      allowAllOutbound: true,
+    })
+
+    // warning:
+    // do not store data on bastion because the latestAmazonLinux machine image will
+    // replace the bastion image when a new one becomes available
+    const bastionInstance = new ec2.BastionHostLinux(this, 'Bastion', {
+      vpc: this.vpc,
+      instanceName: `${this.getProjectTag()}-${this.getDeployStageTag()}-bastion`,
+      securityGroup: bastionSecurityGroup,
+      subnetSelection: { subnetType: ec2.SubnetType.PUBLIC },
+      instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3A, ec2.InstanceSize.NANO),
+      machineImage: ec2.MachineImage.latestAmazonLinux({ generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2 }),
+      // init:
+    })
+
+    // sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+
+    this.bastion = {
+      securityGroup: bastionSecurityGroup,
+      instance: bastionInstance,
+    }
+
+    bastionSecurityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.icmpPing(), 'allow ping')
+    bastionSecurityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(22), 'allow ssh connections from any ipv4')
 
     this.printOutputs()
   }
