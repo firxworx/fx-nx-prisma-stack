@@ -43,7 +43,7 @@ const app = new cdk.App()
 const coreStackProd = new CoreStack(app, 'CoreStackProd', {
   env,
   description: `[${PROJECT_TAG}] - Core Infra Stack`,
-  ...getBaseProps(DeployStage.DEV, PROJECT_DOMAIN),
+  ...getBaseProps(DeployStage.DEV, PROJECT_DOMAIN), // @todo PRODUCTION!!
 })
 
 const ecrStackProd = new EcrStack(app, 'EcrStackProd', {
@@ -63,6 +63,7 @@ const rdsStackProd = new RdsStack(app, 'RdsStackProd', {
   env,
   description: `[${PROJECT_TAG}] - RDS Postgres Stack`,
   vpc: coreStackProd.vpc,
+  bastion: coreStackProd.bastion,
   ...getBaseProps(DeployStage.PRODUCTION, PROJECT_DOMAIN),
 })
 
