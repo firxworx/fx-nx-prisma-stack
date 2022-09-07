@@ -1,3 +1,6 @@
+import * as path from 'path'
+import * as dotenv from 'dotenv'
+
 import { Construct } from 'constructs'
 import * as iam from 'aws-cdk-lib/aws-iam'
 import * as ec2 from 'aws-cdk-lib/aws-ec2'
@@ -13,6 +16,8 @@ import { FxBaseStack, FxBaseStackProps } from '../../abstract/fx-base.abstract.s
 import { AlbFargateApi } from '../../constructs/alb-fargate-api'
 import { StaticUi } from '../../constructs/static-ui'
 
+dotenv.config({ path: path.join(process.cwd(), '.env') })
+
 // import { Route53SubHostedZone } from '../../constructs/route53-sub-hosted-zone'
 
 export interface ProjectStackProps extends FxBaseStackProps {
@@ -21,7 +26,7 @@ export interface ProjectStackProps extends FxBaseStackProps {
   containerInsights?: boolean
   database: {
     instance: rds.DatabaseInstance
-    proxy: rds.DatabaseProxy
+    proxy: rds.DatabaseProxy | undefined
     credentials: {
       secret: secretsManager.ISecret
     }
@@ -70,15 +75,17 @@ export class ProjectStack extends FxBaseStack {
       database: props.database.credentials.secret,
     }
 
+    // @todo add props + logic for project-subdomains or apex domain
     // const subdomain = this.isProduction() ? undefined : `${this.getProjectTag()}.${this.getDeployStageTag()}`
     // const uri = `${subdomain ? `${subdomain}.` : ''}${props.deploy.domain}`
 
-    const uri = this.deploy.domain // @temp should be olivia.party
+    // const uri = this.deploy.domain // @temp should be olivia.party
+    const subOrDomainName = this.deploy.domain // @temp should be olivia.party
 
     this.api = {
       uri: {
-        public: `${uri}/api`,
-        loadBalancer: `${this.getProjectTag()}.api.${uri}`,
+        public: `${subOrDomainName}/api`,
+        loadBalancer: `${this.getProjectTag()}.api.${subOrDomainName}`,
       },
       paths: {
         basePath: this.getProjectTag(), // will be appended with '/api' when setting BASE_PATH env var
@@ -86,7 +93,7 @@ export class ProjectStack extends FxBaseStack {
       },
     }
 
-    const zone = route53.HostedZone.fromLookup(this, 'Zone', { domainName: uri }) // @temp using main zone
+    const zone = route53.HostedZone.fromLookup(this, 'Zone', { domainName: subOrDomainName }) // @temp using main zone
 
     // const postgresInstance = new RdsPostgresInstance(this, 'Db', {
     //   vpc: props.vpc,
@@ -117,6 +124,20 @@ export class ProjectStack extends FxBaseStack {
     const apiBasePath = `/${this.getProjectTag()}`
     const apiVersion = 'v1'
 
+    const apiDeployConfig = {
+      port: 3333,
+    }
+
+    const emailRegex = /[a-z0-9]+@[a-z]+\.[a-z]{2,5}$/ // quick test (regex not suitable for user input validation)
+    const sesSenderAddress = process.env.AWS_SES_SENDER_ADDRESS ?? ''
+    const sesReplyToAddress = process.env.AWS_SES_REPLY_TO_ADDRESS ?? ''
+
+    if (!emailRegex.test(sesSenderAddress) || !emailRegex.test(sesReplyToAddress)) {
+      throw new Error(
+        'Environment variables AWS_SES_SENDER_ADDRESS + AWS_SES_REPLY_TO_ADDRESS must be set in .env in project root',
+      )
+    }
+
     const apiDeployment = new AlbFargateApi(this, 'AlbFargateApi', {
       ecrRepository: apiEcrRepository,
       api: {
@@ -138,8 +159,15 @@ export class ProjectStack extends FxBaseStack {
         container: {
           name: `${this.getProjectTag()}-${this.getDeployStageTag()}-nestjs`,
           executionRole: this.roles.taskExecution,
-          port: 3333,
+          port: apiDeployConfig.port,
           environment: {
+            API_PROJECT_TAG: this.getProjectTag(),
+            ORIGIN: subOrDomainName,
+            PORT: String(apiDeployConfig.port),
+
+            BASE_PATH: `${this.api.paths.basePath}/api`,
+            API_VERSION: 'v1',
+
             DB_NAME: this.getProjectTag(),
             DB_HOST: props.database.instance.dbInstanceEndpointAddress,
             DB_PORT: props.database.instance.dbInstanceEndpointPort,
@@ -157,13 +185,13 @@ export class ProjectStack extends FxBaseStack {
 
             NO_COLOR: '1', // disable console colors because the raw codes clutter cloudwatch logs
 
-            BASE_PATH: `${this.api.paths.basePath}/api`, // 'api',
-            API_VERSION: 'v1',
-
             API_OPT_COMPRESSION: 'ON',
             API_OPT_CSRF_PROTECTION: 'OFF',
 
             CSRF_TOKEN_COOKIE_NAME: 'CSRF-TOKEN',
+
+            AWS_SES_SENDER_ADDRESS: sesSenderAddress,
+            AWS_SES_REPLY_TO_ADDRESS: sesReplyToAddress,
 
             JWT_ACCESS_TOKEN_SECRET: 'jwt_secret_f2rncaww3on', // @todo move to secret parameters
             JWT_REFRESH_TOKEN_SECRET: 'jwt_refresh_secret_vasdla34pand', // @todo move to secret parameters
@@ -180,10 +208,9 @@ export class ProjectStack extends FxBaseStack {
         publicLoadBalancer: true,
         assignPublicIp: false,
         targetGroup: {
-          // @todo temporary healthcheck while the api's healthcheck isn't implemented :)
           healthcheck: {
-            path: `${apiBasePath}/${apiVersion}/videos`,
-            healthyHttpCodes: '401',
+            path: `${apiBasePath}/${apiVersion}/health-check`,
+            healthyHttpCodes: '200-299',
           },
         },
       },
@@ -191,16 +218,20 @@ export class ProjectStack extends FxBaseStack {
     })
 
     // configure sg's to allow api to connect to the database
+    // note: going backwards vs. granting from rds eliminates a circular stack reference due to rds being in its own
+    //       stack, however this approach generates an erroneous console warning about ignoring an egress rule
     apiDeployment.albfs.service.connections.allowTo(
       props.database.instance,
       ec2.Port.tcp(props.database.instance.instanceEndpoint.port),
     )
 
     const ui = new StaticUi(this, 'Ui', {
+      apexDomain: this.deploy.domain,
       uri: this.deploy.domain,
-      // api: {
-      //   basePath: this.api.paths.basePath,
-      // },
+      api: {
+        targetDomainName: this.api.uri.loadBalancer,
+        basePath: this.api.paths.basePath,
+      },
     })
   }
 

@@ -140,6 +140,7 @@ export class AlbFargateApi extends FxBaseConstruct {
       memoryLimitMiB: props.ecs.task?.memoryLimit ?? 512,
       cpu: props.ecs.task?.cpuLimit ?? 256,
 
+      protocol: elbv2.ApplicationProtocol.HTTPS,
       certificate: props.certificate,
       domainZone: props.zone,
       domainName: props.domainName,
@@ -172,12 +173,11 @@ export class AlbFargateApi extends FxBaseConstruct {
     })
 
     // refer to EC2 > Target groups in the AWS Console UI
+    // example path: `${props.api.basePath}/${props.api.version}/health-check`
     if (props.alb.targetGroup?.healthcheck) {
       this.albfs.targetGroup.configureHealthCheck({
-        // e.g. path `${props.api.basePath}/${props.api.version}` -- note leading slash is required
-        path: props.alb.targetGroup?.healthcheck.path,
-        healthyHttpCodes: props.alb.targetGroup?.healthcheck.healthyHttpCodes, // e.g. '200-299',
-        protocol: elbv2.Protocol.HTTPS,
+        path: props.alb.targetGroup?.healthcheck.path, // leading slash required
+        healthyHttpCodes: props.alb.targetGroup?.healthcheck.healthyHttpCodes, // e.g. '200-299'
       })
     }
 
