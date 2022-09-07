@@ -55,7 +55,9 @@ export async function apiFetch<T>(path: string, options?: RequestInit): Promise<
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
-        ...(!options?.method || options.method === 'GET' ? {} : { 'CSRF-Token': getCsrfCookieValue() }),
+        ...(!options?.method || options.method === 'GET' || process.env.NEXT_PUBLIC_CSRF_OPT_FLAG === 'OFF'
+          ? {}
+          : { 'CSRF-Token': getCsrfCookieValue() }),
         // alternatively for authorization header, e.g.: 'Authorization': `Bearer ${token}`,
       },
       // required for cors + cookie authentication

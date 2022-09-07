@@ -21,6 +21,7 @@
 /**/.env
 /**/.env.*
 !/**/.env.sample
+!/apps/ui/.env.development
 
 # generated files e.g. prisma client (database)
 /apps/**/src/generated
