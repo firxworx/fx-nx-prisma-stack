@@ -14,7 +14,7 @@ import { AppConfig } from './config/types/app-config.interface'
 import { APP_INTERCEPTOR } from '@nestjs/core'
 import { LoggingInterceptor } from './interceptors/logging.interceptor'
 import { LoggerConfig } from './config/types/logger-config.interface'
-import { HealthCheckModule } from './modules/health/health.module'
+import { HealthModule } from './modules/health/health.module'
 
 @Module({
   imports: [
@@ -36,7 +36,7 @@ import { HealthCheckModule } from './modules/health/health.module'
         return loggerConfig.nestJsPino
       },
     }),
-    HealthCheckModule,
+    HealthModule,
     PrismaModule,
     AuthModule,
     VideosModule,
