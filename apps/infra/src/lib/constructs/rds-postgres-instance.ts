@@ -31,6 +31,10 @@ export interface RdsPostgresInstanceProps extends FxBaseConstructProps {
   backupRetention?: Duration
   logsRetention?: logs.RetentionDays
   deletionProtection?: boolean
+
+  options: {
+    createRdsProxy: boolean
+  }
 }
 
 /**
@@ -47,7 +51,7 @@ export interface RdsPostgresInstanceProps extends FxBaseConstructProps {
  */
 export class RdsPostgresInstance extends FxBaseConstruct {
   readonly instance: rds.DatabaseInstance
-  readonly proxy: rds.DatabaseProxy
+  readonly proxy: rds.DatabaseProxy | undefined
   readonly parameterGroup: rds.ParameterGroup
 
   readonly credentials: {
@@ -124,13 +128,15 @@ export class RdsPostgresInstance extends FxBaseConstruct {
       // backupRetention: Duration.days(1),
     })
 
-    this.proxy = this.instance.addProxy('RdsProxy', {
-      vpc: props.vpc,
-      secrets: [this.credentials.secret],
-      debugLogging: parent.isDevelopment(),
-      borrowTimeout: Duration.seconds(60),
-      securityGroups: props.securityGroups,
-    })
+    if (props.options.createRdsProxy) {
+      this.proxy = this.instance.addProxy('RdsProxy', {
+        vpc: props.vpc,
+        secrets: [this.credentials.secret],
+        debugLogging: parent.isDevelopment(),
+        borrowTimeout: Duration.seconds(60),
+        securityGroups: props.securityGroups,
+      })
+    }
 
     // @future - add option to also build a read replica instance
     // this.readReplica = new rds.DatabaseInstanceReadReplica(this, 'ReadReplica', {
