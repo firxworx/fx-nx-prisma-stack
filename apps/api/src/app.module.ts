@@ -5,6 +5,7 @@ import { LoggerModule } from 'nestjs-pino'
 import apiConfig from './config/api.config'
 import authConfig from './config/auth.config'
 import loggerConfig from './config/logger.config'
+import healthConfig from './config/health.config'
 
 import { AuthModule } from './modules/auth/auth.module'
 import { PrismaModule } from './modules/prisma/prisma.module'
@@ -13,13 +14,14 @@ import { AppConfig } from './config/types/app-config.interface'
 import { APP_INTERCEPTOR } from '@nestjs/core'
 import { LoggingInterceptor } from './interceptors/logging.interceptor'
 import { LoggerConfig } from './config/types/logger-config.interface'
+import { HealthCheckModule } from './modules/health/health.module'
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true, // cache process.env in memory
-      load: [authConfig, apiConfig, loggerConfig],
+      load: [authConfig, apiConfig, loggerConfig, healthConfig],
     }),
     LoggerModule.forRootAsync({
       imports: [ConfigModule],
@@ -34,6 +36,7 @@ import { LoggerConfig } from './config/types/logger-config.interface'
         return loggerConfig.nestJsPino
       },
     }),
+    HealthCheckModule,
     PrismaModule,
     AuthModule,
     VideosModule,
