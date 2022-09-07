@@ -39,6 +39,9 @@ cdk.context.json
 /notes
 /.draft
 
+# dev workflow
+/db-dumps
+
 #############################################
 # Generated nx
 #############################################
