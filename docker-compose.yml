@@ -4,31 +4,36 @@ version: '3.8'
 # port mapping format: host_port:container_port
 
 services:
+  # docker compose up --build api
+  # docker compose up --build --force-recreate api
   api:
     image: fx/project-api
-    container_name: fxnxprisma_api
+    container_name: project-api
     build:
       context: .
+      dockerfile: apps/api/Dockerfile
+      # cache_from:
+      #   - fx/project-base:nx-base
       args:
-        NODE_ENV: development
-      # target: development
+        NODE_ENV: production
+        # GITHUB_AUTH_TOKEN: ${GITHUB_AUTH_TOKEN}
+    env_file:
+      - apps/api/.env
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/postgres?schema=public
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
     ports:
       - ${PORT:-3333}:${PORT:-3333}
       - 9229:9229 # debug port
-    # environment:
-    # env_file:
-    #   - .env
     networks:
       - project_network
     links:
       - postgres:postgres
     depends_on:
       - postgres
-    command: dumb-init node dist/main
-    # command: dumb-init yarn start:prod
+    command: dumb-init node dist/apps/api/main
     restart: unless-stopped
 
   # redis:
@@ -54,7 +59,7 @@ services:
       # ./db/initdb.d:/docker-entrypoint-initdb.d  # https://hub.docker.com/_/postgres/ (only runs if data dir empty)
     networks:
       - project_network
-    restart: always
+    restart: always # unless-stopped
 
   # adminer:
   #   image: adminer
