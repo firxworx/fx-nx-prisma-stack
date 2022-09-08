@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import * as React from 'react'
 import { RegisterOptions, useFormContext } from 'react-hook-form'
-import { ExclamationCircleIcon } from '@heroicons/react/outline'
+import { ExclamationCircleIcon } from '@heroicons/react/24/outline'
 import { useId } from '@reach/auto-id'
 
 export interface SelectInputProps extends React.ComponentPropsWithoutRef<'select'> {
@@ -45,9 +45,9 @@ export const SelectInput = ({
   const id = useId(restProps.id)
   const value = id ? watch(id) : undefined
 
-  // add `disabled` and `selected` attribute to option tag, will be used if readonly
+  // add `disabled` and `selected` attribute to option tag -- applies when SelectInput.readOnly is true
   const readOnlyChildren = React.Children.map<React.ReactNode, React.ReactNode>(children, (child) => {
-    if (React.isValidElement(child)) {
+    if (React.isValidElement<HTMLOptionElement>(child)) {
       return React.cloneElement(child, {
         disabled: child.props.value !== restProps?.defaultValue,
         // selected: child.props.value === rest?.defaultValue,

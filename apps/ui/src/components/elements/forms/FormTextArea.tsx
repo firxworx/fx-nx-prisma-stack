@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import { RegisterOptions, useFormContext } from 'react-hook-form'
-import { ExclamationCircleIcon } from '@heroicons/react/outline'
+import { ExclamationCircleIcon } from '@heroicons/react/24/outline'
 import { useId } from '@reach/auto-id'
 
 export interface TextAreaProps extends React.ComponentPropsWithoutRef<'textarea'> {

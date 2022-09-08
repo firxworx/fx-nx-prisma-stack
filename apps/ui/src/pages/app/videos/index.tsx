@@ -2,7 +2,7 @@ import type { NextPage } from 'next'
 import Link from 'next/link'
 import clsx from 'clsx'
 
-import { PlusIcon } from '@heroicons/react/outline'
+import { PlusIcon } from '@heroicons/react/24/outline'
 import { AiOutlineYoutube } from 'react-icons/ai'
 
 import { useVideosQuery } from '../../../api/videos'

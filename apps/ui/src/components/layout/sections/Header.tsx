@@ -4,8 +4,8 @@ import { useRouter } from 'next/router'
 import clsx from 'clsx'
 import { Popover, Transition } from '@headlessui/react'
 
-import { MenuIcon, XIcon, CloudIcon } from '@heroicons/react/outline'
-import { LogoutIcon } from '@heroicons/react/solid'
+import { Bars3Icon, XMarkIcon, CloudIcon } from '@heroicons/react/24/outline'
+import { ArrowLeftOnRectangleIcon } from '@heroicons/react/20/solid' // LogoutIcon
 
 import type { NavigationLink } from '../../../types/navigation.types'
 import { useAuthSession, useSessionContext } from '../../../context/SessionContextProvider'
@@ -146,7 +146,7 @@ const MobileNavMenu: React.FC<
             )}
           >
             <span className="sr-only">Close Menu</span>
-            <XIcon className="h-5 w-5 text-slate-800" aria-hidden="true" />
+            <XMarkIcon className="h-5 w-5 text-slate-800" aria-hidden="true" />
           </Popover.Button>
         </div>
       </div>
@@ -167,7 +167,7 @@ const MobileNavMenu: React.FC<
               role="menuitem"
               onClick={() => signOut()}
             >
-              <LogoutIcon className="inline-block h-5 w-5 mr-2" aria-hidden />
+              <ArrowLeftOnRectangleIcon className="inline-block h-5 w-5 mr-2" aria-hidden />
               <span>Sign Out</span>
             </button>
           </div>
@@ -228,7 +228,7 @@ export const Header: React.FC<HeaderProps> = ({ navigationLinks }) => {
                     )}
                   >
                     <span className="sr-only">Open Navigation Menu</span>
-                    <MenuIcon className="h-5 w-5 text-slate-600" />
+                    <Bars3Icon className="h-5 w-5 text-slate-600" />
                   </Popover.Button>
                 </div>
               </div>

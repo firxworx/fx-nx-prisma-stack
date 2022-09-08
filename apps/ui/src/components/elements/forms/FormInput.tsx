@@ -3,7 +3,7 @@ import clsx from 'clsx'
 import { useId } from '@reach/auto-id'
 import { type RegisterOptions, useFormContext } from 'react-hook-form'
 
-import { ExclamationCircleIcon } from '@heroicons/react/outline'
+import { ExclamationCircleIcon } from '@heroicons/react/24/outline'
 
 import useMergedRef from '../../../hooks/useMergedRef'
 

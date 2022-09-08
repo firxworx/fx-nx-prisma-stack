@@ -1,6 +1,6 @@
 import type { NextPage } from 'next'
 
-import { HomeIcon } from '@heroicons/react/outline'
+import { HomeIcon } from '@heroicons/react/24/outline'
 
 import { SignInForm } from '../components/prefabs/SignInForm'
 import { SignOutButton } from '../components/prefabs/SignOutButton'
