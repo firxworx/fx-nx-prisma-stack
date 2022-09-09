@@ -118,26 +118,26 @@ module.exports = {
         },
         '.fx-button-base, button.fx-button-base, a.fx-button-base': {
           '@apply inline-flex items-center justify-center px-4 py-2 rounded-md': {},
-          '@apply fx-focus-ring transition-colors': {},
+          '@apply font-medium tracking-tight fx-focus-ring transition-colors': {},
         },
         'button.fx-button-solid-primary, a.fx-button-solid-primary': {
-          '@apply border border-transparent bg-sky-800 text-white hover:bg-sky-900': {},
+          '@apply border-2 border-sky-800 bg-sky-800 text-white hover:bg-sky-900 hover:bg-sky-900': {},
         },
         'button.fx-button-solid-primary-disabled, a.fx-button-solid-primary-disabled': {
-          '@apply border border-transparent bg-slate-200 text-slate-400 cursor-not-allowed': {},
+          '@apply border-2 border-slate-200 bg-slate-200 text-slate-400 cursor-not-allowed': {},
         },
         'button.fx-button-outline-primary, a.fx-button-outline-primary': {
-          '@apply border bg-transparent border-sky-800 text-sky-800 hover:bg-sky-100 hover:border-sky-900 hover:text-sky-900':
+          '@apply border-2 bg-transparent border-sky-800 text-sky-800 hover:bg-sky-100 hover:border-sky-900 hover:text-sky-900':
             {},
         },
         'button.fx-button-outline-primary-disabled, a.fx-button-outline-primary-disabled': {
-          '@apply border bg-transparent border-slate-300 text-slate-400 cursor-not-allowed': {},
+          '@apply border-2 bg-transparent border-slate-300 text-slate-400 cursor-not-allowed': {},
         },
         'button.fx-button-transparent-primary, a.fx-button-transparent-primary': {
-          '@apply border bg-transparent border-transparent text-sky-800 hover:text-sky-900': {},
+          '@apply border-2 bg-transparent border-transparent text-sky-800 hover:text-sky-900': {},
         },
         'button.fx-button-transparent-primary-disabled, a.fx-button-transparent-primary-disabled': {
-          '@apply border bg-transparent border-transparent text-slate-400 cursor-not-allowed': {},
+          '@apply border-2 bg-transparent border-transparent text-slate-400 cursor-not-allowed': {},
         },
         '.fx-input-border, input.fx-input-border': {
           '@apply border border-slate-300 rounded-md': {},
@@ -146,7 +146,7 @@ module.exports = {
           '@apply focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-100': {},
         },
         '.fx-link': {
-          '@apply text-sky-800 transition-colors duration-150': {},
+          '@apply font-medium text-sky-800 transition-colors duration-150': {},
           '&:hover': {
             '@apply text-sky-900 underline': {},
           },
