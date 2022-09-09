@@ -1,3 +1,4 @@
+import { Server } from 'http'
 import {
   ClassSerializerInterceptor,
   HttpStatus,
@@ -20,23 +21,14 @@ import * as compression from 'compression'
 import { AppModule } from './app.module'
 import { PrismaService } from './modules/prisma/prisma.service'
 import type { ApiConfig } from './config/types/api-config.interface'
+import { assertNonNullable } from './types/type-assertions/assert-non-nullable'
 
-async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    bufferLogs: true, // @see <https://github.com/iamolegga/nestjs-pino>
-  })
-
-  const logger = app.get(Logger)
-  app.useLogger(logger)
-
-  const configService = app.get<ConfigService>(ConfigService)
-  const apiConfig = configService.get<ApiConfig>('api')
-
-  if (!apiConfig) {
-    throw new Error('Configuration error: missing ApiConfig')
-  }
-
-  const { origin, port, globalPrefix } = apiConfig
+export async function configureNestExpressApp(
+  app: NestExpressApplication,
+  apiConfig: ApiConfig,
+  logger: Logger,
+): Promise<void> {
+  const { origin, globalPrefix } = apiConfig
 
   // set global prefix for api (e.g. `api/v1`)
   app.setGlobalPrefix(globalPrefix, {
@@ -144,6 +136,23 @@ async function bootstrap() {
       // contentSecurityPolicy: { directives: {...} }
     }),
   )
+}
+
+async function bootstrap(): Promise<Server> {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bufferLogs: true, // @see <https://github.com/iamolegga/nestjs-pino>
+  })
+
+  const logger = app.get(Logger)
+  app.useLogger(logger)
+
+  const configService = app.get<ConfigService>(ConfigService)
+  const apiConfig = configService.get<ApiConfig>('api')
+
+  assertNonNullable(apiConfig, 'Configuration error: missing ApiConfig')
+  const { origin, port, globalPrefix } = apiConfig
+
+  await configureNestExpressApp(app, apiConfig, logger)
 
   const httpServer = await app.listen(port, () => {
     logger.log(`🚀 Application environment: ${process.env.NODE_ENV}`)
