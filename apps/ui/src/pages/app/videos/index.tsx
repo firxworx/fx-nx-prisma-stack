@@ -2,13 +2,14 @@ import type { NextPage } from 'next'
 import Link from 'next/link'
 import clsx from 'clsx'
 
-import { PlusIcon } from '@heroicons/react/24/outline'
+import { PlusIcon } from '@heroicons/react/20/solid'
 import { AiOutlineYoutube } from 'react-icons/ai'
 
 import { useVideosQuery } from '../../../api/videos'
 import type { VideoDto } from '../../../types/videos.types'
 import { Spinner } from '../../../components/elements/feedback/Spinner'
 import { LinkButton } from '../../../components/elements/inputs/LinkButton'
+import { NavLink } from 'apps/ui/src/components/elements/inputs/NavLink'
 
 export const VideoPlatformLogo: React.FC<{ platform?: VideoDto['platform'] }> = ({ platform }) => {
   switch (platform) {
@@ -21,6 +22,8 @@ export const VideoPlatformLogo: React.FC<{ platform?: VideoDto['platform'] }> = 
   }
 }
 
+const ADD_VIDEO_ROUTE = '/app/videos/create'
+
 export const VideosPage: NextPage = (_props) => {
   const { data, isSuccess, isLoading, isError } = useVideosQuery()
 
@@ -28,7 +31,7 @@ export const VideosPage: NextPage = (_props) => {
     <div>
       <h2 className="text-lg">Videos Page</h2>
       <div className="flex justify-end">
-        <LinkButton href="/app/videos/create" variant="outline" appendClassName="mb-2">
+        <LinkButton href={ADD_VIDEO_ROUTE} variant="outline" appendClassName="mb-2">
           <PlusIcon className="h-5 w-5 mr-1" />
           <span>Add Video</span>
         </LinkButton>
@@ -36,7 +39,7 @@ export const VideosPage: NextPage = (_props) => {
       <div>
         {isError && <p>Error fetching data</p>}
         {isLoading && <Spinner />}
-        {isSuccess && data && (
+        {isSuccess && !!data?.length && (
           <ul className="space-y-2">
             {data?.map((video) => (
               <li
@@ -57,6 +60,13 @@ export const VideosPage: NextPage = (_props) => {
               </li>
             ))}
           </ul>
+        )}
+        {isSuccess && !data?.length && (
+          <div className="flex items-center border-2 border-dashed rounded-md p-4">
+            <div>
+              No videos found. Try <NavLink href={ADD_VIDEO_ROUTE}>Adding a Video</NavLink>.
+            </div>
+          </div>
         )}
       </div>
     </div>
