@@ -90,6 +90,8 @@ function CustomApp({ Component, pageProps, router }: AppProps) {
               if (router.asPath !== SIGN_IN_ROUTE) {
                 routerPush(SIGN_IN_ROUTE)
               }
+
+              return
             }
 
             // // only show toast if there's already data in the cache - this indicates a failed background update

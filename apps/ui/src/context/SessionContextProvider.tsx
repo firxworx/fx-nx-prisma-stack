@@ -9,10 +9,17 @@ const SessionContext = React.createContext<AuthSession<SessionStatus> | undefine
 
 const LOCAL_STORAGE_SESSION_CTX_FLAG_KEY = 'FX_SESSION_CTX_FLAG'
 
+/**
+ * React context provider of a user's session context.
+ *
+ * The initial `true` state of `isQueryEnabled` will result in an immediate request to the API `/auth/session`
+ * endpoint on page load/refresh. The response indicates if the user is authenticated and provides a means
+ * to set the CSRF cookie.
+ */
 export const SessionContextProvider: React.FC<{
   children: (isSessionReady: boolean) => React.ReactElement
 }> = ({ children }) => {
-  const [isQueryEnabled, setIsQueryEnabled] = useState<boolean>(false)
+  const [isQueryEnabled, setIsQueryEnabled] = useState<boolean>(true)
   const { data: profile, refetch, error, status, invalidate, remove } = useAuthSessionQuery(isQueryEnabled)
 
   useEffect(() => {
