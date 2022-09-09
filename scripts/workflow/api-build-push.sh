@@ -15,9 +15,10 @@ set +o allexport
 
 # ---------------------------------------------------------------------------------------------------------------------
 DEPLOY_STAGE_TAG=prod
-DOCKER_VERSION_TAG="v0.0.0-alpha.3"
+DOCKER_VERSION_TAG="v0.0.0-alpha.5"
 
-DOCKER_COMPOSE_SERVICE_NAME=basic2-api
+DOCKER_COMPOSE_SERVICE_NAME=api
+DOCKER_IMAGE="fx/project-${DOCKER_COMPOSE_SERVICE_NAME}"
 # ---------------------------------------------------------------------------------------------------------------------
 
 ECS_CLUSTER_NAME="$PROJECT_TAG-$DEPLOY_STAGE_TAG-cluster"
@@ -28,11 +29,11 @@ ECR_REPO_URI="$DEPLOY_AWS_ACCOUNT.dkr.ecr.$DEPLOY_AWS_REGION.amazonaws.com/$ECR_
 
 docker compose -f "$GIT_REPO_ROOT/docker-compose.yml" build "$DOCKER_COMPOSE_SERVICE_NAME"
 
-docker tag fx/basic2-api fx/basic2-api:$DOCKER_VERSION_TAG
-docker tag fx/basic2-api $ECR_REPO_URI:latest
-docker tag fx/basic2-api $ECR_REPO_URI:$DOCKER_VERSION_TAG
+docker tag $DOCKER_IMAGE $DOCKER_IMAGE:$DOCKER_VERSION_TAG
+docker tag $DOCKER_IMAGE $ECR_REPO_URI:latest
+docker tag $DOCKER_IMAGE $ECR_REPO_URI:$DOCKER_VERSION_TAG
 
-# push to ecr with both version and 'latest' tags (note: the image itself will only be uploaded once)
+# push to ecr with both version and 'latest' tags (note: the image will only be uploaded once; 2x pushes set both tags)
 docker push $ECR_REPO_URI:$DOCKER_VERSION_TAG
 docker push $ECR_REPO_URI:latest
 
