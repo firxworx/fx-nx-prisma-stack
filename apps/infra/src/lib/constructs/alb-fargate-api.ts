@@ -178,6 +178,7 @@ export class AlbFargateApi extends FxBaseConstruct {
       this.albfs.targetGroup.configureHealthCheck({
         path: props.alb.targetGroup?.healthcheck.path, // leading slash required
         healthyHttpCodes: props.alb.targetGroup?.healthcheck.healthyHttpCodes, // e.g. '200-299'
+        protocol: elbv2.Protocol.HTTP,
       })
     }
 
@@ -193,6 +194,12 @@ export class AlbFargateApi extends FxBaseConstruct {
 
   private assertValidProps(props: AlbFargateApiProps): true {
     const errorPrefix = 'Validation Error:'
+
+    if (props.alb.targetGroup?.healthcheck && props.alb.targetGroup.healthcheck.path.slice(0, 1) !== '/') {
+      throw new Error(
+        `${errorPrefix} API targetGroup healthcheck path must have a leading forward slash. Received: '${props.alb.targetGroup.healthcheck.path}'`,
+      )
+    }
 
     if (props.api.basePath.slice(0, 1) !== '/') {
       throw new Error(

@@ -15,6 +15,7 @@ import * as route53 from 'aws-cdk-lib/aws-route53'
 import { FxBaseStack, FxBaseStackProps } from '../../abstract/fx-base.abstract.stack'
 import { AlbFargateApi } from '../../constructs/alb-fargate-api'
 import { StaticUi } from '../../constructs/static-ui'
+import { CfnOutput } from 'aws-cdk-lib'
 
 dotenv.config({ path: path.join(process.cwd(), '.env') })
 
@@ -186,7 +187,7 @@ export class ProjectStack extends FxBaseStack {
             NO_COLOR: '1', // disable console colors because the raw codes clutter cloudwatch logs
 
             API_OPT_COMPRESSION: 'ON',
-            API_OPT_CSRF_PROTECTION: 'OFF',
+            API_OPT_CSRF_PROTECTION: 'ON',
 
             CSRF_TOKEN_COOKIE_NAME: 'CSRF-TOKEN',
 
@@ -209,7 +210,8 @@ export class ProjectStack extends FxBaseStack {
         assignPublicIp: false,
         targetGroup: {
           healthcheck: {
-            path: `${apiBasePath}/${apiVersion}/health-check`,
+            // path: `${apiBasePath}/api/${apiVersion}/health-check`,
+            path: `/${this.getProjectTag()}/api/${apiVersion}/health-check`, // preceding character
             healthyHttpCodes: '200-299',
           },
         },
@@ -233,6 +235,12 @@ export class ProjectStack extends FxBaseStack {
         basePath: this.api.paths.basePath,
       },
     })
+
+    this.printOutputs()
+  }
+
+  private printOutputs(): void {
+    new CfnOutput(this, 'ProjectApiVersion', { value: `https://${this.api.paths.version}` })
   }
 
   /**
