@@ -63,7 +63,7 @@ export const VideosPage: NextPage = (_props) => {
         )}
         {isSuccess && !data?.length && (
           <div className="flex items-center border-2 border-dashed rounded-md p-4">
-            <div>
+            <div className="text-slate-600">
               No videos found. Try <NavLink href={ADD_VIDEO_ROUTE}>Adding a Video</NavLink>.
             </div>
           </div>
