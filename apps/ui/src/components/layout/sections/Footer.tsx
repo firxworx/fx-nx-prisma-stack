@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import Link from 'next/link'
+import { NavLink } from '../../elements/inputs/NavLink'
 
 export interface FooterProps {}
 
@@ -19,9 +19,9 @@ export const Footer: React.FC<FooterProps> = () => {
         {process.env.NEXT_PUBLIC_PROJECT_ORG_CONTACT_URL && process.env.NEXT_PUBLIC_PROJECT_ORG_NAME && (
           <div>
             <span>&copy; {new Date().getFullYear()} </span>
-            <Link href={process.env.NEXT_PUBLIC_PROJECT_ORG_CONTACT_URL}>
-              <a className="hover:underline">{process.env.NEXT_PUBLIC_PROJECT_ORG_NAME}</a>
-            </Link>
+            <NavLink href={process.env.NEXT_PUBLIC_PROJECT_ORG_CONTACT_URL}>
+              {process.env.NEXT_PUBLIC_PROJECT_ORG_NAME}
+            </NavLink>
           </div>
         )}
         {process.env.NEXT_PUBLIC_PROJECT_ORG_ADDRESS && (

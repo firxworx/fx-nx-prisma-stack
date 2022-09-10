@@ -7,10 +7,10 @@ export const AppIndexPage: NextPage = (_props) => {
     <div>
       <h2 className="text-lg">App Index / Dashboard Page</h2>
       <div className="space-x-4">
-        <NavLink href="/app/settings" className="mt-8">
+        <NavLink href="/app/settings" appendClassName="mt-8">
           Go to Settings Page (Auth-Only)
         </NavLink>
-        <NavLink href="/about" className="mt-8">
+        <NavLink href="/about" appendClassName="mt-8">
           Go to About Page (Public)
         </NavLink>
       </div>
