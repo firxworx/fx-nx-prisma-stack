@@ -35,6 +35,13 @@ module.exports = {
         button: {
           primary: colors.sky[700],
         },
+        action: {
+          primary: {
+            lighter: colors.sky[600],
+            DEFAULT: colors.sky[700],
+            darker: colors.sky[800],
+          },
+        },
         error: {
           DEFAULT: '#cb4848',
           50: '#fdf3f3',
@@ -68,13 +75,16 @@ module.exports = {
 
       // these selectors match + override the selector used by the @tailwindcss/forms plugin
       const formInputTargets = `[type='text']:not(.fx-custom-input), [type='email'], [type='url'], [type='password'], [type='number'], [type='date'], [type='datetime-local'], [type='month'], [type='search'], [type='tel'], [type='time'], [type='week'], [multiple], textarea, select`
-      const formInputFocusTargets = `[type='text']:focus:not(.fx-custom-input), [type='email']:focus, [type='url']:focus, [type='password']:focus, [type='number']:focus, [type='date']:focus, [type='datetime-local']:focus, [type='month']:focus, [type='search']:focus, [type='tel']:focus, [type='time']:focus, [type='week']:focus, [multiple]:focus, textarea:focus, select:focus`
-      const buttonTargets = `button, [type='button'], [type='reset'], [type='submit']`
+      // const formInputFocusTargets = `[type='text']:focus:not(.fx-custom-input), [type='email']:focus, [type='url']:focus, [type='password']:focus, [type='number']:focus, [type='date']:focus, [type='datetime-local']:focus, [type='month']:focus, [type='search']:focus, [type='tel']:focus, [type='time']:focus, [type='week']:focus, [multiple]:focus, textarea:focus, select:focus`
+      // const buttonTargets = `button, [type='button'], [type='reset'], [type='submit']`
 
       addBase({
         // always show scrollbar to avoid horizontal jank on Windows PC's during loading + modals + transitions
         body: {
           overflowY: 'scroll',
+        },
+        main: {
+          '@apply text-slate-900': {},
         },
         // remove spinner on number inputs for chrome/safari/edge/opera
         'input::-webkit-outer-spin-button, input::-webkit-inner-spin-button': {
@@ -143,10 +153,10 @@ module.exports = {
           '@apply border border-slate-300 rounded-md': {},
         },
         '.fx-focus-ring': {
-          '@apply focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-100': {},
+          '@apply focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-200': {},
         },
         '.fx-link': {
-          '@apply font-medium text-sky-800 transition-colors duration-150': {},
+          '@apply font-medium text-sky-800 fx-focus-ring focus:rounded-sm transition-colors duration-150': {},
           '&:hover': {
             '@apply text-sky-900 underline': {},
           },
