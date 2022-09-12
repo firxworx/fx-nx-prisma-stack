@@ -14,7 +14,6 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 import '../styles/tailwind.css'
 
-import { authQueryKeys } from '../api/auth'
 import { AuthError } from '../api/errors/AuthError.class'
 import { SessionLoadingScreen } from '../components/layout/SessionLoadingScreen'
 import { AppLayout } from '../components/layout/AppLayout'
@@ -25,15 +24,17 @@ import { ActionButton } from '../components/elements/inputs/ActionButton'
 import { PlaceholderLayout } from '../components/layout/PlaceholderLayout'
 
 export const SIGN_IN_ROUTE = '/sign-in'
+export const DEFAULT_AUTHENTICATED_ROUTE = '/app'
 
-const PUBLIC_ROUTES_WHITELIST = ['/', SIGN_IN_ROUTE, '/about']
+export const PUBLIC_ROUTES_WHITELIST = ['/', SIGN_IN_ROUTE, '/about']
 
-const PUBLIC_NAV_LINKS = [
+export const PUBLIC_NAV_LINKS = [
   { title: 'About', href: '/about' },
   { title: 'Sign-In', href: SIGN_IN_ROUTE },
 ]
-const AUTHENTICATED_NAV_LINKS = [
-  { title: 'App', href: '/app' },
+
+export const AUTHENTICATED_NAV_LINKS = [
+  { title: 'App', href: DEFAULT_AUTHENTICATED_ROUTE },
   { title: 'Videos', href: '/app/videos' },
   { title: 'About', href: '/about' },
 ]
@@ -61,19 +62,16 @@ function CustomApp({ Component, pageProps, router }: AppProps) {
           queries: {
             suspense: false,
             // retry: true,
-            // retry: (_count, error) => {
-            //   return !(error instanceof AuthError || (error instanceof FetchError && error.status === 404))
-            // },
             // refetchOnWindowFocus: true,
             // useErrorBoundary: true,
             useErrorBoundary: (error: unknown) => {
-              return error instanceof AuthError // or e.g. return error.response?.status >= 500
+              return error instanceof AuthError // e.g. error.response?.status >= 500
             },
           },
           mutations: {
             // useErrorBoundary: false
             useErrorBoundary: (error: unknown) => {
-              return error instanceof AuthError // or e.g. error.response?.status >= 500
+              return error instanceof AuthError // e.g. error.response?.status >= 500
             },
           },
         },
@@ -82,19 +80,19 @@ function CustomApp({ Component, pageProps, router }: AppProps) {
             // @todo add notifications/toasts for network errors e.g. toast.error(error.message)
 
             if (error instanceof AuthError) {
-              console.error(`global query error handler (AuthError) [${error.message}]`, error)
+              console.error(`Global query client error handler (AuthError Case) [${error.message}]`, error)
 
-              queryClient.removeQueries(authQueryKeys.session)
-              queryClient.clear()
-
-              if (router.asPath !== SIGN_IN_ROUTE) {
-                routerPush(SIGN_IN_ROUTE)
+              if (router.pathname !== SIGN_IN_ROUTE) {
+                routerPush(
+                  router.asPath ? `${SIGN_IN_ROUTE}?redirect=${encodeURIComponent(router.asPath)}` : SIGN_IN_ROUTE,
+                )
               }
 
+              queryClient.clear()
               return
             }
 
-            // // only show toast if there's already data in the cache - this indicates a failed background update
+            // // only show toast if there's already data in the cache -- indicates failed background update
             // if (query.state.data !== undefined) {
             //   // toast.error(`Something went wrong: ${error.message}`)
             // }
