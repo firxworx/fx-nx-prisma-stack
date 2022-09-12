@@ -41,18 +41,22 @@ export const FormButton: React.FC<FormButtonProps> = ({
 
   return (
     <button
-      className={clsx('fx-button-base', {
-        // conditional animation
-        'animate-pulse': isLoading || isSubmitting,
+      className={clsx(
+        'fx-button-base',
+        {
+          // conditional animation
+          'animate-pulse': isLoading || isSubmitting,
 
-        // button variant styles
-        ['fx-button-solid-primary']: variant === 'solid' && !renderDisabled,
-        ['fx-button-solid-primary-disabled']: variant === 'solid' && renderDisabled,
-        ['fx-button-outline-primary']: variant === 'outline' && !renderDisabled,
-        ['fx-button-outline-primary-disabled']: variant === 'outline' && renderDisabled,
-        ['fx-button-transparent-primary']: variant === 'transparent' && !renderDisabled,
-        ['fx-button-transparent-primary-disabled']: variant === 'transparent' && renderDisabled,
-      })}
+          // button variant styles
+          ['fx-button-solid-primary']: variant === 'solid' && !renderDisabled,
+          ['fx-button-solid-primary-disabled']: variant === 'solid' && renderDisabled,
+          ['fx-button-outline-primary']: variant === 'outline' && !renderDisabled,
+          ['fx-button-outline-primary-disabled']: variant === 'outline' && renderDisabled,
+          ['fx-button-transparent-primary']: variant === 'transparent' && !renderDisabled,
+          ['fx-button-transparent-primary-disabled']: variant === 'transparent' && renderDisabled,
+        },
+        appendClassName,
+      )}
       disabled={renderDisabled}
       {...restProps}
     >
