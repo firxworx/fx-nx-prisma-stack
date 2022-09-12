@@ -1,3 +1,4 @@
+import { PageHeading } from 'apps/ui/src/components/elements/headings/PageHeading'
 import type { NextPage } from 'next'
 
 import { useVideoGroupsQuery } from '../../../api/video-groups'
@@ -8,7 +9,7 @@ export const VideoGroupsPage: NextPage = (_props) => {
 
   return (
     <div>
-      <h2 className="text-lg">Video Groups Page</h2>
+      <PageHeading>Video Groups</PageHeading>
       <div className="mt-4">
         {isError && <p>Error fetching data</p>}
         {isLoading && <Spinner />}

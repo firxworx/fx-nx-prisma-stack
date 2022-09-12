@@ -1,3 +1,4 @@
+import { PageHeading } from 'apps/ui/src/components/elements/headings/PageHeading'
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useCallback } from 'react'
@@ -15,7 +16,7 @@ export const VideoCreatePage: NextPage = () => {
 
   return (
     <div>
-      <h2 className="text-lg">Add Video</h2>
+      <PageHeading>Add Video</PageHeading>
       <div className="mt-4">
         <VideoCreateForm onSuccess={onCreateSuccessRedirectHandler} />
       </div>

@@ -10,6 +10,7 @@ import type { VideoDto } from '../../../types/videos.types'
 import { Spinner } from '../../../components/elements/feedback/Spinner'
 import { LinkButton } from '../../../components/elements/inputs/LinkButton'
 import { NavLink } from 'apps/ui/src/components/elements/inputs/NavLink'
+import { PageHeading } from 'apps/ui/src/components/elements/headings/PageHeading'
 
 export const VideoPlatformLogo: React.FC<{ platform?: VideoDto['platform'] }> = ({ platform }) => {
   switch (platform) {
@@ -29,9 +30,9 @@ export const VideosPage: NextPage = (_props) => {
 
   return (
     <div>
-      <h2 className="text-lg">Videos Page</h2>
+      <PageHeading>Videos</PageHeading>
       <div className="flex justify-end">
-        <LinkButton href={ADD_VIDEO_ROUTE} variant="outline" appendClassName="mb-2">
+        <LinkButton href={ADD_VIDEO_ROUTE} variant="outline" appendClassName="mb-4">
           <PlusIcon className="h-5 w-5 mr-1" />
           <span>Add Video</span>
         </LinkButton>
