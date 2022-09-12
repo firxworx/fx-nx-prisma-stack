@@ -1,10 +1,10 @@
 import clsx from 'clsx'
-import * as React from 'react'
+import React from 'react'
 import { RegisterOptions, useFormContext } from 'react-hook-form'
 import { ExclamationCircleIcon } from '@heroicons/react/24/outline'
 import { useId } from '@reach/auto-id'
 
-export interface SelectInputProps extends React.ComponentPropsWithoutRef<'select'> {
+export interface FormSelectInputProps extends React.ComponentPropsWithoutRef<'select'> {
   id?: string
   name: string
   label: string
@@ -14,7 +14,7 @@ export interface SelectInputProps extends React.ComponentPropsWithoutRef<'select
   readOnly?: boolean
   hideLabel?: boolean
   validation?: RegisterOptions
-  children: React.ReactNode
+  children?: React.ReactNode // made ? for FormSelectInput2
 }
 
 /**
@@ -25,7 +25,7 @@ export interface SelectInputProps extends React.ComponentPropsWithoutRef<'select
  *
  * @see {@link https://react-hook-form.com/api/useformcontext}
  */
-export const SelectInput = ({
+export const FormSelectInput = ({
   name,
   label,
   helperText,
@@ -35,7 +35,7 @@ export const SelectInput = ({
   children,
   validation,
   ...restProps
-}: SelectInputProps) => {
+}: FormSelectInputProps) => {
   const {
     register,
     formState: { isSubmitting, errors },

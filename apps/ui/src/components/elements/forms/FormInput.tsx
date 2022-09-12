@@ -69,11 +69,11 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
     return (
       <div>
         {!hideLabel && ( // @todo more a11y-friendly label hide of FormInput
-          <label htmlFor={id} className="block text-sm font-normal text-slate-700">
+          <label htmlFor={id} className="fx-form-label mb-1">
             {label}
           </label>
         )}
-        <div className="relative mt-1">
+        <div className="relative">
           <input
             id={id}
             ref={mergedRef}

@@ -162,6 +162,9 @@ module.exports = {
         '.fx-focus-ring': {
           '@apply focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-200': {},
         },
+        '.fx-focus-ring-form': {
+          '@apply focus:outline-none focus:border-slate-300 focus:ring-2 focus:ring-sky-100': {},
+        },
         '.fx-link': {
           '@apply font-medium text-action-primary-darker fx-focus-ring focus:rounded-sm transition-colors duration-150':
             {},
@@ -171,6 +174,9 @@ module.exports = {
           '&:active': {
             '@apply text-action-primary': {},
           },
+        },
+        '.fx-form-label': {
+          '@apply block text-sm font-normal text-slate-700': {},
         },
       })
     }),
