@@ -2,12 +2,13 @@ import { useRouter } from 'next/router'
 import { useCallback, useEffect } from 'react'
 import { FormProvider, useForm, type SubmitHandler } from 'react-hook-form'
 
+import { DEFAULT_AUTHENTICATED_ROUTE } from '../../pages/_app'
 import { useAuthSignIn } from '../../api/auth'
 import { useIsMounted } from '../../hooks/useIsMounted'
 import { FormButton } from '../elements/forms/FormButton'
 import { FormInput } from '../elements/forms/FormInput'
-
-const DEFAULT_SIGN_IN_REDIRECT_PATH = '/app'
+import { getValidatedPathUri } from '../../lib/uri/paths'
+import { getQueryStringValue } from '../../lib/uri/query'
 
 export interface SignInFormInputs {
   email: string
@@ -19,14 +20,23 @@ export interface SignInFormProps {
   onSignIn?: () => unknown
 }
 
+const LABELS = {
+  EMAIL_ADDRESS: 'Email Address',
+  PASSWORD: 'Password',
+  SIGN_IN: 'Sign In',
+}
+
 export const SignInForm: React.FC<SignInFormProps> = ({ signInRedirectPath, onSignIn }) => {
   const isMounted = useIsMounted()
-  const { push: routerPush } = useRouter()
+  const { push: routerPush, query: routerQuery } = useRouter()
 
   const { signIn, isSuccess } = useAuthSignIn() // @todo add error to sign in (add user feedback)
 
   const form = useForm<SignInFormInputs>()
   const { handleSubmit } = form
+
+  const redirectPath =
+    signInRedirectPath ?? getValidatedPathUri(getQueryStringValue(routerQuery?.redirect)) ?? DEFAULT_AUTHENTICATED_ROUTE
 
   useEffect(() => {
     if (isSuccess) {
@@ -38,9 +48,9 @@ export const SignInForm: React.FC<SignInFormProps> = ({ signInRedirectPath, onSi
         onSignIn()
       }
 
-      routerPush(signInRedirectPath ?? DEFAULT_SIGN_IN_REDIRECT_PATH)
+      routerPush(redirectPath)
     }
-  }, [isSuccess, isMounted, routerPush, onSignIn, signInRedirectPath])
+  }, [isSuccess, isMounted, routerPush, onSignIn, redirectPath])
 
   const handleSignInSubmit: SubmitHandler<SignInFormInputs> = useCallback(
     async ({ email, password }) => {
@@ -59,8 +69,8 @@ export const SignInForm: React.FC<SignInFormProps> = ({ signInRedirectPath, onSi
         <div className="space-y-4">
           <FormInput
             name="email"
-            label="Email Address"
-            placeholder="Email Address"
+            label={LABELS.EMAIL_ADDRESS}
+            placeholder={LABELS.EMAIL_ADDRESS}
             hideLabel
             validationOptions={{ required: true, pattern: /.+@.+/ }}
           />
@@ -68,19 +78,15 @@ export const SignInForm: React.FC<SignInFormProps> = ({ signInRedirectPath, onSi
           <FormInput
             type="password"
             name="password"
-            label="Password"
-            placeholder="Password"
+            label={LABELS.PASSWORD}
+            placeholder={LABELS.PASSWORD}
             hideLabel
             validationOptions={{ required: true }}
           />
 
-          <FormButton type="submit">Sign In</FormButton>
+          <FormButton type="submit">{LABELS.SIGN_IN}</FormButton>
         </div>
       </form>
     </FormProvider>
   )
-}
-
-SignInForm.defaultProps = {
-  signInRedirectPath: DEFAULT_SIGN_IN_REDIRECT_PATH,
 }
