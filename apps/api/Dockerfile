@@ -1,12 +1,12 @@
 #######################################################################################################################
-# docker:
-# docker build -f ./apps/api/Dockerfile . -t fx/project-api
-# docker run -p 3333:3333 fx/project-api
-#
 # docker compose:
 # docker compose build api
 # docker compose up --build api
 # docker compose up api
+#
+# docker:
+# docker build -f ./apps/api/Dockerfile . -t fx/project-api
+# docker run -p 3333:3333 fx/project-api
 #######################################################################################################################
 
 FROM node:16.17-alpine AS DEPS
@@ -32,6 +32,15 @@ RUN npx dotenv -e apps/api/.env npx prisma generate --schema apps/api/prisma/sch
 
 RUN yarn build:api:prod
 
+# could attempt manual cleanup of offenders if no prune + prod-only deps fails (@see scripts/deps/node-module-size.sh)
+# RUN rm -rf \
+# ./node_modules/aws-cdk-lib \
+# ./node_modules/@nrwl \
+# ./node_modules/aws-cdk \
+# ./node_modules/react* \
+# ./node_modules/@next \
+# ./node_modules/@types
+
 # #######################################################################################################################
 
 FROM node:16.17-alpine AS RUNNER
@@ -45,18 +54,20 @@ USER node
 WORKDIR /usr/src/app
 
 # approach 1) copy compiled api + node_modules + package.json
-# COPY --chown=node:node --from=DEPS /usr/src/app/dist ./dist
-# COPY --chown=node:node --from=DEPS /usr/src/app/node_modules ./node_modules
-# COPY --chown=node:node --from=DEPS /usr/src/app/dist/apps/api/package*.json ./
-
-# approach 2) copy compiled api + yarn + api build's package.json + yarn.lock + install prod deps only
 COPY --chown=node:node --from=DEPS /usr/src/app/dist ./dist
+COPY --chown=node:node --from=DEPS /usr/src/app/node_modules ./node_modules
 COPY --chown=node:node --from=DEPS /usr/src/app/dist/apps/api/package*.json ./
-COPY --chown=node:node --from=DEPS /usr/src/app/.yarn/plugins .yarn/plugins
-COPY --chown=node:node --from=DEPS /usr/src/app/.yarn/releases .yarn/releases
-COPY --chown=node:node --from=DEPS /usr/src/app/.yarnrc.yml ./
-COPY --chown=node:node --from=DEPS /usr/src/app/yarn.lock ./
-RUN yarn workspaces focus --all --production
+
+# [broken] approach 2) copy compiled api + yarn + api build's package.json + yarn.lock + install prod deps only
+# @todo @backlog - aimed to reduce image size however the resulting image has dependency resolution issues
+#
+# COPY --chown=node:node --from=DEPS /usr/src/app/dist ./dist
+# COPY --chown=node:node --from=DEPS /usr/src/app/dist/apps/api/package*.json ./
+# COPY --chown=node:node --from=DEPS /usr/src/app/.yarn/plugins .yarn/plugins
+# COPY --chown=node:node --from=DEPS /usr/src/app/.yarn/releases .yarn/releases
+# COPY --chown=node:node --from=DEPS /usr/src/app/.yarnrc.yml ./
+# COPY --chown=node:node --from=DEPS /usr/src/app/yarn.lock ./
+# RUN yarn workspaces focus --all --production
 
 EXPOSE 3333
 
