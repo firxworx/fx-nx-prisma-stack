@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { FormProvider, SubmitHandler, useForm } from 'react-hook-form'
 
 import type { UpdateVideoDto, VideoDto, VideoGroupDto } from '../../../types/videos.types'
@@ -9,6 +9,7 @@ import { FormButton } from '../../elements/forms/FormButton'
 import { FormInput } from '../../elements/forms/FormInput'
 import { FormMultiComboBox } from '../../elements/forms/FormMultiComboBox'
 import { useVideoGroupsQuery } from '../../../api/video-groups'
+import { FormListBox } from '../../elements/forms/FormListBox'
 
 export interface VideoMutateFormData extends Omit<UpdateVideoDto, 'groups'> {
   groups: Pick<VideoDto['groups'][number], 'uuid' | 'name'>[]
@@ -37,12 +38,17 @@ const mapFormDataToRequestDto = (formData: VideoMutateFormData): UpdateVideoDto 
 
 export const VideoMutateForm: React.FC<VideoMutateFormProps> = ({ uuid, video, onSuccess }) => {
   const isMounted = useIsMounted()
-  const { mutateAsync, error: videoMutationError, isError: isVideoMutationError } = useVideoMutationQuery({ onSuccess })
+  const {
+    mutateAsync,
+    error: videoMutationError,
+    isLoading: isVideoMutationLoading,
+    isError: isVideoMutationError,
+  } = useVideoMutationQuery({ onSuccess })
 
   const { data: videoGroups } = useVideoGroupsQuery()
 
   const videoDefaultFormData = useMemo(() => mapVideoDtoToFormData(video), [video])
-  // const videoDefaultFormData = mapVideoDtoToFormData(video)
+
   const form = useForm<VideoMutateFormData>({ defaultValues: videoDefaultFormData })
   const { handleSubmit } = form
 
@@ -82,25 +88,28 @@ export const VideoMutateForm: React.FC<VideoMutateFormProps> = ({ uuid, video, o
   return (
     <FormProvider {...form}>
       {isVideoMutationError && <div className="font-bold">{String(videoMutationError)}</div>}
-      <form onSubmit={handleSubmit(handleMutationQuery)}>
-        <div className="space-y-4 p-4 mt-4">
-          <FormInput
-            name="name"
-            label="Name"
-            placeholder="Video Name"
-            hideLabel
-            validationOptions={{ required: true }}
-          />
+      <form onSubmit={handleSubmit(handleMutationQuery)} className="p-4 mt-4">
+        <div className="space-y-4">
+          <FormInput name="name" label="Name" placeholder="Video Name" validationOptions={{ required: true }} />
           <FormInput
             name="externalId"
             label="Share/Embed Code"
             placeholder="abcd1234"
-            hideLabel
             validationOptions={{ required: true }}
           />
+          <FormListBox
+            name="platform"
+            label="Platform"
+            options={[
+              { value: 'YOUTUBE', label: 'YouTube' },
+              { value: 'VIMEO', label: 'Vimeo' },
+            ]}
+          />
           <FormMultiComboBox name="groups" label="Video Groups" options={videoGroupSelectOptions} />
-          <FormButton type="submit">Save</FormButton>
         </div>
+        <FormButton type="submit" isLoading={isVideoMutationLoading} appendClassName="mt-6">
+          Save
+        </FormButton>
       </form>
     </FormProvider>
   )

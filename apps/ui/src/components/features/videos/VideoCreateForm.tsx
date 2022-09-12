@@ -6,6 +6,7 @@ import { useIsMounted } from '../../../hooks/useIsMounted'
 import { VideoPlatform } from '../../../types/videos.types'
 import { FormButton } from '../../elements/forms/FormButton'
 import { FormInput } from '../../elements/forms/FormInput'
+import { FormListBox } from '../../elements/forms/FormListBox'
 
 export interface VideoCreateFormData {
   name: string
@@ -52,8 +53,8 @@ export const VideoCreateForm: React.FC<VideoCreateFormProps> = ({ onSuccess }) =
 
   return (
     <FormProvider {...form}>
-      <form onSubmit={handleSubmit(handleCreateQuery)}>
-        <div className="space-y-4 p-4 mt-4">
+      <form onSubmit={handleSubmit(handleCreateQuery)} className="p4 mt-4">
+        <div className="space-y-4">
           <FormInput
             name="name"
             label="Name"
@@ -68,18 +69,20 @@ export const VideoCreateForm: React.FC<VideoCreateFormProps> = ({ onSuccess }) =
             hideLabel
             validationOptions={{ required: true }}
           />
-          <FormInput
+          <FormListBox
             name="platform"
             label="Platform"
-            placeholder="Platform"
             hideLabel
-            validationOptions={{ required: true }}
+            options={[
+              { value: 'YOUTUBE', label: 'YouTube' },
+              { value: 'VIMEO', label: 'Vimeo' },
+            ]}
           />
           <FormInput name="groups" label="Video Groups" placeholder="Video Groups" hideLabel />
-          <FormButton type="submit" disabled={isLoading}>
-            Save
-          </FormButton>
         </div>
+        <FormButton type="submit" isLoading={isLoading} appendClassName="mt-6">
+          Save
+        </FormButton>
       </form>
     </FormProvider>
   )
