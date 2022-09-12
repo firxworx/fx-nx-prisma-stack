@@ -69,6 +69,58 @@ The build outputs to the `dist/` folder.
 
 The nx config `project.json` for each of the `api` + `ui` apps includes the `generatePackageJson: true` flag to produce an app-specific `package.json` in the corresponding app dist folders.
 
+## Docker build
+
+This project implements a multi-stage build.
+
+In the project root folder:
+
+- `Dockerfile` installs all dependencies in the monorepo and can get quite large
+- `docker-compose.yml` specifies a build for the `api` service and its dependencies and references the API app's Dockerfile in `apps/api/Dockerfile`.
+
+The stages in the API app's Dockerfile are to reduce the final image size and prevent any secrets required for the build from ending up in the cache or history of production images.
+
+The image build process works as follows:
+
+- root Dockerfile creates common base image `fx/project-base:nx-base`
+- api `base` image produces a production build
+- api `build` image copies the production build and installs only the api's production dependencies
+  - this discrete step ensures any build secrets such as GitHub tokens and special access keys stay in this layer
+- api `production` image copies what's needed for production and runs the api
+
+### API image build
+
+#### Ad-hoc deployment of API image
+
+Refer to the helper script `scripts/workflow/api-build-push.sh` to build the API Docker image, tag it, push to ECR, and trigger ECS to update the container service.
+
+To push to ECS, the target AWS ECR repository must exist (i.e. you must have infra deployed), and you must be logged into Docker with credentials that correspond to the ECR repo (refer to `scripts/workflow/docker-ecr-login.sh`).
+
+#### Manual build of API image
+
+Use the command below to manually build the api image using `docker compose`:
+
+```sh
+# (re)build api image
+docker compose build api
+```
+
+In troubleshooting or major-change scenarios, it can be helpful to rebuild the image without cache:
+
+```sh
+# troubleshooting -- (re)build api image without cache
+docker compose build api --no-cache
+
+# troubleshooting -- (re)build api image without cache + fresh pull of base image
+docker compose build api --no-cache --pull
+```
+
+To run the image in a container, ensure the local api dev server is off and that the local dev postgres database is running, then run:
+
+```sh
+docker compose up api
+```
+
 ## Infra / Deployment with AWS CDK
 
 The 'infra' app (`apps/infra`) is an Infrastructure-as-Code (IaC) solution implemented in AWS CDK for the deployment of this project to AWS.
