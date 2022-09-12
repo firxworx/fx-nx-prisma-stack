@@ -18,6 +18,7 @@ export interface FormMultiComboBoxOption extends ApiObject {
 export interface FormMultiComboBoxProps extends UseControllerProps {
   label: string
   options: FormMultiComboBoxOption[]
+  hideLabel?: boolean
   disabled?: boolean // currently not part of react-hook-form useController/Controller
 }
 
@@ -191,6 +192,7 @@ const ComboBoxFilterQuerySelectionButton: React.FC<ComboBoxFilterQuerySelectionB
 export const FormMultiComboBox: React.FC<FormMultiComboBoxProps> = ({
   label,
   options,
+  hideLabel,
   disabled,
   ...restReactHookFormProps
 }) => {
@@ -259,6 +261,7 @@ export const FormMultiComboBox: React.FC<FormMultiComboBoxProps> = ({
       disabled={disabled}
     >
       <div className="relative">
+        {!hideLabel && <ComboBox.Label className="fx-form-label mb-1">{label}</ComboBox.Label>}
         {/* <SelectedItemsCommaList selectedItems={field.value} /> */}
         <div className="relative w-full cursor-default bg-white text-left text-base">
           {true && ( // original contender for the ui element:
