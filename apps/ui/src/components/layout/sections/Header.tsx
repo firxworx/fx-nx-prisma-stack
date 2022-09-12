@@ -8,13 +8,18 @@ import { Bars3Icon, XMarkIcon, CloudIcon } from '@heroicons/react/24/outline'
 import { ArrowLeftOnRectangleIcon } from '@heroicons/react/20/solid' // LogoutIcon
 
 import type { NavigationLink } from '../../../types/navigation.types'
-import { useAuthSession, useSessionContext } from '../../../context/SessionContextProvider'
+import { useSessionContext } from '../../../context/SessionContextProvider'
 import { useAuthSignOut } from '../../../api/auth'
 import { UserProfileMenu } from '../menus/UserProfileMenu'
 import { useIsMounted } from '../../../hooks/useIsMounted'
 
 export interface HeaderProps {
   navigationLinks: NavigationLink[]
+}
+
+const LABELS = {
+  HOME: 'Home',
+  SIGN_OUT: 'Sign Out',
 }
 
 /**
@@ -25,12 +30,16 @@ const LogoLink: React.FC<{ href?: string; appendClassName?: string }> = ({ href,
     <Link href={href ?? '/'}>
       <a
         className={clsx(
-          'group inline-block w-fit relative rounded-md fx-focus-ring transition-colors',
+          'group inline-block w-fit relative border-2 border-transparent rounded-md',
+          'fx-focus-ring focus:bg-white transition-colors',
+          'hover:bg-white hover:border-slate-200 hover:border-dashed',
           appendClassName,
         )}
       >
-        <span className="sr-only">{process.env.NEXT_PUBLIC_PROJECT_ORG} Home</span>
-        <CloudIcon className="h-8 sm:h-10 w-auto transition-colors text-action-primary group-hover:text-action-primary-darker" />
+        <span className="sr-only">
+          {process.env.NEXT_PUBLIC_SITE_TITLE} &emdash; {LABELS.HOME}
+        </span>
+        <CloudIcon className="h-8 sm:h-10 w-auto transition-colors text-action-primary-darkest group-hover:text-action-primary-darker" />
       </a>
     </Link>
   )
@@ -85,7 +94,7 @@ const MenuLinks: React.FC<
  * Desktop navigation menu containing horizontal links, hidden via CSS for viewports < tailwindcss 'lg' breakpoint.
  */
 const DesktopNavMenu: React.FC<Pick<HeaderProps, 'navigationLinks'>> = ({ navigationLinks }) => {
-  const session = useAuthSession(true)
+  const session = useSessionContext()
 
   return (
     <div className="hidden lg:flex lg:justify-start lg:items-center lg:flex-1 text-slate-900">
@@ -95,15 +104,16 @@ const DesktopNavMenu: React.FC<Pick<HeaderProps, 'navigationLinks'>> = ({ naviga
             navigationLinks={navigationLinks}
             linkClassName={clsx(
               'inline-block px-4 py-2 border-2 rounded-lg',
-              'transition-bg duration-200',
-              'text-base text-center leading-tight font-medium hover:text-slate-800',
-              'border-transparent hover:bg-slate-100 hover:border-slate-200',
-              'fx-focus-ring ring-inset',
+              'transition-colors duration-200',
+              'text-base font-medium text-center leading-tight',
+              'text-action-primary-darkest border-transparent',
+              'hover:bg-white hover:border-slate-200 hover:border-dashed',
+              'fx-focus-ring focus:bg-white',
             )}
             linkCurrentClassName={'text-slate-900'}
           />
         </div>
-        {session && <UserProfileMenu name={session.profile.name} />}
+        {session?.profile && <UserProfileMenu name={session.profile.name} />}
       </div>
     </div>
   )

@@ -37,9 +37,11 @@ module.exports = {
         },
         action: {
           primary: {
+            lightest: colors.sky[500],
             lighter: colors.sky[600],
             DEFAULT: colors.sky[700],
             darker: colors.sky[800],
+            darkest: colors.sky[900],
           },
         },
         error: {
@@ -156,12 +158,13 @@ module.exports = {
           '@apply focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-200': {},
         },
         '.fx-link': {
-          '@apply font-medium text-sky-800 fx-focus-ring focus:rounded-sm transition-colors duration-150': {},
+          '@apply font-medium text-action-primary-darker fx-focus-ring focus:rounded-sm transition-colors duration-150':
+            {},
           '&:hover': {
-            '@apply text-sky-900 underline': {},
+            '@apply text-action-primary underline': {},
           },
           '&:active': {
-            '@apply text-sky-700': {},
+            '@apply text-action-primary': {},
           },
         },
       })

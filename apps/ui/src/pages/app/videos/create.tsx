@@ -4,6 +4,8 @@ import { useCallback } from 'react'
 
 import { VideoCreateForm } from '../../../components/features/videos/VideoCreateForm'
 
+// youtube video id regex /^[A-Za-z0-9_-]{11}$/
+
 export const VideoCreatePage: NextPage = () => {
   const { push: routerPush } = useRouter()
 

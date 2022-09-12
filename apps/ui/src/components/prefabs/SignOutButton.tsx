@@ -10,6 +10,10 @@ export interface SignOutButtonProps {
   onSignOut?: () => Promise<unknown>
 }
 
+const LABELS = {
+  SIGN_OUT: 'Sign Out',
+}
+
 export const SignOutButton: React.FC<SignOutButtonProps> = ({ signOutRedirectPath, onSignOut }) => {
   const isMounted = useIsMounted()
   const { push: routerPush } = useRouter()
@@ -38,7 +42,7 @@ export const SignOutButton: React.FC<SignOutButtonProps> = ({ signOutRedirectPat
 
   return (
     <ActionButton isLoading={isLoading} onClick={handleSignOut}>
-      Sign Out
+      {LABELS.SIGN_OUT}
     </ActionButton>
   )
 }
