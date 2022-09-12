@@ -1,7 +1,7 @@
 const colors = require('tailwindcss/colors')
 const plugin = require('tailwindcss/plugin')
 
-// const defaultTheme = require('tailwindcss/defaultTheme')
+const defaultTheme = require('tailwindcss/defaultTheme')
 
 // const Color = require('color')
 // const alpha = (c, val) => Color(c).alpha(val).rgb().string()
@@ -10,6 +10,10 @@ const plugin = require('tailwindcss/plugin')
 
 module.exports = {
   theme: {
+    screens: {
+      xs: '475px',
+      ...defaultTheme.screens,
+    },
     extend: {
       spacing: {
         1.25: '0.3125rem',
@@ -120,17 +124,18 @@ module.exports = {
           '@apply max-w-6xl': {},
         },
         '.fx-layout-padding-x': {
-          '@apply px-4 sm:px-6 xl:px-8': {},
+          '@apply px-0 xs:px-4 sm:px-6 xl:px-8': {},
         },
         '.fx-layout-padding-y': {
-          '@apply pt-4 pb-12 sm:pt-6 sm:pb-16': {},
+          '@apply pt-0 xs:pt-4 sm:pt-6 pb-10 xs:pb-12 sm:pb-16': {},
         },
         '.fx-box': {
-          'p-4 sm:p-6 lg:p-8': {},
+          'p-2 xs:p-4 sm:p-6 lg:p-8': {},
         },
         '.fx-button-base, button.fx-button-base, a.fx-button-base': {
-          '@apply inline-flex items-center justify-center px-4 py-2 rounded-md': {},
-          '@apply font-medium tracking-tight fx-focus-ring transition-colors': {},
+          // px-2 py-1
+          '@apply inline-flex items-center justify-center px-3 py-1.5 xs:px-4 xs:py-2 rounded-md': {},
+          '@apply text-base font-medium tracking-tight fx-focus-ring transition-colors': {},
         },
         'button.fx-button-solid-primary, a.fx-button-solid-primary': {
           '@apply border-2 border-sky-800 bg-sky-800 text-white hover:bg-sky-900 hover:bg-sky-900': {},

@@ -6,7 +6,7 @@ export const AuthenticatedLayout: React.FC<PropsWithChildren> = ({ children }) =
   // console.log(session.profile.name)
 
   return (
-    <div className="p-4 sm:p-8 border-2 border-slate-200 rounded-md">
+    <div className="p-4 sm:p-8 border-0 xs:border-2 border-slate-200 rounded-md">
       <div>{children}</div>
     </div>
   )

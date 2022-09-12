@@ -54,7 +54,7 @@ export const ActionButton: React.FC<PropsWithChildren<ActionButtonProps>> = ({
     >
       {isLoading || isSubmitting ? (
         <>
-          <Spinner size="sm" appendClassName="mr-1" />
+          <Spinner size="sm" appendClassName="mr-2" />
           <div className="inline-flex items-center justify-center">{children}</div>
         </>
       ) : (

@@ -64,9 +64,8 @@ const MenuLinks: React.FC<
 > = ({ navigationLinks, linkClassName, linkCurrentClassName, onLinkClick }) => {
   const router = useRouter()
 
-  // check is tolerant to no trailing slash on router.pathname
   const isCurrentMenuLink = (routerPathName: string, itemHref: string): boolean => {
-    return routerPathName !== '/' && itemHref.includes(routerPathName)
+    return routerPathName !== '/' && itemHref === routerPathName
   }
 
   return (
