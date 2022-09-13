@@ -48,6 +48,24 @@ module.exports = {
             darkest: colors.sky[900],
           },
         },
+        palette: {
+          form: {
+            border: {
+              DEFAULT: colors.slate[300],
+            },
+            input: {
+              DEFAULT: colors.slate[800],
+            },
+            placeholder: {
+              DEFAULT: colors.slate[500], // WCAG 2.0
+            },
+          },
+        },
+        form: {
+          placeholder: {
+            DEFAULT: colors.slate[500], // WCAG 2.0
+          },
+        },
         error: {
           DEFAULT: '#cb4848',
           50: '#fdf3f3',
@@ -70,6 +88,9 @@ module.exports = {
     require('@tailwindcss/forms'),
     require('@tailwindcss/aspect-ratio'),
     require('@tailwindcss/line-clamp'),
+
+    // headlessui tailwindcss plugin - adds modifiers for headlessui including ui-open:*, ui-active:*, etc
+    require('@headlessui/tailwindcss'),
 
     // add custom styles via inline custom plugin
     plugin(function ({ addBase, addComponents }) {
@@ -112,9 +133,7 @@ module.exports = {
           height: 0,
         },
         [formInputTargets]: {
-          '@apply border border-slate-300 rounded-md': {},
-          '@apply focus:outline-none focus-visible:border-slate-300 focus-visible:ring-2 focus-visible:ring-blue-100':
-            {},
+          '@apply fx-form-input': {},
         },
         // [formInputFocusTargets]: {
         // }
@@ -175,8 +194,14 @@ module.exports = {
             '@apply text-action-primary': {},
           },
         },
+        '.fx-form-input': {
+          '@apply border rounded-md': {},
+          '@apply border-palette-form-border text-palette-form-input placeholder:text-palette-form-placeholder': {},
+          '@apply fx-focus-ring-form': {},
+        },
         '.fx-form-label': {
-          '@apply block text-sm font-normal text-slate-700': {},
+          // requires that a parent wrapping div have the tailwind 'group' class applied
+          '@apply block text-sm font-normal text-slate-700 group-focus-within:font-medium': {},
         },
       })
     }),
