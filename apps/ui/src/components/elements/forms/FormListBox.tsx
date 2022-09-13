@@ -69,7 +69,7 @@ export const FormListBox = ({
               <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                 <ChevronUpDownIcon
                   className={clsx('h-5 w-5 text-slate-400', {
-                    ['group-hover:text-slate-600 group-active:text-slate-800']: !!(options && options.length),
+                    ['group-hover:text-slate-600 group-active:text-palette-form-input']: !!(options && options.length),
                   })}
                   aria-hidden="true"
                 />
@@ -95,7 +95,7 @@ export const FormListBox = ({
                     key={`${option.label}-${option.value}`}
                     className={({ active }) =>
                       clsx(
-                        active ? 'text-white bg-sky-500' : 'text-slate-900',
+                        active ? 'bg-sky-100' : 'text-palette-form-input',
                         'relative py-2 pl-8 pr-4 cursor-default select-none',
                       )
                     }
@@ -104,14 +104,19 @@ export const FormListBox = ({
                   >
                     {({ selected, active }) => (
                       <>
-                        <span className={clsx(selected ? 'font-medium' : 'font-normal', 'block truncate')}>
+                        <span
+                          className={clsx(
+                            selected ? 'font-medium text-action-primary-darker' : 'font-normal',
+                            'block truncate',
+                          )}
+                        >
                           {option.label}
                         </span>
 
                         {selected ? (
                           <span
                             className={clsx(
-                              active ? 'text-white' : 'text-sky-600',
+                              active ? 'text-action-primary-darker' : 'text-action-primary',
                               'absolute inset-y-0 left-0 flex items-center pl-1.5',
                             )}
                           >

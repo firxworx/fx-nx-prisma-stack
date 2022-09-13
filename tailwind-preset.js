@@ -56,6 +56,9 @@ module.exports = {
             input: {
               DEFAULT: colors.slate[800],
             },
+            label: {
+              DEFAULT: colors.slate[700],
+            },
             placeholder: {
               DEFAULT: colors.slate[500], // WCAG 2.0
             },
@@ -201,7 +204,7 @@ module.exports = {
         },
         '.fx-form-label': {
           // requires that a parent wrapping div have the tailwind 'group' class applied
-          '@apply block text-sm font-normal text-slate-700 group-focus-within:font-medium': {},
+          '@apply block text-sm font-normal text-palette-form-label group-focus-within:font-medium': {},
         },
       })
     }),

@@ -43,11 +43,9 @@ export const TextArea = ({
 
   return (
     <div>
-      {!hideLabel && ( // @todo more a11y-friendly label hide of FormInput
-        <label htmlFor={id} className="block text-sm font-normal text-slate-700">
-          {label}
-        </label>
-      )}
+      <label htmlFor={id} className={clsx(hideLabel ? 'sr-only' : 'fx-form-label mb-1')}>
+        {label}
+      </label>
       <div className="relative mt-1">
         <textarea
           id={id}
