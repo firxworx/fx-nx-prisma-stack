@@ -21,6 +21,7 @@ export interface FormListBoxProps extends UseControllerProps {
   options: FormListBoxOption[]
   readOnly?: boolean
   hideLabel?: boolean
+  appendClassName?: string
   // validation?: RegisterOptions
 }
 
@@ -36,31 +37,40 @@ export const FormListBox = ({
   options,
   readOnly = false,
   hideLabel = false,
+  appendClassName,
   // validation,
   ...restReactHookFormProps
 }: FormListBoxProps) => {
   const { field } = useController({ name, ...restReactHookFormProps }) // { name, control, rule, defaultValue }
 
   return (
-    <Listbox value={field.value} onChange={field.onChange} as="div">
+    <Listbox value={field.value} onChange={field.onChange} as="div" className={clsx('group w-full', appendClassName)}>
       {({ open }) => (
         <>
-          {!hideLabel && <Listbox.Label className="fx-form-label mb-1">{label}</Listbox.Label>}
+          <Listbox.Label className={clsx(hideLabel ? 'sr-only' : 'fx-form-label mb-1')}>{label}</Listbox.Label>
           <div className="relative">
             <Listbox.Button
+              ref={field.ref} // setting ref enables react-hook-form to focus on input on error
               className={clsx(
-                'relative gtoup w-full cursor-default rounded-md border text-base',
+                'relative group w-full cursor-default rounded-md border text-base',
                 'py-2 pl-3 pr-10 text-left shadow-sm',
-                'border-slate-300 bg-white',
+                'border-palette-form-border bg-white',
                 'fx-focus-ring-form',
               )}
             >
-              <span className="block truncate">
+              <span
+                className={clsx('block truncate', {
+                  ['text-palette-form-input']: !!field.value,
+                  ['text-palette-form-placeholder']: !field.value,
+                })}
+              >
                 {field.value ? options.find((option) => option.value === field.value)?.label : `Select ${label}`}
               </span>
               <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                 <ChevronUpDownIcon
-                  className={clsx('h-5 w-5 text-slate-400 group-hover:text-slate-600 group-active:text-slate-800')}
+                  className={clsx('h-5 w-5 text-slate-400', {
+                    ['group-hover:text-slate-600 group-active:text-slate-800']: !!(options && options.length),
+                  })}
                   aria-hidden="true"
                 />
               </span>

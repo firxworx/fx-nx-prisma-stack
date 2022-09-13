@@ -28,6 +28,8 @@ export interface FormInputProps extends React.ComponentPropsWithoutRef<'input'> 
   hideError?: boolean
   /** manual validation options passed to react-hook-form; it is encouraged to use a yup resolver instead */
   validationOptions?: RegisterOptions
+  /** append className to the component's wrapper div; useful for adding margins, flex/grid controls, etc. */
+  appendClassName?: string
 }
 
 /**
@@ -50,6 +52,7 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
       hideError = false,
       hideLabel = false,
       validationOptions,
+      appendClassName,
       ...restProps
     }: FormInputProps,
     forwardedRef,
@@ -67,12 +70,10 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
     const isDisabled = restProps.disabled || isSubmitting
 
     return (
-      <div>
-        {!hideLabel && ( // @todo more a11y-friendly label hide of FormInput
-          <label htmlFor={id} className="fx-form-label mb-1">
-            {label}
-          </label>
-        )}
+      <div className={clsx('group', appendClassName)}>
+        <label htmlFor={id} className={clsx(hideLabel ? 'sr-only' : 'fx-form-label mb-1')}>
+          {label}
+        </label>
         <div className="relative">
           <input
             id={id}
@@ -83,7 +84,7 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
             type={type}
             readOnly={readOnly}
             className={clsx(
-              'block border w-full rounded-md shadow-sm focus:outline-none',
+              'block border w-full rounded-md focus:outline-none',
               readOnly
                 ? 'bg-slate-100 border-slate-300 cursor-not-allowed focus:ring-0 focus:border-slate-300'
                 : 'bg-white focus:ring-2',
@@ -109,17 +110,13 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
           {helperText && <div className="text-xs text-slate-500">{helperText}</div>}
           {!hideError && errors[name] && (
             <div className="text-sm text-error-600">
-              {
-                // @ts-expect-error type issue w/ react-hook-form -- type 'required' not supported in types for generic inputs
-                errors[name]?.type === 'required' && !errors[name]?.message
-                  ? 'Field is required'
-                  : // @ts-expect-error type issue w/ react-hook-form -- type 'required' not supported in types for generic inputs
-                  errors[name]?.type === 'pattern' && !errors[name]?.message
-                  ? 'Invalid value'
-                  : String(errors[name]?.message)
-                  ? String(errors[name]?.message)
-                  : 'Invalid input'
-              }
+              {errors[name]?.type === 'required' && !errors[name]?.message
+                ? 'Field is required'
+                : errors[name]?.type === 'pattern' && !errors[name]?.message
+                ? 'Invalid value'
+                : String(errors[name]?.message)
+                ? String(errors[name]?.message)
+                : 'Invalid input'}
             </div>
           )}
         </div>
