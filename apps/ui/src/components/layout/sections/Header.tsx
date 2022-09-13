@@ -109,7 +109,7 @@ const DesktopNavMenu: React.FC<Pick<HeaderProps, 'navigationLinks'>> = ({ naviga
               'hover:bg-white hover:border-slate-200 hover:border-dashed',
               'fx-focus-ring focus:bg-white',
             )}
-            linkCurrentClassName={'text-slate-900'}
+            linkCurrentClassName={'bg-white'}
           />
         </div>
         {session?.profile && <UserProfileMenu name={session.profile.name} />}
