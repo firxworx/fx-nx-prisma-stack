@@ -1,19 +1,17 @@
 import { useCallback, useMemo } from 'react'
 import { FormProvider, SubmitHandler, useForm } from 'react-hook-form'
 
-import type { UpdateVideoDto, VideoDto, VideoGroupDto } from '../../../types/videos.types'
+import type { UpdateVideoDto, VideoDto } from '../../../types/videos.types'
 import { useVideoMutationQuery } from '../../../api/videos'
 import { useIsMounted } from '../../../hooks/useIsMounted'
 import { Spinner } from '../../elements/feedback/Spinner'
 import { FormButton } from '../../elements/forms/FormButton'
 import { FormInput } from '../../elements/forms/FormInput'
-import { FormMultiComboBox } from '../../elements/forms/FormMultiComboBox'
 import { useVideoGroupsQuery } from '../../../api/video-groups'
 import { FormListBox } from '../../elements/forms/FormListBox'
+import { FormMultiListBox } from '../../elements/forms/FormMultiListBox'
 
-export interface VideoMutateFormData extends Omit<UpdateVideoDto, 'groups'> {
-  groups: Pick<VideoDto['groups'][number], 'uuid' | 'name'>[]
-}
+export interface VideoMutateFormValues extends UpdateVideoDto {}
 
 export interface VideoMutateFormProps {
   uuid?: string
@@ -21,20 +19,15 @@ export interface VideoMutateFormProps {
   onSuccess?: () => void | Promise<void>
 }
 
-const mapVideoDtoToFormData = (video?: VideoDto): VideoMutateFormData | undefined =>
+const mapVideoDtoToFormData = (video?: VideoDto): VideoMutateFormValues | undefined =>
   video
     ? {
         name: video.name,
         externalId: video.externalId,
         platform: video.platform,
-        groups: video.groups?.map((vg) => ({ uuid: vg.uuid, name: vg.name })) ?? [],
+        groups: video.groups?.map((vg) => vg.uuid) ?? [],
       }
     : undefined
-
-const mapFormDataToRequestDto = (formData: VideoMutateFormData): UpdateVideoDto => ({
-  ...formData,
-  groups: formData.groups.map((d) => d.uuid), // Array.isArray(data.groups) ? data.groups.map((d) => d.uuid) : data.groups ? [data.groups] : undefined,
-})
 
 export const VideoMutateForm: React.FC<VideoMutateFormProps> = ({ uuid, video, onSuccess }) => {
   const isMounted = useIsMounted()
@@ -49,10 +42,10 @@ export const VideoMutateForm: React.FC<VideoMutateFormProps> = ({ uuid, video, o
 
   const videoDefaultFormData = useMemo(() => mapVideoDtoToFormData(video), [video])
 
-  const form = useForm<VideoMutateFormData>({ defaultValues: videoDefaultFormData })
+  const form = useForm<VideoMutateFormValues>({ defaultValues: videoDefaultFormData })
   const { handleSubmit } = form
 
-  const handleMutationQuery: SubmitHandler<VideoMutateFormData> = useCallback(
+  const handleMutationQuery: SubmitHandler<VideoMutateFormValues> = useCallback(
     async (formData) => {
       if (!isMounted || !uuid) {
         return
@@ -61,12 +54,8 @@ export const VideoMutateForm: React.FC<VideoMutateFormProps> = ({ uuid, video, o
       try {
         const video = await mutateAsync({
           uuid,
-          ...mapFormDataToRequestDto(formData),
+          ...formData,
         })
-
-        if (process.env.NODE_ENV === 'development') {
-          console.debug(video)
-        }
 
         return video
       } catch (error: unknown) {
@@ -77,8 +66,8 @@ export const VideoMutateForm: React.FC<VideoMutateFormProps> = ({ uuid, video, o
     [uuid, isMounted],
   )
 
-  const videoGroupSelectOptions: Pick<VideoGroupDto, 'uuid' | 'name'>[] = useMemo(() => {
-    return videoGroups?.map((vg) => ({ uuid: vg.uuid, name: vg.name })) ?? []
+  const videoGroupSelectOptions: { value: string; label: string }[] = useMemo(() => {
+    return videoGroups?.map((vg) => ({ value: vg.uuid, label: vg.name })) ?? []
   }, [videoGroups])
 
   if (!video || !videoGroups) {
@@ -87,10 +76,16 @@ export const VideoMutateForm: React.FC<VideoMutateFormProps> = ({ uuid, video, o
 
   return (
     <FormProvider {...form}>
-      {isVideoMutationError && <div className="font-bold">{String(videoMutationError)}</div>}
-      <form onSubmit={handleSubmit(handleMutationQuery)} className="p-4 mt-4">
-        <div className="space-y-4">
-          <FormInput name="name" label="Name" placeholder="Video Name" validationOptions={{ required: true }} />
+      <form onSubmit={handleSubmit(handleMutationQuery)} className="p-4 mt-4 w-full">
+        {isVideoMutationError && <div className="font-medium my-4">{String(videoMutationError)}</div>}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <FormInput
+            name="name"
+            label="Name"
+            placeholder="Video Name"
+            validationOptions={{ required: true }}
+            appendClassName="sm:col-span-2"
+          />
           <FormInput
             name="externalId"
             label="Share/Embed Code"
@@ -105,7 +100,12 @@ export const VideoMutateForm: React.FC<VideoMutateFormProps> = ({ uuid, video, o
               { value: 'VIMEO', label: 'Vimeo' },
             ]}
           />
-          <FormMultiComboBox name="groups" label="Video Groups" options={videoGroupSelectOptions} />
+          <FormMultiListBox
+            name="groups"
+            label="Video Groups"
+            options={videoGroupSelectOptions}
+            appendClassName="sm:col-span-2"
+          />
         </div>
         <FormButton type="submit" isLoading={isVideoMutationLoading} appendClassName="mt-6">
           Save
