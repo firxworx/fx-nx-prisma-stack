@@ -1473,6 +1473,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.8.7":
+  version: 7.19.0
+  resolution: "@babel/runtime@npm:7.19.0"
+  dependencies:
+    regenerator-runtime: ^0.13.4
+  checksum: fa69c351bb05e1db3ceb9a02fdcf620c234180af68cdda02152d3561015f6d55277265d3109815992f96d910f3db709458cae4f8df1c3def66f32e0867d82294
+  languageName: node
+  linkType: hard
+
 "@babel/template@npm:^7.18.10, @babel/template@npm:^7.18.6, @babel/template@npm:^7.3.3":
   version: 7.18.10
   resolution: "@babel/template@npm:7.18.10"
@@ -3976,6 +3985,15 @@ __metadata:
   dependencies:
     "@types/react": "*"
   checksum: db571047af1a567631758700b9f7d143e566df939cfe5fbf7535347cc0c726a1cdbb5e3f8566d076e54cf708b6c1166689de194a9ba09ee35efc9e1d45911685
+  languageName: node
+  linkType: hard
+
+"@types/react-transition-group@npm:^4":
+  version: 4.4.5
+  resolution: "@types/react-transition-group@npm:4.4.5"
+  dependencies:
+    "@types/react": "*"
+  checksum: 265f1c74061556708ffe8d15559e35c60d6c11478c9950d3735575d2c116ca69f461d85effa06d73a613eb8b73c84fd32682feb57cf7c5f9e4284021dbca25b0
   languageName: node
   linkType: hard
 
@@ -6918,6 +6936,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"dom-helpers@npm:^5.0.1":
+  version: 5.2.1
+  resolution: "dom-helpers@npm:5.2.1"
+  dependencies:
+    "@babel/runtime": ^7.8.7
+    csstype: ^3.0.2
+  checksum: 863ba9e086f7093df3376b43e74ce4422571d404fc9828bf2c56140963d5edf0e56160f9b2f3bb61b282c07f8fc8134f023c98fd684bddcb12daf7b0f14d951c
+  languageName: node
+  linkType: hard
+
 "dom-serializer@npm:^1.0.1":
   version: 1.4.1
   resolution: "dom-serializer@npm:1.4.1"
@@ -8342,6 +8370,29 @@ __metadata:
   languageName: node
   linkType: hard
 
+"focus-trap-react@npm:^10.0.0":
+  version: 10.0.0
+  resolution: "focus-trap-react@npm:10.0.0"
+  dependencies:
+    focus-trap: ^7.0.0
+    tabbable: ^6.0.0
+  peerDependencies:
+    prop-types: ^15.8.1
+    react: ">=16.3.0"
+    react-dom: ">=16.3.0"
+  checksum: 44e98f61fbeb49b94f4d89bcc3c6833b31a07cdd742b74999c4dead54d3b7b06b6f094da76151575e7a052215eb305898b7bee5e3e759238302d45d78f85da1c
+  languageName: node
+  linkType: hard
+
+"focus-trap@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "focus-trap@npm:7.0.0"
+  dependencies:
+    tabbable: ^6.0.0
+  checksum: 36812c880a5262478d5d8a678cae0a0576b3c801a7c00010d44154d5526aeaeaab5cd05aaf3199ceee97ff9be8defe47809f3712c8211bc829bde6c0614d7bb9
+  languageName: node
+  linkType: hard
+
 "follow-redirects@npm:^1.0.0, follow-redirects@npm:^1.14.9":
   version: 1.15.1
   resolution: "follow-redirects@npm:1.15.1"
@@ -8624,6 +8675,7 @@ __metadata:
     "@types/prettier": ^2.7.0
     "@types/react": 18.0.19
     "@types/react-dom": 18.0.6
+    "@types/react-transition-group": ^4
     "@types/source-map-support": ^0.5.6
     "@types/supertest": ^2.0.12
     "@types/validator": ^13.7.6
@@ -8657,6 +8709,7 @@ __metadata:
     eslint-plugin-react: 7.31.1
     eslint-plugin-react-hooks: 4.6.0
     express: ^4.18.1
+    focus-trap-react: ^10.0.0
     helmet: ^5.1.1
     jest: 28.1.3
     lodash: ^4.17.21
@@ -8680,7 +8733,9 @@ __metadata:
     react-error-boundary: ^3.1.4
     react-hook-form: ^7.35.0
     react-icons: ^4.4.0
+    react-modal-hook: ^3.0.2
     react-test-renderer: 18.2.0
+    react-transition-group: ^4.4.5
     react-use: ^17.4.0
     reflect-metadata: ^0.1.13
     regenerator-runtime: 0.13.9
@@ -13254,7 +13309,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:^15.8.1":
+"prop-types@npm:^15.6.2, prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -13505,6 +13560,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-modal-hook@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "react-modal-hook@npm:3.0.2"
+  peerDependencies:
+    prop-types: ^15.5.4
+    react: ">=16.8.3"
+    react-dom: ">=16.8.3"
+  checksum: 53671e3d40bbdff176caec5f3700b5ac18326b02303060babbb50c3461f4aff3922f204ab0606377219b15ce24eda6f2948120cc70f53a3f11a692b3528e5c2e
+  languageName: node
+  linkType: hard
+
 "react-refresh@npm:^0.10.0":
   version: 0.10.0
   resolution: "react-refresh@npm:0.10.0"
@@ -13534,6 +13600,21 @@ __metadata:
   peerDependencies:
     react: ^18.2.0
   checksum: 6b6980ced93fa2b72662d5e4ab3b4896833586940047ce52ca9aca801e5432adf05fcbe28289b0af3ce6a2a7c590974e25dcc8aa43d0de658bfe8bbcd686f958
+  languageName: node
+  linkType: hard
+
+"react-transition-group@npm:^4.4.5":
+  version: 4.4.5
+  resolution: "react-transition-group@npm:4.4.5"
+  dependencies:
+    "@babel/runtime": ^7.5.5
+    dom-helpers: ^5.0.1
+    loose-envify: ^1.4.0
+    prop-types: ^15.6.2
+  peerDependencies:
+    react: ">=16.6.0"
+    react-dom: ">=16.6.0"
+  checksum: 75602840106aa9c6545149d6d7ae1502fb7b7abadcce70a6954c4b64a438ff1cd16fc77a0a1e5197cdd72da398f39eb929ea06f9005c45b132ed34e056ebdeb1
   languageName: node
   linkType: hard
 
@@ -15018,6 +15099,13 @@ __metadata:
   version: 4.14.0
   resolution: "swagger-ui-dist@npm:4.14.0"
   checksum: 8670e230ae841b16c983bf8420a3c52073fc3e6590cd1c700342ee788e6c46e329daeeff7e5dcfa59ffe58d2efce40cf51377b7f29ce36af9134b4112cd5c97e
+  languageName: node
+  linkType: hard
+
+"tabbable@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "tabbable@npm:6.0.0"
+  checksum: a6bd253035b91b6ed280c77e07880f35d337509c2d49f6eef9e9d80a006bf6bddb42cdc5772f7a33a2a6625f47d2faa47b50398dda4bb83157a078c3002884ba
   languageName: node
   linkType: hard
 

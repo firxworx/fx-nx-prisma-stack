@@ -22,6 +22,7 @@ import { PublicLayout } from '../components/layout/PublicLayout'
 import { SessionContextProvider } from '../context/SessionContextProvider'
 import { ActionButton } from '../components/elements/inputs/ActionButton'
 import { PlaceholderLayout } from '../components/layout/PlaceholderLayout'
+import { ModalContextProvider } from '../context/ModalContextProvider'
 
 export const SIGN_IN_ROUTE = '/sign-in'
 export const DEFAULT_AUTHENTICATED_ROUTE = '/app'
@@ -106,7 +107,7 @@ function CustomApp({ Component, pageProps, router }: AppProps) {
   )
 
   return (
-    <>
+    <ModalContextProvider>
       <Head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="initial-scale=1.0, width=device-width" />
@@ -152,7 +153,7 @@ function CustomApp({ Component, pageProps, router }: AppProps) {
           <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
       </ErrorBoundary>
-    </>
+    </ModalContextProvider>
   )
 }
 
