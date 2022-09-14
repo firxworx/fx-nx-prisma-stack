@@ -1,7 +1,7 @@
 import type { NextPage } from 'next'
 import { PageHeading } from '../../../components/elements/headings/PageHeading'
 
-import { useVideoGroupsQuery } from '../../../api/video-groups'
+import { useVideoGroupsQuery } from '../../../api/hooks/video-groups'
 import { Spinner } from '../../../components/elements/feedback/Spinner'
 
 export const VideoGroupsPage: NextPage = (_props) => {
