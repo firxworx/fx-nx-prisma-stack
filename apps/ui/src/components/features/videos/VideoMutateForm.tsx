@@ -7,7 +7,7 @@ import { useIsMounted } from '../../../hooks/useIsMounted'
 import { Spinner } from '../../elements/feedback/Spinner'
 import { FormButton } from '../../elements/forms/FormButton'
 import { FormInput } from '../../elements/forms/FormInput'
-import { useVideoGroupsQuery } from '../../../api/video-groups'
+import { useVideoGroupsQuery } from '../../../api/hooks/video-groups'
 import { FormListBox } from '../../elements/forms/FormListBox'
 import { FormMultiListBox } from '../../elements/forms/FormMultiListBox'
 
