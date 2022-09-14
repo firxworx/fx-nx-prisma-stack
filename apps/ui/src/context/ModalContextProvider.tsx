@@ -19,9 +19,21 @@ import { ModalContainer } from '../components/elements/modals/ModalContainer'
  * const [showModal] = useModalContext({ title: 'hello' }, <div>Hello</div>)
  *
  * return (
- *  <button onClick={showModal}>click me</button>
+ *  <button onClick={showModal}>show modal</button>
  * )
  * ```
+ *
+ * The `hideModal()` function is also optionally available via render-prop to the modal contents:
+ *
+ * ```ts
+ * const [showModal] = useModalContext(
+ *  { title: 'hello' },
+ *  (hideModal) => (<div><button onClick={hideModal}>close this modal</button></div>)
+ * )
+ * ```
+ *
+ * @see ModalContextProvider
+ * @see ModalBody
  */
 export function useModalContext(
   modalBodyProps: ModalBodyProps,

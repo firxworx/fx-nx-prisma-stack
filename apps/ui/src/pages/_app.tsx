@@ -107,7 +107,7 @@ function CustomApp({ Component, pageProps, router }: AppProps) {
   )
 
   return (
-    <ModalContextProvider>
+    <>
       <Head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="initial-scale=1.0, width=device-width" />
@@ -124,36 +124,38 @@ function CustomApp({ Component, pageProps, router }: AppProps) {
         )}
       >
         <QueryClientProvider client={queryClient}>
-          <SessionContextProvider>
-            {(isSessionReady) => (
-              <>
-                {isPublicRoute(router.asPath) ? (
-                  <AppLayout navigationLinks={isSessionReady ? AUTHENTICATED_NAV_LINKS : PUBLIC_NAV_LINKS}>
-                    <PublicLayout>
-                      <Component {...pageProps} />
-                    </PublicLayout>
-                  </AppLayout>
-                ) : isSessionReady ? (
-                  <AppLayout navigationLinks={isSessionReady ? AUTHENTICATED_NAV_LINKS : PUBLIC_NAV_LINKS}>
-                    <AuthenticatedLayout>
-                      {/* autherrorlistener, sessiontimer, etc */}
-                      <Component {...pageProps} />
-                    </AuthenticatedLayout>
-                  </AppLayout>
-                ) : (
-                  <PlaceholderLayout>
-                    <SessionLoadingScreen />
-                  </PlaceholderLayout>
-                )}
-              </>
-            )}
-          </SessionContextProvider>
+          <ModalContextProvider>
+            <SessionContextProvider>
+              {(isSessionReady) => (
+                <>
+                  {isPublicRoute(router.asPath) ? (
+                    <AppLayout navigationLinks={isSessionReady ? AUTHENTICATED_NAV_LINKS : PUBLIC_NAV_LINKS}>
+                      <PublicLayout>
+                        <Component {...pageProps} />
+                      </PublicLayout>
+                    </AppLayout>
+                  ) : isSessionReady ? (
+                    <AppLayout navigationLinks={isSessionReady ? AUTHENTICATED_NAV_LINKS : PUBLIC_NAV_LINKS}>
+                      <AuthenticatedLayout>
+                        {/* autherrorlistener, sessiontimer, etc */}
+                        <Component {...pageProps} />
+                      </AuthenticatedLayout>
+                    </AppLayout>
+                  ) : (
+                    <PlaceholderLayout>
+                      <SessionLoadingScreen />
+                    </PlaceholderLayout>
+                  )}
+                </>
+              )}
+            </SessionContextProvider>
 
-          {/* ReactQueryDevtools is only included in bundles when NODE_ENV === 'development' */}
-          <ReactQueryDevtools initialIsOpen={false} />
+            {/* ReactQueryDevtools is only included in bundles when NODE_ENV === 'development' */}
+            <ReactQueryDevtools initialIsOpen={false} />
+          </ModalContextProvider>
         </QueryClientProvider>
       </ErrorBoundary>
-    </ModalContextProvider>
+    </>
   )
 }
 
