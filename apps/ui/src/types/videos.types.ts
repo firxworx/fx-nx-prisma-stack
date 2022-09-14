@@ -29,3 +29,9 @@ export interface VideoGroupDto extends ApiObject {
   description: string
   videos: VideoDto[]
 }
+
+export interface CreateVideoGroupDto extends Pick<VideoGroupDto, 'name' | 'description'> {
+  groups?: VideoGroupDto['videos'][number]['uuid'][]
+}
+
+export interface UpdateVideoGroupDto extends Partial<CreateVideoGroupDto> {}
