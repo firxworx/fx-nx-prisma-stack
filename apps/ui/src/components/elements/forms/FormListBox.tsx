@@ -86,7 +86,7 @@ export const FormListBox = ({
               <Listbox.Options
                 className={clsx(
                   'absolute z-10 mt-1 max-h-60 w-full py-1 overflow-auto rounded-md',
-                  'bg-white text-base shadow-lg',
+                  'bg-white text-base text-left shadow-lg',
                   'ring-1 ring-black ring-opacity-5 focus:outline-none', // dropdown menu border
                 )}
               >

@@ -46,7 +46,7 @@ export const TextArea = ({
       <label htmlFor={id} className={clsx(hideLabel ? 'sr-only' : 'fx-form-label mb-1')}>
         {label}
       </label>
-      <div className="relative mt-1">
+      <div className="relative mt-1 text-left">
         <textarea
           id={id}
           disabled={restProps.disabled || isSubmitting}
@@ -72,7 +72,7 @@ export const TextArea = ({
           </div>
         )}
       </div>
-      <div className="mt-1">
+      <div className="mt-1 text-left">
         {helperText && <p className="text-xs text-slate-500">{helperText}</p>}
         {!hideError && errors[name] && <span className="text-sm text-error-600">{String(errors[name]?.message)}</span>}
       </div>

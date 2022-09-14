@@ -309,7 +309,7 @@ export const FormMultiComboBox: React.FC<FormMultiComboBoxProps> = ({
             // static
             className={clsx(
               'absolute mt-1 max-h-60 w-full overflow-auto rounded-md py-1',
-              'sm:text-sm bg-white shadow-lg',
+              'sm:text-sm text-left bg-white shadow-lg',
               'ring-1 ring-slate-300 focus:outline-none',
             )}
           >

@@ -106,7 +106,7 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
             </div>
           )}
         </div>
-        <div className="mt-1">
+        <div className="mt-1 text-left">
           {helperText && <div className="text-xs text-slate-500">{helperText}</div>}
           {!hideError && errors[name] && (
             <div className="text-sm text-error-600">
