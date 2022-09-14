@@ -8722,7 +8722,7 @@ __metadata:
     pg: ^8.8.0
     pino: ^8.4.1
     pino-http: ^8.2.0
-    pino-pretty: ^9.0.0
+    pino-pretty: ^9.1.0
     postcss: 8.4.16
     prettier: ^2.7.1
     prettier-plugin-prisma: ^4.2.0
@@ -9127,12 +9127,12 @@ __metadata:
   linkType: hard
 
 "help-me@npm:^4.0.1":
-  version: 4.0.1
-  resolution: "help-me@npm:4.0.1"
+  version: 4.1.0
+  resolution: "help-me@npm:4.1.0"
   dependencies:
     glob: ^8.0.0
     readable-stream: ^3.6.0
-  checksum: d7815a7b2876b1883a87d6dd837b0ec4d7192d84d89e5695e20d3df23c2c67d6bb785752892a52d5be21ae221818e627d90e2c52fcc75ab324ba10af7e96a352
+  checksum: 521b1b3f8cef500eff7b22fdeb7c5315c93001026dd3dac2450e8f85bfeba5512d51c14e3654fa03527a996130a372e903e3bf88a0e0fea1ec089c947212477e
   languageName: node
   linkType: hard
 
@@ -12583,9 +12583,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pino-pretty@npm:^9.0.0":
-  version: 9.0.0
-  resolution: "pino-pretty@npm:9.0.0"
+"pino-pretty@npm:^9.1.0":
+  version: 9.1.0
+  resolution: "pino-pretty@npm:9.1.0"
   dependencies:
     colorette: ^2.0.7
     dateformat: ^4.6.3
@@ -12603,7 +12603,7 @@ __metadata:
     strip-json-comments: ^3.1.1
   bin:
     pino-pretty: bin.js
-  checksum: d1b730337036fad02ba3f6712b13d36731189d3a1b95624c2577f403329fe172353810b38ae4bba2e3709edd6ef65fc5beb113969737a8e6f6ac877e7025b3c3
+  checksum: 44416ebfcc8c4b996a1508b7866301087565f47d2b9155cbe41ca56cc3e638f54c989728492bc71a07e8ea73a64d1ea44b2728a2440c1d67f9ea43c25c8cceaa
   languageName: node
   linkType: hard
 

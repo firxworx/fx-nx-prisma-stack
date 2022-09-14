@@ -1,6 +1,7 @@
 import * as os from 'os'
 import { registerAs } from '@nestjs/config'
 import pino from 'pino'
+import 'pino-pretty'
 
 import type { LoggerConfig } from './types/logger-config.interface'
 
