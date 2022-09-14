@@ -3,9 +3,10 @@ import clsx from 'clsx'
 import { useController, type UseControllerProps } from 'react-hook-form'
 import { Listbox, Transition } from '@headlessui/react'
 
-import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
+import { CheckIcon, ChevronUpDownIcon, PlusIcon } from '@heroicons/react/20/solid'
 
 import type { FormListBoxOption } from './FormListBox'
+import { ActionButton } from '../inputs/ActionButton'
 
 export interface FormMultiListBoxProps extends UseControllerProps {
   id?: string
@@ -18,6 +19,7 @@ export interface FormMultiListBoxProps extends UseControllerProps {
   hideLabel?: boolean
   disabled?: boolean
   appendClassName?: string
+  onAddItemClick?: (event: React.MouseEvent) => void
   // validation?: RegisterOptions
 }
 
@@ -38,6 +40,7 @@ export const FormMultiListBox = ({
   hideLabel = false,
   disabled,
   appendClassName,
+  onAddItemClick,
   // validation,
   ...restReactHookFormProps
 }: FormMultiListBoxProps) => {
@@ -53,44 +56,59 @@ export const FormMultiListBox = ({
       multiple
       as="div"
       disabled={disabled}
-      className={clsx('group w-full', appendClassName)}
+      className={clsx('w-full', appendClassName)}
     >
       {({ open }) => (
         <>
           <Listbox.Label className={clsx(hideLabel ? 'sr-only' : 'fx-form-label mb-1')}>{label}</Listbox.Label>
           <div className="relative">
-            <Listbox.Button
-              ref={field.ref} // setting ref enables react-hook-form to focus on input on error
-              className={clsx(
-                'relative gtoup w-full cursor-default rounded-md border text-base',
-                'py-2 pl-3 pr-10 text-left shadow-sm',
-                'border-slate-300 bg-white',
-                'fx-focus-ring-form',
-              )}
-            >
-              <span
-                className={clsx('block truncate', {
-                  ['text-palette-form-input']: !!(Array.isArray(field.value) && field.value.length),
-                  ['text-palette-form-placeholder']:
-                    !field.value || (Array.isArray(field.value) && field.value.length === 0),
-                })}
+            <div className="flex w-full">
+              <Listbox.Button
+                ref={field.ref} // setting ref enables react-hook-form to focus on input on error
+                className={clsx(
+                  'group relative w-full cursor-default rounded-md border text-base',
+                  'py-2 pl-3 pr-10 text-left shadow-sm',
+                  'border-slate-300 bg-white',
+                  'fx-focus-ring-form',
+                )}
               >
-                {Array.isArray(field.value) && !!field.value.length
-                  ? field.value
-                      .map((selectedOption) => options.find((i) => i.value === selectedOption)?.label)
-                      .join(', ')
-                  : `Select ${label}`}
-              </span>
-              <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                <ChevronUpDownIcon
-                  className={clsx('h-5 w-5 text-slate-400', {
-                    ['group-hover:text-slate-600 group-active:text-palette-form-input']: !!(options && options.length),
+                <span
+                  className={clsx('block truncate', {
+                    ['text-palette-form-input']: !!(Array.isArray(field.value) && field.value.length),
+                    ['text-palette-form-placeholder']:
+                      !field.value || (Array.isArray(field.value) && field.value.length === 0),
                   })}
-                  aria-hidden="true"
-                />
-              </span>
-            </Listbox.Button>
-
+                >
+                  {Array.isArray(field.value) && !!field.value.length
+                    ? field.value
+                        .map((selectedOption) => options.find((i) => i.value === selectedOption)?.label)
+                        .join(', ')
+                    : `Select ${label}`}
+                </span>
+                <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                  <ChevronUpDownIcon
+                    className={clsx('h-5 w-5 text-slate-400', {
+                      ['group-hover:text-slate-600 group-active:text-palette-form-input']: !!(
+                        options && options.length
+                      ),
+                    })}
+                    aria-hidden="true"
+                  />
+                </span>
+              </Listbox.Button>
+              {typeof onAddItemClick === 'function' && (
+                <div className="flex items-center">
+                  <ActionButton
+                    variant="outline"
+                    border="thin"
+                    appendClassName="min-w-content ml-2"
+                    onClick={onAddItemClick}
+                  >
+                    <PlusIcon className="h-5 w-5" />
+                  </ActionButton>
+                </div>
+              )}
+            </div>
             <Transition
               show={open}
               as={React.Fragment}
@@ -101,7 +119,7 @@ export const FormMultiListBox = ({
               <Listbox.Options
                 className={clsx(
                   'absolute z-10 mt-1 max-h-60 w-full py-1 overflow-auto rounded-md',
-                  'bg-white text-base',
+                  'bg-white text-base text-left',
                   'ring-1 ring-black ring-opacity-5 focus:outline-none shadow-lg', // dropdown menu border
                 )}
               >
