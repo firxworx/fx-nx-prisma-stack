@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { apiFetch } from './lib/api-fetch'
-import type { VideoGroupDto, VideoDto, CreateVideoDto, UpdateVideoDto } from '../types/videos.types'
+import type { VideoDto, CreateVideoDto, UpdateVideoDto } from '../types/videos.types'
 
 export interface MutationQueryArgs {
   onSuccess?: () => void
