@@ -4,13 +4,16 @@ import { Transition } from '@headlessui/react'
 import { useId } from '@reach/auto-id'
 import FocusTrap from 'focus-trap-react'
 
-import { CheckIcon, ExclamationTriangleIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { ModalBodyVariantIcon } from './body-parts/ModalBodyVariantIcon'
+import { ModalBodyActions } from './body-parts/ModalBodyActions'
+import { ModalBodyCloseButton } from './body-parts/ModalBodyCloseButton'
 
 /**
  * Enum of modal variants:
  *
  * DEFAULT - default modal
- * ALERT - no close button ('x') + click-outside to close is disabled
+ * FORM - title and close button but no default modal actions/button(s)
+ * ALERT - no close button ('x') + click-outside-to-close is disabled
  * SUCCESS - display green check icon
  * WARN - display yellow warning icon
  * ERROR - display red warning icon
@@ -20,6 +23,7 @@ import { CheckIcon, ExclamationTriangleIcon, XMarkIcon } from '@heroicons/react/
  */
 export enum ModalVariant {
   DEFAULT = 'DEFAULT',
+  FORM = 'FORM',
   ALERT = 'ALERT',
   SUCCESS = 'SUCCESS',
   WARN = 'WARN',
@@ -34,7 +38,13 @@ export interface ModalBodyProps {
   actionLabel?: string
 }
 
-const LABELS = {
+export interface ModalBodyContextProps {
+  show: boolean
+  hideModal: () => void
+  onExited: () => void
+}
+
+export const MODAL_LABELS = {
   OK: 'OK',
   CLOSE: 'Close',
 }
@@ -46,15 +56,16 @@ const LABELS = {
  *
  * @see ModalContextProvider
  */
-export const ModalBody: React.FC<
-  React.PropsWithChildren<
-    ModalBodyProps & {
-      show: boolean
-      hideModal: () => void
-      onExited: () => void
-    }
-  >
-> = ({ title, variant = ModalVariant.DEFAULT, action, actionLabel, show, onExited, hideModal, children }) => {
+export const ModalBody: React.FC<React.PropsWithChildren<ModalBodyProps & ModalBodyContextProps>> = ({
+  title,
+  variant = ModalVariant.DEFAULT,
+  action,
+  actionLabel,
+  show,
+  onExited,
+  hideModal,
+  children,
+}) => {
   const modalRef = useRef<HTMLDivElement>(null)
 
   // for transition performance: only add the box-shadow to modal after it has transitioned
@@ -78,12 +89,13 @@ export const ModalBody: React.FC<
   }
 
   if (variant === ModalVariant.BLANK && (title !== undefined || !!action || actionLabel !== undefined)) {
-    console.warn('Modal variant BLANK is ignoring provided title and action-related props')
+    console.warn('Modal variant BLANK ignoring provided title and action-related props')
   }
 
   return (
     <div className="fixed inset-0 z-50 pointer-events-none">
       <div className="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center pointer-events-auto sm:block sm:p-0">
+        {/* zero-width-space (&#8203;) required as layout trick -- do not allow prettier to break the next line */}
         {/* prettier-ignore */}
         <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
         <Transition
@@ -115,24 +127,19 @@ export const ModalBody: React.FC<
             <div
               ref={modalRef}
               tabIndex={-1}
-              className={clsx('px-4 pt-5 pb-4 overflow-hidden bg-white rounded-lg sm:p-6 focus:outline-none', {
-                ['shadow-modal']: hasEntered,
-              })}
+              className={clsx(
+                'px-4 pt-5 pb-4 text-left overflow-hidden bg-white rounded-lg sm:p-6 focus:outline-none',
+                {
+                  ['shadow-modal']: hasEntered,
+                },
+              )}
               role="dialog"
               aria-modal
               aria-labelledby={variant !== ModalVariant.BLANK ? modalId : undefined}
             >
               {variant !== ModalVariant.ALERT && (
                 <div className="absolute top-0 right-0 hidden pt-4 pr-4 sm:block">
-                  <button
-                    type="button"
-                    className="text-slate-400 bg-white rounded-md hover:text-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-100"
-                    onClick={hideModal}
-                    tabIndex={-1}
-                  >
-                    <span className="sr-only">{LABELS.CLOSE}</span>
-                    <XMarkIcon className="w-6 h-6" aria-hidden="true" />
-                  </button>
+                  <ModalBodyCloseButton hideModal={hideModal} />
                 </div>
               )}
               <div>
@@ -141,65 +148,17 @@ export const ModalBody: React.FC<
                 ) : (
                   <>
                     <div>
-                      {(variant === ModalVariant.SUCCESS ||
-                        variant === ModalVariant.WARN ||
-                        variant === ModalVariant.ERROR) && (
-                        <div
-                          className={clsx(
-                            'flex items-center justify-center w-12 h-12 mx-auto mb-3 rounded-full sm:mb-5',
-                            {
-                              ['bg-green-100']: variant === ModalVariant.SUCCESS,
-                              ['bg-yellow-100']: variant === ModalVariant.WARN,
-                              ['bg-red-100']: variant === ModalVariant.ERROR,
-                            },
-                          )}
-                        >
-                          {variant === ModalVariant.SUCCESS && <CheckIcon className="w-6 h-6 text-green-600" />}
-                          {variant === ModalVariant.WARN && (
-                            <ExclamationTriangleIcon className="w-6 h-6 text-yellow-600" />
-                          )}
-                          {variant === ModalVariant.ERROR && <ExclamationTriangleIcon className="w-6 h-6 text-error" />}
-                        </div>
-                      )}
-                      <div className="text-center">
-                        <h3 className="text-lg font-medium leading-6 text-slate-900" id={modalId}>
+                      <ModalBodyVariantIcon variant={variant} />
+                      <div>
+                        <h3 className="text-lg font-medium leading-6 text-center text-slate-900" id={modalId}>
                           {title}
                         </h3>
                         <div className="mt-2 text-base text-slate-500">{children}</div>
                       </div>
                     </div>
-                    <div className="mt-5 sm:mt-6">
-                      {action ? (
-                        <button
-                          type="button"
-                          className={clsx(
-                            'inline-flex justify-center w-full px-4 py-2 rounded-md shadow-sm',
-                            'text-base sm:text-sm font-medium text-white border border-transparent',
-                            'bg-action-primary hover:bg-action-primary-darker',
-                            'fx-focus-ring-form',
-                          )}
-                          onClick={() => {
-                            action()
-                            hideModal()
-                          }}
-                        >
-                          {actionLabel || LABELS.OK}
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          className={clsx(
-                            'inline-flex justify-center w-full px-4 py-2 rounded-md shadow-sm',
-                            'text-base sm:text-sm font-medium text-white border border-transparent',
-                            'bg-action-primary hover:bg-action-primary-darker',
-                            'fx-focus-ring-form',
-                          )}
-                          onClick={hideModal}
-                        >
-                          {actionLabel || LABELS.OK}
-                        </button>
-                      )}
-                    </div>
+                    {(variant !== ModalVariant.FORM || action) && (
+                      <ModalBodyActions action={action} actionLabel={actionLabel} hideModal={hideModal} />
+                    )}
                   </>
                 )}
               </div>
