@@ -22,6 +22,7 @@ export interface ActionButtonProps
  */
 export const ActionButton: React.FC<PropsWithChildren<ActionButtonProps>> = ({
   variant,
+  border,
   appendClassName,
   disabled,
   isLoading,
@@ -37,7 +38,11 @@ export const ActionButton: React.FC<PropsWithChildren<ActionButtonProps>> = ({
         'fx-button-base',
         {
           // conditional animation
-          'animate-pulse': isLoading || isSubmitting,
+          ['animate-pulse']: isLoading || isSubmitting,
+
+          // border style
+          ['fx-button-standard-border']: border === 'standard',
+          ['fx-button-thin-border']: border === 'thin',
 
           // button variant styles
           ['fx-button-solid-primary']: variant === 'solid' && !renderDisabled,
@@ -67,4 +72,5 @@ export const ActionButton: React.FC<PropsWithChildren<ActionButtonProps>> = ({
 ActionButton.defaultProps = {
   type: 'button',
   variant: 'solid',
+  border: 'standard',
 }

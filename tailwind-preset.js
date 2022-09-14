@@ -58,6 +58,7 @@ module.exports = {
             },
             label: {
               DEFAULT: colors.slate[700],
+              focus: colors.sky[900],
             },
             placeholder: {
               DEFAULT: colors.slate[500], // WCAG 2.0
@@ -159,24 +160,30 @@ module.exports = {
           '@apply inline-flex items-center justify-center px-3 py-1.5 xs:px-4 xs:py-2 rounded-md': {},
           '@apply text-base font-medium tracking-tight fx-focus-ring transition-colors': {},
         },
+        '.fx-button-standard-border': {
+          '@apply border-2': {},
+        },
+        '.fx-button-thin-border': {
+          '@apply border': {},
+        },
         'button.fx-button-solid-primary, a.fx-button-solid-primary': {
-          '@apply border-2 border-sky-800 bg-sky-800 text-white hover:bg-sky-900 hover:bg-sky-900': {},
+          '@apply border-sky-800 bg-sky-800 text-white hover:bg-sky-900 hover:bg-sky-900': {},
         },
         'button.fx-button-solid-primary-disabled, a.fx-button-solid-primary-disabled': {
-          '@apply border-2 border-slate-200 bg-slate-200 text-slate-400 cursor-not-allowed': {},
+          '@apply border-slate-200 bg-slate-200 text-slate-400 cursor-not-allowed': {},
         },
         'button.fx-button-outline-primary, a.fx-button-outline-primary': {
-          '@apply border-2 bg-transparent border-sky-800 text-sky-800 hover:bg-sky-100 hover:border-sky-900 hover:text-sky-900':
+          '@apply bg-transparent border-sky-800 text-sky-800 hover:bg-sky-100 hover:border-sky-900 hover:text-sky-900':
             {},
         },
         'button.fx-button-outline-primary-disabled, a.fx-button-outline-primary-disabled': {
-          '@apply border-2 bg-transparent border-slate-300 text-slate-400 cursor-not-allowed': {},
+          '@apply bg-transparent border-slate-300 text-slate-400 cursor-not-allowed': {},
         },
         'button.fx-button-transparent-primary, a.fx-button-transparent-primary': {
-          '@apply border-2 bg-transparent border-transparent text-sky-800 hover:text-sky-900': {},
+          '@apply bg-transparent border-transparent text-sky-800 hover:text-sky-900': {},
         },
         'button.fx-button-transparent-primary-disabled, a.fx-button-transparent-primary-disabled': {
-          '@apply border-2 bg-transparent border-transparent text-slate-400 cursor-not-allowed': {},
+          '@apply bg-transparent border-transparent text-slate-400 cursor-not-allowed': {},
         },
         '.fx-input-border, input.fx-input-border': {
           '@apply border border-slate-300 rounded-md': {},
@@ -204,7 +211,9 @@ module.exports = {
         },
         '.fx-form-label': {
           // requires that a parent wrapping div have the tailwind 'group' class applied
-          '@apply block text-sm font-normal text-palette-form-label group-focus-within:font-medium': {},
+          '@apply block text-sm font-normal text-left': {},
+          '@apply text-palette-form-label group-focus-within:font-medium group-focus-within:text-palette-form-label-focus':
+            {},
         },
       })
     }),

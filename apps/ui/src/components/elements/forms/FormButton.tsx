@@ -28,6 +28,7 @@ export interface FormButtonProps
 export const FormButton: React.FC<FormButtonProps> = ({
   type,
   variant,
+  border,
   appendClassName,
   disabled,
   isLoading,
@@ -46,6 +47,10 @@ export const FormButton: React.FC<FormButtonProps> = ({
         {
           // conditional animation
           'animate-pulse': isLoading || isSubmitting,
+
+          // border style
+          ['fx-button-standard-border']: border === 'standard',
+          ['fx-button-thin-border']: border === 'thin',
 
           // button variant styles
           ['fx-button-solid-primary']: variant === 'solid' && !renderDisabled,
@@ -74,4 +79,5 @@ export const FormButton: React.FC<FormButtonProps> = ({
 
 FormButton.defaultProps = {
   variant: 'solid',
+  border: 'standard',
 }

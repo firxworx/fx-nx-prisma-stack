@@ -8,6 +8,11 @@ export interface ButtonSharedProps {
   variant?: 'solid' | 'outline' | 'transparent'
 
   /**
+   * Border style. Default 'standard' has a >1px border.
+   */
+  border?: 'standard' | 'thin'
+
+  /**
    * Control if the button click/submit behavior is disabled or not.
    */
   disabled?: boolean

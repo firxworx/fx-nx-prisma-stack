@@ -19,6 +19,7 @@ export interface LinkButtonProps extends ButtonSharedProps, LinkProps {}
 export const LinkButton: React.FC<PropsWithChildren<LinkButtonProps>> = ({
   href,
   variant,
+  border,
   disabled,
   appendClassName,
   isLoading,
@@ -39,6 +40,10 @@ export const LinkButton: React.FC<PropsWithChildren<LinkButtonProps>> = ({
 
             // conditional animation
             'animate-pulse': isLoading || isSubmitting,
+
+            // border style
+            ['fx-button-standard-border']: border === 'standard',
+            ['fx-button-thin-border']: border === 'thin',
 
             // button variant styles
             ['fx-button-solid-primary']: variant === 'solid' && !renderDisabled,
@@ -66,4 +71,5 @@ export const LinkButton: React.FC<PropsWithChildren<LinkButtonProps>> = ({
 
 LinkButton.defaultProps = {
   variant: 'solid',
+  border: 'standard',
 }
