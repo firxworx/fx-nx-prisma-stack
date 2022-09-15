@@ -41,6 +41,7 @@ cdk.context.json
 
 # dev workflow
 /db-dumps
+/scripts/wip
 
 #############################################
 # Generated nx

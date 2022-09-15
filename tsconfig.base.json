@@ -17,5 +17,5 @@
     "baseUrl": ".",
     "paths": {}
   },
-  "exclude": ["node_modules", "tmp", "notes", "examples"]
+  "exclude": ["node_modules", "tmp", "notes", "examples", "scripts"]
 }
