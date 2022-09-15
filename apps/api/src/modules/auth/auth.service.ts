@@ -203,7 +203,7 @@ export class AuthService {
    * Return the `SanitizedUser` corresponding to the given email address and signed refresh token.
    * Applicable to the Passport JWT refresh token strategy.
    *
-   * @throws {UnauthorizedException} if no user is found with the given email
+   * @throws {UnauthorizedException} if a user's refresh token is invalid or no user is found with the given email
    */
   async getAuthenticatedUserByRefreshToken(email: string, signedRefreshToken: string): Promise<SanitizedUser> {
     const user = await this.prisma.user.findUnique({ where: { email } })
@@ -212,7 +212,7 @@ export class AuthService {
       throw new UnauthorizedException(this.ERROR_MESSAGES.INVALID_CREDENTIALS)
     }
 
-    // throw if the user record is missing a refresh token hash
+    // throw if the user's record is missing a refresh token hash
     if (!user.refreshToken) {
       throw new UnauthorizedException(this.ERROR_MESSAGES.INVALID_CREDENTIALS)
     }
@@ -260,6 +260,8 @@ export class AuthService {
 
   /**
    * Return an Authentication token cookie with a signed JWT created with the given payload.
+   *
+   * @todo conditional SameSite on cookie
    */
   public buildSignedAuthenticationTokenCookie(tokenPayload: TokenPayload): string {
     const authConfig = this.configService.get<AuthConfig>('auth')

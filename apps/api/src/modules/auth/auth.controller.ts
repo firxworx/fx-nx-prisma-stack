@@ -70,7 +70,6 @@ export class AuthController {
     this.logger.log(`User sign-in: ${user.email} <${user.id}> <${user.uuid}> <${user.name}>`)
 
     const payload = this.authService.buildJwtTokenPayload(user)
-
     const authTokenCookie = this.authService.buildSignedAuthenticationTokenCookie(payload)
     const { cookie: refreshTokenCookie, token: signedRefreshToken } =
       this.authService.buildSignedRefreshTokenCookie(payload)
@@ -106,19 +105,29 @@ export class AuthController {
     request.res?.setHeader('Set-Cookie', this.authService.buildSignOutCookies())
   }
 
+  // @todo upon issuing a rotated refresh token, MUST NOT extend the lifetime
+  // of the new refresh token beyond the lifetime of the initial
+  // refresh token if the refresh token has a pre-established expiration
+  // time
+  //
+  // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-browser-based-apps-05#section-8
   @Get('refresh')
   @UseGuards(JwtRefreshGuard)
   @HttpCode(HttpStatus.OK)
-  refreshToken(@Req() request: RequestWithUser): SanitizedUserResponse {
+  async refreshToken(@Req() request: RequestWithUser): Promise<SanitizedUserResponse> {
     const { user } = request
     const { name, email } = user
 
     this.logger.log(`Auth refresh token request: ${email}`)
 
+    // issue fresh auth + refresh tokens (@see "refresh token rotation")
     const payload = this.authService.buildJwtTokenPayload(user)
     const authTokenCookie = this.authService.buildSignedAuthenticationTokenCookie(payload)
+    const { cookie: refreshTokenCookie, token: signedRefreshToken } =
+      this.authService.buildSignedRefreshTokenCookie(payload)
+    await this.authService.setUserRefreshTokenHash(user.email, signedRefreshToken)
 
-    request.res?.setHeader('Set-Cookie', authTokenCookie)
+    request.res?.setHeader('Set-Cookie', [authTokenCookie, refreshTokenCookie])
 
     return {
       name,
