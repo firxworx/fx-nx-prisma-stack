@@ -11,6 +11,7 @@ import { JwtService } from '@nestjs/jwt'
 import { Prisma, User } from '@prisma/client'
 import type { AppConfig } from '../../config/types/app-config.interface'
 import type { AuthConfig } from '../../config/types/auth-config.interface'
+// import { CookieOptions } from 'express'
 
 import { PrismaService } from '../prisma/prisma.service'
 import { ChangePasswordDto } from './dto/change-password.dto'
@@ -288,6 +289,17 @@ export class AuthService {
     })
 
     const secureCookie = process.env.NODE_ENV === 'production' ? 'Secure; ' : ''
+
+    // @todo consider refactor to use express to build cookie (at risk of dropping fastify support for AuthService)
+    // https://expressjs.com/en/4x/api.html#res.cookie
+    // const x: CookieOptions = {
+    //   secure: process.env.NODE_ENV === 'production',
+    //   httpOnly: true,
+    //   maxAge: authConfig?.jwt.refreshToken.expirationTime,
+    //   sameSite: true, // @todo make SameSite an env file setting // also 'lax' | 'strict' | 'none'
+    //   path: '/', //@todo confirm
+    //   // expires: authConfig?.jwt.refreshToken.expirationTime, // @todo Date() GMT
+    // }
 
     return {
       token,

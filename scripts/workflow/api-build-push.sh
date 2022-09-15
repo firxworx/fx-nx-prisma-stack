@@ -15,7 +15,7 @@ set +o allexport
 
 # ---------------------------------------------------------------------------------------------------------------------
 DEPLOY_STAGE_TAG=prod
-DOCKER_VERSION_TAG="v0.0.0-alpha.5"
+DOCKER_VERSION_TAG="v0.0.0-alpha.6"
 
 DOCKER_COMPOSE_SERVICE_NAME=api
 DOCKER_IMAGE="fx/project-${DOCKER_COMPOSE_SERVICE_NAME}"

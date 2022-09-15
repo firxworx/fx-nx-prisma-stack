@@ -9,7 +9,7 @@ export const API_BASE_URL = process.env.NEXT_PUBLIC_PROJECT_API_BASE_URL
 const LABELS = {
   ERROR_INVALID_OR_EXPIRED_CREDENTIALS: 'Invalid or expired credentials',
   ERROR_AUTH_REFRESH_TOKEN_FAILED: 'Authorization refresh token failed',
-  SERVER_ERROR: 'Server error',
+  ERROR_API_SERVER: 'Server error',
 }
 
 /**
@@ -76,10 +76,10 @@ export async function projectFetch(path: string, options?: RequestInit): Promise
  * Generic API "fetcher" implemented with the browser `fetch()` API that will automatically retry requests
  * met with a 401 response after.
  *
- * Note: the implementation returns rejected promises w/ Errors to avoid the top-level catch in cases of HTTP
+ * Note: the implementation returns rejected promises w/ Errors to bypass the top-level catch in cases of HTTP
  * errors; the top-level catch is specifically intended for network errors thrown by the `fetch()` function.
  *
- * @see CustomApp (`pages/_app.tsx`) for global handling of AuthError case{}
+ * @see CustomApp `pages/_app.tsx` for global query error handling + error boundary
  */
 export async function apiFetch<T>(path: string, options?: RequestInit, isRetryAttempt?: boolean): Promise<T>
 export async function apiFetch(path: string, options?: RequestInit, isRetryAttempt?: boolean) {
@@ -103,19 +103,21 @@ export async function apiFetch(path: string, options?: RequestInit, isRetryAttem
             const refreshResponse = await projectFetch(authQueryEndpointRoutes.refresh, { signal: controller.signal })
 
             if (refreshResponse.status === 401) {
-              console.error(LABELS.ERROR_AUTH_REFRESH_TOKEN_FAILED)
+              console.warn(LABELS.ERROR_AUTH_REFRESH_TOKEN_FAILED)
               return Promise.reject(new AuthError(LABELS.ERROR_INVALID_OR_EXPIRED_CREDENTIALS))
             }
 
             if (!refreshResponse.ok) {
-              console.error(LABELS.SERVER_ERROR)
-              return Promise.reject(new ApiError(`${LABELS.SERVER_ERROR} (${refreshResponse.status})`, response.status))
+              console.warn(LABELS.ERROR_API_SERVER)
+              return Promise.reject(
+                new ApiError(`${LABELS.ERROR_API_SERVER} (${refreshResponse.status})`, response.status),
+              )
             }
 
             return apiFetch(path, options, true)
           } catch (error: unknown) {
-            if (controller.signal.aborted) {
-              console.error(`API timeout (${RETRY_TIMEOUT}ms) failure refreshing authentication using refresh token`)
+            if (controller.signal.aborted || (error instanceof Error && error.name === 'AbortError')) {
+              console.warn(`API timeout (${RETRY_TIMEOUT}ms): failed to authenticate using refresh token...`)
               return Promise.reject(new AuthError(LABELS.ERROR_AUTH_REFRESH_TOKEN_FAILED))
             }
 
