@@ -1,5 +1,7 @@
 import { authQueryEndpointRoutes } from '../auth'
+import { ApiError } from '../errors/ApiError.class'
 import { AuthError } from '../errors/AuthError.class'
+import { FormError } from '../errors/FormError.class'
 
 /** Base URL of the project's back-end API. */
 export const API_BASE_URL = process.env.NEXT_PUBLIC_PROJECT_API_BASE_URL
@@ -7,6 +9,7 @@ export const API_BASE_URL = process.env.NEXT_PUBLIC_PROJECT_API_BASE_URL
 const LABELS = {
   ERROR_INVALID_OR_EXPIRED_CREDENTIALS: 'Invalid or expired credentials',
   ERROR_AUTH_REFRESH_TOKEN_FAILED: 'Authorization refresh token failed',
+  SERVER_ERROR: 'Server error',
 }
 
 /**
@@ -48,17 +51,6 @@ function getCsrfCookieValue(): string {
   return csrfToken
 }
 
-export async function apiFetchRefreshTokenCookie(): Promise<void> {
-  const response = await fetch(`/auth/refresh`, {
-    credentials: 'same-origin',
-  })
-
-  if (!response.ok || response.status >= 400) {
-    console.error(LABELS.ERROR_AUTH_REFRESH_TOKEN_FAILED)
-    throw new AuthError(LABELS.ERROR_INVALID_OR_EXPIRED_CREDENTIALS)
-  }
-}
-
 /**
  * Thin wrapper for browser `fetch()` that passes required project headers and is configured to
  * send credentials to same-origin URL's.
@@ -82,7 +74,10 @@ export async function projectFetch(path: string, options?: RequestInit): Promise
 
 /**
  * Generic API "fetcher" implemented with the browser `fetch()` API that will automatically retry requests
- * met with a 401 response after
+ * met with a 401 response after.
+ *
+ * Note: the implementation returns rejected promises w/ Errors to avoid the top-level catch in cases of HTTP
+ * errors; the top-level catch is specifically intended for network errors thrown by the `fetch()` function.
  *
  * @see CustomApp (`pages/_app.tsx`) for global handling of AuthError case{}
  */
@@ -94,11 +89,12 @@ export async function apiFetch(path: string, options?: RequestInit, isRetryAttem
     if (response.status === 401) {
       switch (!!isRetryAttempt) {
         case true: {
-          console.warn('apiFetch failed on isRetryAttempt')
-          throw new AuthError(LABELS.ERROR_INVALID_OR_EXPIRED_CREDENTIALS)
+          console.warn('apiFetch refresh token retry attempt failed...')
+          return Promise.reject(new AuthError(LABELS.ERROR_INVALID_OR_EXPIRED_CREDENTIALS))
         }
         case false: {
-          console.warn('apiFetch attempting refresh')
+          console.warn('apiFetch attempting refresh...')
+
           const RETRY_TIMEOUT = 5000
           const controller = new AbortController()
           const timeout = setTimeout(() => controller.abort(), RETRY_TIMEOUT)
@@ -106,16 +102,21 @@ export async function apiFetch(path: string, options?: RequestInit, isRetryAttem
           try {
             const refreshResponse = await projectFetch(authQueryEndpointRoutes.refresh, { signal: controller.signal })
 
-            if (!refreshResponse.ok || refreshResponse.status >= 400) {
+            if (refreshResponse.status === 401) {
               console.error(LABELS.ERROR_AUTH_REFRESH_TOKEN_FAILED)
-              throw new AuthError(LABELS.ERROR_INVALID_OR_EXPIRED_CREDENTIALS)
+              return Promise.reject(new AuthError(LABELS.ERROR_INVALID_OR_EXPIRED_CREDENTIALS))
+            }
+
+            if (!refreshResponse.ok) {
+              console.error(LABELS.SERVER_ERROR)
+              return Promise.reject(new ApiError(`${LABELS.SERVER_ERROR} (${refreshResponse.status})`, response.status))
             }
 
             return apiFetch(path, options, true)
           } catch (error: unknown) {
             if (controller.signal.aborted) {
               console.error(`API timeout (${RETRY_TIMEOUT}ms) failure refreshing authentication using refresh token`)
-              throw new AuthError(LABELS.ERROR_AUTH_REFRESH_TOKEN_FAILED)
+              return Promise.reject(new AuthError(LABELS.ERROR_AUTH_REFRESH_TOKEN_FAILED))
             }
 
             throw error
@@ -126,98 +127,35 @@ export async function apiFetch(path: string, options?: RequestInit, isRetryAttem
       }
     }
 
-    // parse responses that are not http-204 (no content) as json
-    const json = response.status === 204 ? {} : await response.json()
-
-    if (!json) {
-      throw new Error(`Fetch error (${response.status}): missing expected response data from ${path}`)
-    }
-
     if (!response.ok) {
       if (options?.method === 'POST' && (response.status === 400 || response.status === 422)) {
-        console.error(`Fetch error (${response.status}) form submission:`, JSON.stringify(json, null, 2))
-        return Promise.reject(json)
+        try {
+          const errorJson = await response.json()
+          return Promise.reject(new FormError('Form Error', response.status, errorJson))
+        } catch (error: unknown) {
+          const errorRaw = await response.text()
+          return Promise.reject(new FormError(errorRaw || `API error (${response.status})`, response.status))
+        }
       }
+
+      return Promise.reject(new ApiError(`API error (${response.status})`, response.status))
     }
 
-    return json
+    try {
+      // parse responses that are not http-204 (no content) as json (return {} in 204 case for truthy result)
+      const json = response.status === 204 ? {} : await response.json()
+      return json
+    } catch (error: unknown) {
+      return Promise.reject(
+        new ApiError('Unexpected malformed response received from API (invalid JSON)', response.status),
+      )
+    }
   } catch (error: unknown) {
-    // fetch api will throw on network errors but not http (4xx+5xx errors)
+    // fetch api will throw on network errors but not http errors (i.e. response statuses 4xx+5xx)
     if (error instanceof Error) {
       throw error
-      // return Promise.reject(error)
     }
 
-    // return Promise.reject(new Error(String(error)))
     throw new Error(String(error))
   }
 }
-
-/**
- * Fetch wrapper for making requests to the project's back-end API.
- * Includes credentials and sets appropriate headers for Content-Type and CSRF protection.
- *
- * Note react-query error handling requires a rejected promise on fetch error (e.g. axios-like behavior).
- */
-// export async function apiFetch<T>(path: string, options?: RequestInit, retry?: boolean): Promise<T> {
-//   try {
-//     const response = await fetch(`${API_BASE_URL}${path}`, {
-//       ...(options ?? {}),
-//       headers: {
-//         'Content-Type': 'application/json',
-//         Accept: 'application/json',
-//         ...(!options?.method || options.method === 'GET' || process.env.NEXT_PUBLIC_CSRF_OPT_FLAG === 'OFF'
-//           ? {}
-//           : { 'CSRF-Token': getCsrfCookieValue() }),
-//         // alternatively for authorization header, e.g.: 'Authorization': `Bearer ${token}`,
-//       },
-//       // required for cors + cookie authentication
-//       credentials: 'same-origin', // 'include'
-//     })
-
-//     if (response.status === 401) {
-//       // getApiEvents().emit(EVENT_AUTH_ERROR) // @future fire event on auth error
-
-//       // return rejected promise vs. throw to bypass catch (enables alternative ux flow in the auth failure case)
-//       // return Promise.reject(new Error('Invalid credentials'))
-
-//       // @see `pages/_app.tsx` for global onError callback and handling of AuthError case
-//       throw new AuthError(LABELS.ERROR_INVALID_OR_EXPIRED_CREDENTIALS)
-//     }
-
-//     // parse responses that are not http-204 (no content) as json
-//     const json = response.status === 204 ? {} : await response.json()
-
-//     if (!json) {
-//       throw new Error(`Fetch error (${response.status}): missing expected response data from ${path}`)
-//     }
-
-//     if (!response.ok) {
-//       // the following block is less relevant with react-query's callbacks for error handling - pulling out for now
-//       // @todo elegant form submission error handling + user feedback
-//       //
-//       // // return rejected promise to bypass catch for 400+422 errors resulting from POST requests (form submission)
-//       // // and throw all other errors
-//       // if (options?.method === 'POST' && (response.status === 400 || response.status === 422)) {
-//       //   console.error(`Fetch error (${response.status}):`, JSON.stringify(json, null, 2))
-//       //   if (json?.message) {
-//       //     return Promise.reject(new Error(String(json.message)))
-//       //   }
-//       //   return Promise.reject(new Error('Form submission error'))
-//       // }
-
-//       console.error(`Fetch error (${response.status}):`, JSON.stringify(json, null, 2))
-//       throw new Error(json)
-//     }
-
-//     return json as T
-//   } catch (error: unknown) {
-//     // getApiEvents().emit(EVENT_NETWORK_ERROR)
-
-//     // return via a rejected promise to provide the error to the calling hook/component
-//     if (error instanceof Error) {
-//       return Promise.reject(error)
-//     }
-
-//     return Promise.reject(new Error(String(error)))
-//   }
