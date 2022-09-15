@@ -3885,6 +3885,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node@npm:>=8.1.0":
+  version: 18.7.18
+  resolution: "@types/node@npm:18.7.18"
+  checksum: 8aec61f0f96e2a69ce51f1f40f949ca578bbb4fe05d7c0b8ce3aeeb848e90f755837f17f6ac132ca404d974fe9b2974150ad3b4984fc9dc7c3ceddb10bae0167
+  languageName: node
+  linkType: hard
+
 "@types/node@npm:^14.14.31":
   version: 14.18.23
   resolution: "@types/node@npm:14.18.23"
@@ -8741,6 +8748,7 @@ __metadata:
     regenerator-runtime: 0.13.9
     rxjs: ^7.5.6
     source-map-support: ^0.5.21
+    stripe: ^10.8.0
     supertest: ^6.2.4
     tailwindcss: 3.1.8
     ts-jest: 28.0.8
@@ -14914,6 +14922,16 @@ __metadata:
   version: 3.1.1
   resolution: "strip-json-comments@npm:3.1.1"
   checksum: 492f73e27268f9b1c122733f28ecb0e7e8d8a531a6662efbd08e22cccb3f9475e90a1b82cab06a392f6afae6d2de636f977e231296400d0ec5304ba70f166443
+  languageName: node
+  linkType: hard
+
+"stripe@npm:^10.8.0":
+  version: 10.8.0
+  resolution: "stripe@npm:10.8.0"
+  dependencies:
+    "@types/node": ">=8.1.0"
+    qs: ^6.10.3
+  checksum: 30f56918530cc0e38e179778888b2e59d3f3469bca5d04cedc5287a8f80b8174cf7b6d061d2b728349b87b1bf9a44302357c61ad6f907f0a1bcb3f4175193ef7
   languageName: node
   linkType: hard
 

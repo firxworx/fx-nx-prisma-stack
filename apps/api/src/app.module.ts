@@ -6,6 +6,7 @@ import apiConfig from './config/api.config'
 import authConfig from './config/auth.config'
 import loggerConfig from './config/logger.config'
 import healthConfig from './config/health.config'
+import stripeConfig from './config/stripe.config'
 
 import { AuthModule } from './modules/auth/auth.module'
 import { PrismaModule } from './modules/prisma/prisma.module'
@@ -15,23 +16,22 @@ import { APP_INTERCEPTOR } from '@nestjs/core'
 import { LoggingInterceptor } from './interceptors/logging.interceptor'
 import { LoggerConfig } from './config/types/logger-config.interface'
 import { HealthModule } from './modules/health/health.module'
+import { StripeModule } from './modules/stripe/stripe.module'
+import { assertNonNullable } from './types/type-assertions/assert-non-nullable'
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true, // cache process.env in memory
-      load: [authConfig, apiConfig, loggerConfig, healthConfig],
+      load: [authConfig, apiConfig, loggerConfig, healthConfig, stripeConfig],
     }),
     LoggerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService<AppConfig>) => {
         const loggerConfig = configService.get<LoggerConfig>('logger')
-
-        if (!loggerConfig) {
-          throw new Error('Missing expected LoggerConfig')
-        }
+        assertNonNullable(loggerConfig, 'Missing expected LoggerConfig')
 
         return loggerConfig.nestJsPino
       },
@@ -39,6 +39,7 @@ import { HealthModule } from './modules/health/health.module'
     HealthModule,
     PrismaModule,
     AuthModule,
+    StripeModule,
     VideosModule,
   ],
   controllers: [],
