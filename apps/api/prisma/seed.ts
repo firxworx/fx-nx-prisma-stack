@@ -58,16 +58,16 @@ async function main() {
     })
     console.log(`Created user ${user.email} with id: ${user.id}`)
   }
-
-  console.log(`Seeding complete.`)
 }
 
 main()
   .then(async () => {
-    await prisma.$disconnect()
+    console.debug('Seeding complete.')
   })
   .catch(async (e) => {
     console.error(e)
-    await prisma.$disconnect()
     process.exit(1)
+  })
+  .finally(async () => {
+    await prisma.$disconnect()
   })

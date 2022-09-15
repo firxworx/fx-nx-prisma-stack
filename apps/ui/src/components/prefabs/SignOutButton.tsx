@@ -3,11 +3,15 @@ import { useEffect } from 'react'
 
 import { useAuthSignOut } from '../../api/auth'
 import { useIsMounted } from '../../hooks/useIsMounted'
-import { Spinner } from '../elements/feedback/Spinner'
+import { ActionButton } from '../elements/inputs/ActionButton'
 
 export interface SignOutButtonProps {
   signOutRedirectPath?: string
   onSignOut?: () => Promise<unknown>
+}
+
+const LABELS = {
+  SIGN_OUT: 'Sign Out',
 }
 
 export const SignOutButton: React.FC<SignOutButtonProps> = ({ signOutRedirectPath, onSignOut }) => {
@@ -37,13 +41,8 @@ export const SignOutButton: React.FC<SignOutButtonProps> = ({ signOutRedirectPat
   }
 
   return (
-    <button
-      className="inline-flex items-center px-4 py-2 rounded-md bg-sky-700 text-white"
-      disabled={isLoading}
-      onClick={handleSignOut}
-    >
-      {isLoading && <Spinner size="sm" appendClassName="mr-1" />}
-      <span>Sign Out</span>
-    </button>
+    <ActionButton isLoading={isLoading} onClick={handleSignOut}>
+      {LABELS.SIGN_OUT}
+    </ActionButton>
   )
 }

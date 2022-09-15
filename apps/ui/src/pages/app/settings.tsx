@@ -1,9 +1,10 @@
 import type { NextPage } from 'next'
+import { PageHeading } from '../../components/elements/headings/PageHeading'
 
 export const AppSettingsPage: NextPage = (_props) => {
   return (
     <div>
-      <h2 className="text-lg">Settings Page</h2>
+      <PageHeading>Settings</PageHeading>
     </div>
   )
 }

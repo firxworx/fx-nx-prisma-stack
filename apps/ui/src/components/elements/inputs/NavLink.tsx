@@ -3,25 +3,25 @@ import Link, { type LinkProps } from 'next/link'
 import clsx from 'clsx'
 
 export interface NavLinkProps extends LinkProps {
-  className: string
+  appendClassName?: string
   anchorProps?: Exclude<React.HTMLAttributes<HTMLAnchorElement>, 'className'>
 }
 
 /**
  * Wrapper for the NextJS Link component.
  *
- * The `className` prop is passed to the underlying anchor (`a`) tag.
+ * The `appendClassName` prop is passed to the underlying anchor (`a`) tag.
  * Additional props specifically for the anchor tag may be supplied via the `anchorProps` prop.
  */
 const NavLinkComponent: React.FC<PropsWithChildren<NavLinkProps>> = ({
-  className,
+  appendClassName,
   children,
   anchorProps,
   ...restProps
 }) => {
   return (
     <Link {...restProps}>
-      <a className={clsx('fx-link', className)} {...anchorProps}>
+      <a className={clsx('fx-link', appendClassName)} {...anchorProps}>
         {children}
       </a>
     </Link>

@@ -1,10 +1,10 @@
 import clsx from 'clsx'
-import * as React from 'react'
+import React from 'react'
 import { RegisterOptions, useFormContext } from 'react-hook-form'
-import { ExclamationCircleIcon } from '@heroicons/react/outline'
+import { ExclamationCircleIcon } from '@heroicons/react/24/outline'
 import { useId } from '@reach/auto-id'
 
-export interface SelectInputProps extends React.ComponentPropsWithoutRef<'select'> {
+export interface FormSelectInputProps extends React.ComponentPropsWithoutRef<'select'> {
   id?: string
   name: string
   label: string
@@ -14,7 +14,7 @@ export interface SelectInputProps extends React.ComponentPropsWithoutRef<'select
   readOnly?: boolean
   hideLabel?: boolean
   validation?: RegisterOptions
-  children: React.ReactNode
+  children?: React.ReactNode // made ? for FormSelectInput2
 }
 
 /**
@@ -25,7 +25,7 @@ export interface SelectInputProps extends React.ComponentPropsWithoutRef<'select
  *
  * @see {@link https://react-hook-form.com/api/useformcontext}
  */
-export const SelectInput = ({
+export const FormSelectInput = ({
   name,
   label,
   helperText,
@@ -35,7 +35,7 @@ export const SelectInput = ({
   children,
   validation,
   ...restProps
-}: SelectInputProps) => {
+}: FormSelectInputProps) => {
   const {
     register,
     formState: { isSubmitting, errors },
@@ -45,9 +45,9 @@ export const SelectInput = ({
   const id = useId(restProps.id)
   const value = id ? watch(id) : undefined
 
-  // add `disabled` and `selected` attribute to option tag, will be used if readonly
+  // add `disabled` and `selected` attribute to option tag -- applies when SelectInput.readOnly is true
   const readOnlyChildren = React.Children.map<React.ReactNode, React.ReactNode>(children, (child) => {
-    if (React.isValidElement(child)) {
+    if (React.isValidElement<HTMLOptionElement>(child)) {
       return React.cloneElement(child, {
         disabled: child.props.value !== restProps?.defaultValue,
         // selected: child.props.value === rest?.defaultValue,
@@ -57,11 +57,9 @@ export const SelectInput = ({
 
   return (
     <div>
-      {!hideLabel && ( // @todo more a11y-friendly label hide of FormInput
-        <label htmlFor={id} className="block text-sm font-normal text-slate-700">
-          {label}
-        </label>
-      )}
+      <label htmlFor={id} className={clsx(hideLabel ? 'sr-only' : 'fx-form-label mb-1')}>
+        {label}
+      </label>
       <div className="relative mt-1">
         <select
           id={id}

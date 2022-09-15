@@ -10,6 +10,12 @@ const nextConfig = {
     // See: https://github.com/gregberge/svgr
     svgr: false,
   },
+
+  // preserve trailing slashes for s3 deployment
+  trailingSlash: true,
+
+  // specify a base path for deployments that are not at the root of a domain/subdomain (e.g. /deploy-path)
+  // basePath: '/deploy-path',
 }
 
 module.exports = withNx(nextConfig)

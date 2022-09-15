@@ -1,16 +1,15 @@
 import type { NextPage } from 'next'
+import { PageHeading } from '../components/elements/headings/PageHeading'
 
 /**
  * About page.
  */
 export const AboutPage: NextPage = (_props) => {
   return (
-    <div className="flex w-full">
-      <div>
-        <h2>About</h2>
-        <p>All about us and stuff stuff</p>
-      </div>
-    </div>
+    <>
+      <PageHeading>About</PageHeading>
+      <p>All about us and stuff stuff</p>
+    </>
   )
 }
 

@@ -1,7 +1,7 @@
 const colors = require('tailwindcss/colors')
 const plugin = require('tailwindcss/plugin')
 
-// const defaultTheme = require('tailwindcss/defaultTheme')
+const defaultTheme = require('tailwindcss/defaultTheme')
 
 // const Color = require('color')
 // const alpha = (c, val) => Color(c).alpha(val).rgb().string()
@@ -10,6 +10,10 @@ const plugin = require('tailwindcss/plugin')
 
 module.exports = {
   theme: {
+    screens: {
+      xs: '475px',
+      ...defaultTheme.screens,
+    },
     extend: {
       spacing: {
         1.25: '0.3125rem',
@@ -35,6 +39,37 @@ module.exports = {
         button: {
           primary: colors.sky[700],
         },
+        action: {
+          primary: {
+            lightest: colors.sky[500],
+            lighter: colors.sky[600],
+            DEFAULT: colors.sky[700],
+            darker: colors.sky[800],
+            darkest: colors.sky[900],
+          },
+        },
+        palette: {
+          form: {
+            border: {
+              DEFAULT: colors.slate[300],
+            },
+            input: {
+              DEFAULT: colors.slate[800],
+            },
+            label: {
+              DEFAULT: colors.slate[700],
+              focus: colors.sky[900],
+            },
+            placeholder: {
+              DEFAULT: colors.slate[500], // WCAG 2.0
+            },
+          },
+        },
+        form: {
+          placeholder: {
+            DEFAULT: colors.slate[500], // WCAG 2.0
+          },
+        },
         error: {
           DEFAULT: '#cb4848',
           50: '#fdf3f3',
@@ -58,6 +93,9 @@ module.exports = {
     require('@tailwindcss/aspect-ratio'),
     require('@tailwindcss/line-clamp'),
 
+    // headlessui tailwindcss plugin - adds modifiers for headlessui including ui-open:*, ui-active:*, etc
+    require('@headlessui/tailwindcss'),
+
     // add custom styles via inline custom plugin
     plugin(function ({ addBase, addComponents }) {
       const webkitSearchInputXIconTarget =
@@ -68,13 +106,16 @@ module.exports = {
 
       // these selectors match + override the selector used by the @tailwindcss/forms plugin
       const formInputTargets = `[type='text']:not(.fx-custom-input), [type='email'], [type='url'], [type='password'], [type='number'], [type='date'], [type='datetime-local'], [type='month'], [type='search'], [type='tel'], [type='time'], [type='week'], [multiple], textarea, select`
-      const formInputFocusTargets = `[type='text']:focus:not(.fx-custom-input), [type='email']:focus, [type='url']:focus, [type='password']:focus, [type='number']:focus, [type='date']:focus, [type='datetime-local']:focus, [type='month']:focus, [type='search']:focus, [type='tel']:focus, [type='time']:focus, [type='week']:focus, [multiple]:focus, textarea:focus, select:focus`
-      const buttonTargets = `button, [type='button'], [type='reset'], [type='submit']`
+      // const formInputFocusTargets = `[type='text']:focus:not(.fx-custom-input), [type='email']:focus, [type='url']:focus, [type='password']:focus, [type='number']:focus, [type='date']:focus, [type='datetime-local']:focus, [type='month']:focus, [type='search']:focus, [type='tel']:focus, [type='time']:focus, [type='week']:focus, [multiple]:focus, textarea:focus, select:focus`
+      // const buttonTargets = `button, [type='button'], [type='reset'], [type='submit']`
 
       addBase({
         // always show scrollbar to avoid horizontal jank on Windows PC's during loading + modals + transitions
         body: {
           overflowY: 'scroll',
+        },
+        main: {
+          '@apply text-slate-900': {},
         },
         // remove spinner on number inputs for chrome/safari/edge/opera
         'input::-webkit-outer-spin-button, input::-webkit-inner-spin-button': {
@@ -96,9 +137,7 @@ module.exports = {
           height: 0,
         },
         [formInputTargets]: {
-          '@apply border border-slate-300 rounded-md': {},
-          '@apply focus:outline-none focus-visible:border-slate-300 focus-visible:ring-2 focus-visible:ring-blue-100':
-            {},
+          '@apply fx-form-input': {},
         },
         // [formInputFocusTargets]: {
         // }
@@ -108,51 +147,73 @@ module.exports = {
           '@apply max-w-6xl': {},
         },
         '.fx-layout-padding-x': {
-          '@apply px-4 sm:px-6 xl:px-8': {},
+          '@apply px-0 xs:px-4 sm:px-6 xl:px-8': {},
         },
         '.fx-layout-padding-y': {
-          '@apply pt-4 pb-12 sm:pt-6 sm:pb-16': {},
+          '@apply pt-0 xs:pt-4 sm:pt-6 pb-10 xs:pb-12 sm:pb-16': {},
         },
         '.fx-box': {
-          'p-4 sm:p-6 lg:p-8': {},
+          'p-2 xs:p-4 sm:p-6 lg:p-8': {},
         },
         '.fx-button-base, button.fx-button-base, a.fx-button-base': {
-          '@apply inline-flex items-center justify-center px-4 py-2 rounded-md': {},
-          '@apply fx-focus-ring transition-colors': {},
+          // px-2 py-1
+          '@apply inline-flex items-center justify-center px-3 py-1.5 xs:px-4 xs:py-2 rounded-md': {},
+          '@apply text-base font-medium tracking-tight fx-focus-ring transition-colors': {},
+        },
+        '.fx-button-standard-border': {
+          '@apply border-2': {},
+        },
+        '.fx-button-thin-border': {
+          '@apply border': {},
         },
         'button.fx-button-solid-primary, a.fx-button-solid-primary': {
-          '@apply border border-transparent bg-sky-800 text-white hover:bg-sky-900': {},
+          '@apply border-sky-800 bg-sky-800 text-white hover:bg-sky-900 hover:bg-sky-900': {},
         },
         'button.fx-button-solid-primary-disabled, a.fx-button-solid-primary-disabled': {
-          '@apply border border-transparent bg-slate-200 text-slate-400 cursor-not-allowed': {},
+          '@apply border-slate-200 bg-slate-200 text-slate-400 cursor-not-allowed': {},
         },
         'button.fx-button-outline-primary, a.fx-button-outline-primary': {
-          '@apply border bg-transparent border-sky-800 text-sky-800 hover:bg-sky-100 hover:border-sky-900 hover:text-sky-900':
+          '@apply bg-transparent border-sky-800 text-sky-800 hover:bg-sky-100 hover:border-sky-900 hover:text-sky-900':
             {},
         },
         'button.fx-button-outline-primary-disabled, a.fx-button-outline-primary-disabled': {
-          '@apply border bg-transparent border-slate-300 text-slate-400 cursor-not-allowed': {},
+          '@apply bg-transparent border-slate-300 text-slate-400 cursor-not-allowed': {},
         },
         'button.fx-button-transparent-primary, a.fx-button-transparent-primary': {
-          '@apply border bg-transparent border-transparent text-sky-800 hover:text-sky-900': {},
+          '@apply bg-transparent border-transparent text-sky-800 hover:text-sky-900': {},
         },
         'button.fx-button-transparent-primary-disabled, a.fx-button-transparent-primary-disabled': {
-          '@apply border bg-transparent border-transparent text-slate-400 cursor-not-allowed': {},
+          '@apply bg-transparent border-transparent text-slate-400 cursor-not-allowed': {},
         },
         '.fx-input-border, input.fx-input-border': {
           '@apply border border-slate-300 rounded-md': {},
         },
         '.fx-focus-ring': {
-          '@apply focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-100': {},
+          '@apply focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-200': {},
+        },
+        '.fx-focus-ring-form': {
+          '@apply focus:outline-none focus:border-slate-300 focus:ring-2 focus:ring-sky-100': {},
         },
         '.fx-link': {
-          '@apply text-sky-800 transition-colors duration-150': {},
+          '@apply font-medium text-action-primary-darker fx-focus-ring focus:rounded-sm transition-colors duration-150':
+            {},
           '&:hover': {
-            '@apply text-sky-900 underline': {},
+            '@apply text-action-primary underline': {},
           },
           '&:active': {
-            '@apply text-sky-700': {},
+            '@apply text-action-primary': {},
           },
+        },
+        '.fx-form-input': {
+          '@apply border rounded-md': {},
+          '@apply border-palette-form-border text-palette-form-input placeholder:text-palette-form-placeholder': {},
+          '@apply fx-focus-ring-form': {},
+        },
+        '.fx-form-label': {
+          // requires that a parent wrapping div have the tailwind 'group' class applied
+          '@apply block text-sm font-normal text-left': {},
+          '@apply text-palette-form-label group-focus-within:font-medium group-focus-within:text-palette-form-label-focus':
+            {},
         },
       })
     }),

@@ -1,27 +1,31 @@
 import type { NextPage } from 'next'
 
-import { HomeIcon } from '@heroicons/react/outline'
+import { HomeIcon } from '@heroicons/react/24/outline'
 
 import { SignInForm } from '../components/prefabs/SignInForm'
 import { SignOutButton } from '../components/prefabs/SignOutButton'
-import { useAuthSession } from '../context/SessionContextProvider'
+import { useSessionContext } from '../context/SessionContextProvider'
+import { PageHeading } from '../components/elements/headings/PageHeading'
 
 export const IndexPage: NextPage = (_props) => {
-  const session = useAuthSession(true)
+  const session = useSessionContext()
 
   return (
-    <div className="flex flex-col items-center">
-      <HomeIcon className="h-20 w-auto text-slate-700" />
+    <>
+      <PageHeading>{process.env.NEXT_PUBLIC_SITE_TITLE}</PageHeading>
+      <div className="flex flex-col items-center">
+        <HomeIcon className="h-20 w-auto text-slate-700" />
 
-      {session ? (
-        <div>
-          <div>Hello {session.profile.name}</div>
-          <SignOutButton />
-        </div>
-      ) : (
-        <SignInForm />
-      )}
-    </div>
+        {session?.profile ? (
+          <div>
+            <div>Hello {session.profile.name}</div>
+            <SignOutButton />
+          </div>
+        ) : (
+          <SignInForm />
+        )}
+      </div>
+    </>
   )
 }
 

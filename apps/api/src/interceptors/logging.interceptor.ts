@@ -21,6 +21,13 @@ const isRecord = (x: unknown): x is Record<string, unknown> => {
 }
 
 /**
+ * Path/route used by the healthcheck controller.
+ *
+ * @see HealthModule
+ */
+const HEALTHCHECK = '/health-check'
+
+/**
  * Interceptor that logs input/output requests.
  */
 @Injectable()
@@ -50,11 +57,16 @@ export class LoggingInterceptor implements NestInterceptor {
    * guaranteed to load before the logger.
    *
    * @param context details about the current request
-   * @param call$ implements `handle()` method and returns an Observable
+   * @param next implements `handle()` method and returns an Observable
    */
-  public intercept(context: ExecutionContext, call$: CallHandler): Observable<unknown> {
+  public intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const req: RequestWithUser = context.switchToHttp().getRequest<RequestWithUser>()
     const { method, url, body, headers } = req
+
+    // ignore healthcheck requests
+    if (req.url === HEALTHCHECK) {
+      return next.handle()
+    }
 
     const ctx: string = `${this.customPrefix}${this.ctxPrefix} - ${method} - ${url}${
       req.user?.email ? ' - ' + req.user.email : ''
@@ -74,7 +86,7 @@ export class LoggingInterceptor implements NestInterceptor {
     )
 
     // log result + response
-    return call$.handle().pipe(
+    return next.handle().pipe(
       tap({
         next: (val: unknown): void => {
           this.logNext(val, context)

@@ -1,49 +1,76 @@
 import React, { type PropsWithChildren } from 'react'
 import clsx from 'clsx'
 
-export interface ActionButtonProps extends Exclude<React.HTMLAttributes<HTMLButtonElement>, 'type' | 'className'> {
-  variant?: 'solid' | 'outline' | 'transparent'
-  disabled?: boolean
-  appendClassName?: string
+import { Spinner } from '../feedback/Spinner'
+import type { ButtonSharedProps } from '../../../types/components/ButtonSharedProps.interface'
+
+export interface ActionButtonProps
+  extends ButtonSharedProps,
+    Exclude<React.HTMLAttributes<HTMLButtonElement>, 'type' | 'className'> {
+  /**
+   * Button `type` is explicitly included and required to protect against corner-case differences across browsers.
+   */
+  type?: React.ComponentPropsWithoutRef<'button'>['type']
 }
 
 /**
- * Reusable button component (`type='button'`) with a base set of styles.
+ * Reusable button component with a standard set of styles for different variants.
+ * Renders an actual HTML `button` element with explicitly defined default `type` "button".
  *
- * Set `variant` to `solid` (default) or `outline`.
- *
- * The `appendClassName` prop supports adding additional style classes. The value is appended to `className`
- * after the component's built-in classes. It can be useful for adding classes for margins/spacing.
+ * @see FormButton for a button component integrated with react-hook-form.
+ * @see LinkButton for a nextjs-compatible anchor (link) styled as a button.
  */
 export const ActionButton: React.FC<PropsWithChildren<ActionButtonProps>> = ({
   variant,
+  border,
   appendClassName,
-  children,
   disabled,
+  isLoading,
+  isSubmitting,
+  children,
   ...restProps
 }) => {
+  const renderDisabled = !!disabled || isLoading || isSubmitting
+
   return (
     <button
-      type="button"
       className={clsx(
         'fx-button-base',
         {
-          ['fx-button-solid-primary']: variant === 'solid' && !disabled,
-          ['fx-button-solid-primary-disabled']: variant === 'solid' && disabled,
-          ['fx-button-outline-primary']: variant === 'outline' && !disabled,
-          ['fx-button-outline-primary-disabled']: variant === 'outline' && disabled,
-          ['fx-button-transparent-primary']: variant === 'transparent' && !disabled,
-          ['fx-button-transparent-primary-disabled']: variant === 'transparent' && disabled,
+          // conditional animation
+          ['animate-pulse']: isLoading || isSubmitting,
+
+          // border style
+          ['fx-button-standard-border']: border === 'standard',
+          ['fx-button-thin-border']: border === 'thin',
+
+          // button variant styles
+          ['fx-button-solid-primary']: variant === 'solid' && !renderDisabled,
+          ['fx-button-solid-primary-disabled']: variant === 'solid' && renderDisabled,
+          ['fx-button-outline-primary']: variant === 'outline' && !renderDisabled,
+          ['fx-button-outline-primary-disabled']: variant === 'outline' && renderDisabled,
+          ['fx-button-transparent-primary']: variant === 'transparent' && !renderDisabled,
+          ['fx-button-transparent-primary-disabled']: variant === 'transparent' && renderDisabled,
         },
         appendClassName,
       )}
+      disabled={renderDisabled}
       {...restProps}
     >
-      {children}
+      {isLoading || isSubmitting ? (
+        <>
+          <Spinner size="sm" appendClassName="mr-2" />
+          <div className="inline-flex items-center justify-center">{children}</div>
+        </>
+      ) : (
+        <>{children}</>
+      )}
     </button>
   )
 }
 
 ActionButton.defaultProps = {
+  type: 'button',
   variant: 'solid',
+  border: 'standard',
 }

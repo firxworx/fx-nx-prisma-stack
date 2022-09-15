@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import { RegisterOptions, useFormContext } from 'react-hook-form'
-import { ExclamationCircleIcon } from '@heroicons/react/outline'
+import { ExclamationCircleIcon } from '@heroicons/react/24/outline'
 import { useId } from '@reach/auto-id'
 
 export interface TextAreaProps extends React.ComponentPropsWithoutRef<'textarea'> {
@@ -43,12 +43,10 @@ export const TextArea = ({
 
   return (
     <div>
-      {!hideLabel && ( // @todo more a11y-friendly label hide of FormInput
-        <label htmlFor={id} className="block text-sm font-normal text-slate-700">
-          {label}
-        </label>
-      )}
-      <div className="relative mt-1">
+      <label htmlFor={id} className={clsx(hideLabel ? 'sr-only' : 'fx-form-label mb-1')}>
+        {label}
+      </label>
+      <div className="relative mt-1 text-left">
         <textarea
           id={id}
           disabled={restProps.disabled || isSubmitting}
@@ -74,7 +72,7 @@ export const TextArea = ({
           </div>
         )}
       </div>
-      <div className="mt-1">
+      <div className="mt-1 text-left">
         {helperText && <p className="text-xs text-slate-500">{helperText}</p>}
         {!hideError && errors[name] && <span className="text-sm text-error-600">{String(errors[name]?.message)}</span>}
       </div>

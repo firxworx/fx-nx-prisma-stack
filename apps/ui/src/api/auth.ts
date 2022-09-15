@@ -6,24 +6,45 @@ import { apiFetch } from './lib/api-fetch'
 
 // @todo create shared lib with interfaces of api responses
 
+/**
+ * LocalStorage key for persisting the enabled/disabled state of the session context query.
+ *
+ * The value 'enabled' or 'disabled' is saved to LocalStorage. If the corresponding value does
+ * not exist or if the value is 'disabled' the user is presumed to be unauthenticated and the
+ * session query will be disabled.
+ *
+ * @see SessionContextProvider
+ */
+export const LOCAL_STORAGE_SESSION_CTX_FLAG_KEY = 'FX_SESSION_CTX_FLAG'
+
 export interface AuthSignInCredentials {
   email: string
   password: string
 }
+
+export type AuthQueryEndpoint = 'session' | 'refresh' | 'signIn' | 'signOut'
 
 const AUTH_KEY_BASE = 'auth' as const
 
 /**
  * Query keys for auth API functions.
  */
-export const authQueryKeys = {
+export const authQueryKeys: Record<AuthQueryEndpoint, Readonly<string[]>> = {
   session: [AUTH_KEY_BASE, 'session'] as const,
+  refresh: [AUTH_KEY_BASE, 'refresh'] as const,
   signIn: [AUTH_KEY_BASE, 'signIn'] as const,
   signOut: [AUTH_KEY_BASE, 'signOut'] as const,
 }
 
+export const authQueryEndpointRoutes: Record<AuthQueryEndpoint, Readonly<string>> = {
+  session: '/auth/session' as const,
+  refresh: '/auth/refresh' as const,
+  signIn: '/auth/sign-in' as const,
+  signOut: '/auth/sign-out' as const,
+}
+
 export async function fetchSession(): Promise<AuthUser> {
-  return apiFetch<AuthUser>(`/auth/session`)
+  return apiFetch<AuthUser>(authQueryEndpointRoutes.session)
 }
 
 export function useAuthSessionQuery(enabled: boolean) {
@@ -42,6 +63,11 @@ export function useAuthSessionQuery(enabled: boolean) {
     retry: false,
     refetchInterval: 900000,
     // refetchOnMount: false, // potential consideration for non-auth + auth layout components that call useAuthSession() hook
+    onError: (error: unknown): void => {
+      console.warn(`useAuthSessionQuery onError handler`, error)
+
+      // queryClient.clear()
+    },
   })
 
   return {
@@ -52,7 +78,7 @@ export function useAuthSessionQuery(enabled: boolean) {
 }
 
 export async function signIn({ email, password }: AuthSignInCredentials): Promise<void> {
-  return apiFetch<void>(`/auth/sign-in`, {
+  return apiFetch<void>(authQueryEndpointRoutes.signIn, {
     method: 'POST',
     body: JSON.stringify({
       email,
@@ -90,7 +116,7 @@ export function useAuthSignIn() {
 }
 
 export async function signOut(): Promise<void> {
-  return apiFetch<void>(`/auth/sign-out`, {
+  return apiFetch<void>(authQueryEndpointRoutes.signOut, {
     method: 'POST',
   })
 }

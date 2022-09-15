@@ -5,6 +5,7 @@ import { useRouter } from 'next/router'
 import { useVideoQuery } from '../../../api/videos'
 import { VideoMutateForm } from '../../../components/features/videos/VideoMutateForm'
 import { Spinner } from '../../../components/elements/feedback/Spinner'
+import { PageHeading } from '../../../components/elements/headings/PageHeading'
 
 export const VideoPage: NextPage = () => {
   const { push: routerPush, query: routerQuery } = useRouter()
@@ -18,7 +19,7 @@ export const VideoPage: NextPage = () => {
 
   return (
     <div>
-      <h2 className="text-lg">Video Detail Page ({videoUuid})</h2>
+      <PageHeading>Video: {videoUuid}</PageHeading>
       <div className="mt-4">
         {isError && <p>Error fetching data</p>}
         {isLoading && <Spinner />}

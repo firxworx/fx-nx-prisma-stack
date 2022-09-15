@@ -1,19 +1,24 @@
 import React, { useMemo, useContext, useState, useEffect, useCallback } from 'react'
 
-import { useAuthSessionQuery } from '../api/auth'
+import { LOCAL_STORAGE_SESSION_CTX_FLAG_KEY, useAuthSessionQuery } from '../api/auth'
 import { isAuthSessionResult } from '../types/type-guards/auth.type-guards'
 import type { AuthSession } from '../types/session.types'
 import type { SessionStatus } from '../types/enums/session.enums'
 
 const SessionContext = React.createContext<AuthSession<SessionStatus> | undefined>(undefined)
 
-const LOCAL_STORAGE_SESSION_CTX_FLAG_KEY = 'FX_SESSION_CTX_FLAG'
-
+/**
+ * React context provider of a user's session context.
+ *
+ * The initial `true` state of `isQueryEnabled` will result in an immediate request to the API `/auth/session`
+ * endpoint on page load/refresh. The response indicates if the user is authenticated and provides a means
+ * to set the CSRF cookie.
+ */
 export const SessionContextProvider: React.FC<{
   children: (isSessionReady: boolean) => React.ReactElement
 }> = ({ children }) => {
-  const [isQueryEnabled, setIsQueryEnabled] = useState<boolean>(false)
-  const { data: profile, refetch, error, status, invalidate, remove } = useAuthSessionQuery(isQueryEnabled)
+  const [isQueryEnabled, setIsQueryEnabled] = useState<boolean>(true)
+  const { data: profile, refetch, error, status, invalidate, remove, ...rest } = useAuthSessionQuery(isQueryEnabled)
 
   useEffect(() => {
     if (typeof window !== 'undefined') {

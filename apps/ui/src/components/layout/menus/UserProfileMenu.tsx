@@ -56,12 +56,12 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({ name }) => {
       <Menu.Button
         className={clsx(
           'flex items-center justify-center w-10 h-10 border-2 rounded-full',
-          'text-sm font-normal text-slate-700',
-          'bg-slate-100 border-slate-200 hover:bg-slate-200',
-          'focus:outline-none focus:ring-2 focus:ring-blue-100',
+          'text-sm font-normal text-action-primary transition-colors',
+          'bg-slate-100 border-action-primary-darkest hover:bg-white',
+          'fx-focus-ring focus:bg-white',
         )}
       >
-        <span className="inline-block leading-none">{name.charAt(0).toUpperCase()}</span>
+        <span className="inline-block leading-none font-semibold">{name.charAt(0).toUpperCase()}</span>
       </Menu.Button>
       <Transition
         as={Fragment}

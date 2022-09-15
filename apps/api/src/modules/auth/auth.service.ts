@@ -11,6 +11,7 @@ import { JwtService } from '@nestjs/jwt'
 import { Prisma, User } from '@prisma/client'
 import type { AppConfig } from '../../config/types/app-config.interface'
 import type { AuthConfig } from '../../config/types/auth-config.interface'
+// import { CookieOptions } from 'express'
 
 import { PrismaService } from '../prisma/prisma.service'
 import { ChangePasswordDto } from './dto/change-password.dto'
@@ -203,7 +204,7 @@ export class AuthService {
    * Return the `SanitizedUser` corresponding to the given email address and signed refresh token.
    * Applicable to the Passport JWT refresh token strategy.
    *
-   * @throws {UnauthorizedException} if no user is found with the given email
+   * @throws {UnauthorizedException} if a user's refresh token is invalid or no user is found with the given email
    */
   async getAuthenticatedUserByRefreshToken(email: string, signedRefreshToken: string): Promise<SanitizedUser> {
     const user = await this.prisma.user.findUnique({ where: { email } })
@@ -212,7 +213,7 @@ export class AuthService {
       throw new UnauthorizedException(this.ERROR_MESSAGES.INVALID_CREDENTIALS)
     }
 
-    // throw if the user record is missing a refresh token hash
+    // throw if the user's record is missing a refresh token hash
     if (!user.refreshToken) {
       throw new UnauthorizedException(this.ERROR_MESSAGES.INVALID_CREDENTIALS)
     }
@@ -260,6 +261,8 @@ export class AuthService {
 
   /**
    * Return an Authentication token cookie with a signed JWT created with the given payload.
+   *
+   * @todo conditional SameSite on cookie
    */
   public buildSignedAuthenticationTokenCookie(tokenPayload: TokenPayload): string {
     const authConfig = this.configService.get<AuthConfig>('auth')
@@ -286,6 +289,17 @@ export class AuthService {
     })
 
     const secureCookie = process.env.NODE_ENV === 'production' ? 'Secure; ' : ''
+
+    // @todo consider refactor to use express to build cookie (at risk of dropping fastify support for AuthService)
+    // https://expressjs.com/en/4x/api.html#res.cookie
+    // const x: CookieOptions = {
+    //   secure: process.env.NODE_ENV === 'production',
+    //   httpOnly: true,
+    //   maxAge: authConfig?.jwt.refreshToken.expirationTime,
+    //   sameSite: true, // @todo make SameSite an env file setting // also 'lax' | 'strict' | 'none'
+    //   path: '/', //@todo confirm
+    //   // expires: authConfig?.jwt.refreshToken.expirationTime, // @todo Date() GMT
+    // }
 
     return {
       token,
