@@ -2,7 +2,7 @@ import { DynamicModule, Module, Provider } from '@nestjs/common'
 import { DiscoveryModule } from '@nestjs/core'
 import { ConfigModule } from '@nestjs/config'
 
-import { STRIPE_CLIENT, STRIPE_MODULE_OPTIONS } from './stripe.constants'
+import { StripeModuleToken } from './constants/stripe-module-token.enum'
 import { StripeWebhookService } from './stripe-webhook.service'
 import { createStripeClientProvider } from './stripe-client.provider'
 import { StripeModuleAsyncOptions } from './types/stripe-module-async-options.interface'
@@ -19,7 +19,7 @@ export class StripeModule {
       imports: [DiscoveryModule, ConfigModule],
       providers: [
         createStripeClientProvider(),
-        { provide: STRIPE_MODULE_OPTIONS, useValue: options },
+        { provide: StripeModuleToken.STRIPE_MODULE_OPTIONS, useValue: options },
         StripeService,
         StripeWebhookService,
       ],
@@ -38,7 +38,7 @@ export class StripeModule {
         StripeService,
         StripeWebhookService,
       ],
-      exports: [StripeService, StripeWebhookService, STRIPE_CLIENT],
+      exports: [StripeService, StripeWebhookService, StripeModuleToken.STRIPE_CLIENT],
     }
   }
 
@@ -63,7 +63,7 @@ export class StripeModule {
   private static createAsyncOptionsProvider(options: StripeModuleAsyncOptions): Provider {
     if (options.useFactory) {
       return {
-        provide: STRIPE_MODULE_OPTIONS,
+        provide: StripeModuleToken.STRIPE_MODULE_OPTIONS,
         inject: options.inject || [],
         useFactory: options.useFactory,
       }
@@ -74,7 +74,7 @@ export class StripeModule {
     }
 
     return {
-      provide: STRIPE_MODULE_OPTIONS,
+      provide: StripeModuleToken.STRIPE_MODULE_OPTIONS,
       inject: [...(options.useExisting ? [options.useExisting] : []), ...(options.useClass ? [options.useClass] : [])],
       useFactory: (optionsFactory: StripeOptionsFactory) => optionsFactory.createOptions(),
     }

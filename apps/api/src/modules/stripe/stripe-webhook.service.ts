@@ -1,10 +1,9 @@
 import { Injectable, OnApplicationBootstrap } from '@nestjs/common'
 import { DiscoveryService, MetadataScanner, Reflector } from '@nestjs/core'
 import { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper'
-
 import Stripe from 'stripe'
 
-import { STRIPE_EVENT_KEY } from './stripe.constants'
+import { StripeModuleToken } from './constants/stripe-module-token.enum'
 
 @Injectable()
 export class StripeWebhookService implements OnApplicationBootstrap {
@@ -45,7 +44,7 @@ export class StripeWebhookService implements OnApplicationBootstrap {
   }
 
   private setWebhookHandler(instance: any, methodKey: any) {
-    const eventType = this.reflector.get(STRIPE_EVENT_KEY, instance[methodKey])
+    const eventType = this.reflector.get(StripeModuleToken.STRIPE_EVENT_KEY, instance[methodKey])
 
     if (!eventType) return
 

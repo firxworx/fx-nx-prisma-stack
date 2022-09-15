@@ -1,17 +1,16 @@
 import { Inject, Injectable, InternalServerErrorException, Scope } from '@nestjs/common'
-import { STRIPE_MODULE_OPTIONS } from './stripe.constants'
-import { StripeModuleOptions } from './types/stripe-module-options.interface'
 import Stripe from 'stripe'
 
-import { STRIPE_CLIENT } from './stripe.constants'
+import { StripeModuleToken } from './constants/stripe-module-token.enum'
+import { StripeModuleOptions } from './types/stripe-module-options.interface'
 
 @Injectable({
   scope: Scope.DEFAULT,
 })
 export class StripeService {
   constructor(
-    @Inject(STRIPE_CLIENT) private readonly stripeClient: Stripe,
-    @Inject(STRIPE_MODULE_OPTIONS) private stripeModuleOptions: StripeModuleOptions,
+    @Inject(StripeModuleToken.STRIPE_CLIENT) private readonly stripeClient: Stripe,
+    @Inject(StripeModuleToken.STRIPE_MODULE_OPTIONS) private stripeModuleOptions: StripeModuleOptions,
   ) {}
 
   /**

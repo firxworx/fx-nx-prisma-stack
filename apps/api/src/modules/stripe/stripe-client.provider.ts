@@ -1,6 +1,7 @@
 import { Provider } from '@nestjs/common'
 import Stripe from 'stripe'
-import { STRIPE_CLIENT, STRIPE_MODULE_OPTIONS } from './stripe.constants'
+
+import { StripeModuleToken } from './constants/stripe-module-token.enum'
 import { StripeModuleOptions } from './types/stripe-module-options.interface'
 
 // export function createStripeClient(options: StripeModuleOptions): Provider<Stripe> {
@@ -14,10 +15,10 @@ import { StripeModuleOptions } from './types/stripe-module-options.interface'
 
 export function createStripeClientProvider(): Provider<Stripe> {
   return {
-    provide: STRIPE_CLIENT,
+    provide: StripeModuleToken.STRIPE_CLIENT,
     useFactory: (options: StripeModuleOptions): Stripe => {
       return new Stripe(options.apiKey, { ...options.stripeConfig, typescript: true })
     },
-    inject: [STRIPE_MODULE_OPTIONS],
+    inject: [StripeModuleToken.STRIPE_MODULE_OPTIONS],
   }
 }
