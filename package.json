@@ -50,6 +50,12 @@
   },
   "private": true,
   "dependencies": {
+    "@aws-sdk/client-eventbridge": "^3.171.0",
+    "@aws-sdk/client-s3": "^3.171.0",
+    "@aws-sdk/client-ses": "^3.171.0",
+    "@aws-sdk/client-sns": "^3.171.0",
+    "@aws-sdk/node-http-handler": "^3.171.0",
+    "@aws-sdk/s3-request-presigner": "^3.171.0",
     "@headlessui/react": "^1.7.1",
     "@headlessui/tailwindcss": "^0.1.1",
     "@heroicons/react": "^2.0.11",
