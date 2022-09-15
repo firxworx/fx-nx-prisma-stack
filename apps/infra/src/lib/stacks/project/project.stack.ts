@@ -129,7 +129,7 @@ export class ProjectStack extends FxBaseStack {
       port: 3333,
     }
 
-    const emailRegex = /[a-z0-9]+@[a-z]+\.[a-z]{2,5}$/ // quick test (regex not suitable for user input validation)
+    const emailRegex = /[a-z0-9]+@[a-z]+\.[a-z]{2,5}$/ // quick test (regex not suitable for public input validation)
     const sesSenderAddress = process.env.AWS_SES_SENDER_ADDRESS ?? ''
     const sesReplyToAddress = process.env.AWS_SES_REPLY_TO_ADDRESS ?? ''
 
@@ -162,12 +162,23 @@ export class ProjectStack extends FxBaseStack {
           executionRole: this.roles.taskExecution,
           port: apiDeployConfig.port,
           environment: {
-            API_PROJECT_TAG: this.getProjectTag(),
+            NO_COLOR: '1', // disable console colors (raw color codes can clutter cloudwatch logs)
+
+            API_PROJECT_TAG: this.getProjectTag(), // @deprecated
+
+            API_TAG_ID: `${this.getProjectTag()}-${this.getDeployStageTag()}-api`,
             ORIGIN: subOrDomainName,
             PORT: String(apiDeployConfig.port),
-
             BASE_PATH: `${this.api.paths.basePath}/api`,
             API_VERSION: 'v1',
+
+            LOG_LEVEL: 'debug',
+            API_LOGS_SYNC: 'ON',
+
+            API_OPT_COMPRESSION: 'ON',
+            API_OPT_CSRF_PROTECTION: 'ON',
+
+            CSRF_TOKEN_COOKIE_NAME: 'CSRF-TOKEN',
 
             DB_NAME: this.getProjectTag(),
             DB_HOST: props.database.instance.dbInstanceEndpointAddress,
@@ -181,16 +192,6 @@ export class ProjectStack extends FxBaseStack {
               props.database.instance.dbInstanceEndpointPort
             }/${secret.secretValueFromJson('database').unsafeUnwrap()}`,
 
-            LOG_LEVEL: 'debug',
-            API_LOGS_SYNC: 'ON',
-
-            NO_COLOR: '1', // disable console colors because the raw codes clutter cloudwatch logs
-
-            API_OPT_COMPRESSION: 'ON',
-            API_OPT_CSRF_PROTECTION: 'ON',
-
-            CSRF_TOKEN_COOKIE_NAME: 'CSRF-TOKEN',
-
             AWS_SES_SENDER_ADDRESS: sesSenderAddress,
             AWS_SES_REPLY_TO_ADDRESS: sesReplyToAddress,
 
@@ -198,6 +199,14 @@ export class ProjectStack extends FxBaseStack {
             JWT_REFRESH_TOKEN_SECRET: 'jwt_refresh_secret_vasdla34pand', // @todo move to secret parameters
             JWT_ACCESS_TOKEN_EXPIRATION_TIME: '3306',
             JWT_REFRESH_TOKEN_EXPIRATION_TIME: '604800',
+
+            HEALTH_CHECK_HTTP_PING_URL: 'https://google.com',
+            HEALTH_CHECK_MAX_HEAP_MIB: '250',
+            HEALTH_CHECK_MAX_RSS_MIB: '250',
+
+            STRIPE_API_KEY: process.env.STRIPE_API_KEY ?? '', // @todo move to secret parameters or store in .env?
+            STRIPE_API_KEY_TEST: process.env.STRIPE_API_KEY_TEST ?? '', // @todo move to secret parameters or store in .env?
+            STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET ?? 'stripe_webhook_secret', // @todo move to secret parameters or store in .env?
           },
           secrets: {
             DB_USER: ecs.Secret.fromSecretsManager(secret, 'username'),

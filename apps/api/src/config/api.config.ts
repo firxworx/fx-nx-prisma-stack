@@ -1,4 +1,5 @@
 import { registerAs } from '@nestjs/config'
+
 import { mapEnvVarsToConfigOptionFlags } from './lib/env-mapper'
 import type { ApiConfig } from './types/api-config.interface'
 
@@ -19,7 +20,7 @@ export default registerAs('api', (): ApiConfig => {
     port: process.env.PORT ? Number(process.env.PORT) : 3333,
     globalPrefix: `${normalizeBasePath(String(process.env.BASE_PATH)) ?? 'api'}/${process.env.API_VERSION ?? 'v1'}`,
     meta: {
-      projectTag: process.env.API_PROJECT_TAG ?? 'fx',
+      projectTag: process.env.API_TAG_ID ?? 'fx',
     },
     options: mapEnvVarsToConfigOptionFlags(requiredEnvsKeyMap),
   }

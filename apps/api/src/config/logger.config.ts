@@ -24,7 +24,10 @@ export default registerAs('logger', (): LoggerConfig => {
       // @see <https://github.com/pinojs/pino-http>
       pinoHttp: {
         base: {
-          app: process.env.API_PROJECT_TAG ?? 'fx',
+          app: process.env.API_TAG_ID ?? 'fx',
+          version: {
+            rest: process.env.API_VERSION ?? '', // e.g. v1 / public rest api version
+          },
           hostname: os.hostname(),
         },
         level: process.env.LOG_LEVEL ?? 'debug', // @todo validate types nestjs-pino
