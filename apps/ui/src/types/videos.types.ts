@@ -1,11 +1,7 @@
 // @temp until refactor to shared project lib
 
 import type { ApiObject } from './api-object.interface'
-
-export enum VideoPlatform {
-  YOUTUBE = 'YOUTUBE',
-  // VIMEO = 'VIMEO',
-}
+import { VideoPlatform } from './enums/videos.enums'
 
 export interface VideoDto extends ApiObject {
   name: string
@@ -31,7 +27,7 @@ export interface VideoGroupDto extends ApiObject {
 }
 
 export interface CreateVideoGroupDto extends Pick<VideoGroupDto, 'name' | 'description'> {
-  groups?: VideoGroupDto['videos'][number]['uuid'][]
+  videos?: VideoGroupDto['videos'][number]['uuid'][]
 }
 
 export interface UpdateVideoGroupDto extends Partial<CreateVideoGroupDto> {}
