@@ -18,6 +18,10 @@ module.exports = {
       spacing: {
         1.25: '0.3125rem',
       },
+      padding: {
+        '1/3': '33.33333%',
+        '2/3': '66.66666%',
+      },
       minWidth: {
         '1/4': '25%',
         '1/2': '50%',
@@ -28,6 +32,11 @@ module.exports = {
       },
       opacity: {
         5: '0.05',
+      },
+      grayscale: {
+        25: '25%',
+        50: '50%',
+        75: '75%',
       },
       // add zIndex values from 60-100 in steps of 10
       zIndex: Array.from({ length: 5 }, (_, i) => (6 + i) * 10).reduce(
