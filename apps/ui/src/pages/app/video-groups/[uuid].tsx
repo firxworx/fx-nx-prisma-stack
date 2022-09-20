@@ -1,10 +1,11 @@
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 
+import { useIsMounted } from '@firx/react-hooks'
+
 import { Spinner } from '../../../components/elements/feedback/Spinner'
 import { PageHeading } from '../../../components/elements/headings/PageHeading'
 import { useVideoGroupQuery } from '../../../api/hooks/video-groups'
-import { useIsMounted } from '../../../hooks/useIsMounted'
 import { useCallback } from 'react'
 import { VideoGroupMultiForm } from '../../../components/features/videos/VideoGroupMultiForm'
 import { VideoActionGallery } from '../../../components/features/videos/VideoActionGallery'

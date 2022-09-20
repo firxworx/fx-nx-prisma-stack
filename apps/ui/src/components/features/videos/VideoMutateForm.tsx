@@ -1,9 +1,10 @@
 import { useCallback, useMemo } from 'react'
 import { FormProvider, SubmitHandler, useForm } from 'react-hook-form'
 
+import { useIsMounted } from '@firx/react-hooks'
+
 import type { UpdateVideoDto, VideoDto } from '../../../types/videos.types'
 import { useVideoMutationQuery } from '../../../api/videos'
-import { useIsMounted } from '../../../hooks/useIsMounted'
 import { Spinner } from '../../elements/feedback/Spinner'
 import { FormButton } from '../../elements/forms/FormButton'
 import { FormInput } from '../../elements/forms/FormInput'

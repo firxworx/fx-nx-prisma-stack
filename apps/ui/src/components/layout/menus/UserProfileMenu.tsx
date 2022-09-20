@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import { Menu, Transition } from '@headlessui/react'
 import clsx from 'clsx'
 import { useAuthSignOut } from '../../../api/auth'
-import { useIsMounted } from '../../../hooks/useIsMounted'
+import { useIsMounted } from '@firx/react-hooks'
 
 const DEFAULT_SIGN_OUT_REDIRECT_PATH = '/'
 

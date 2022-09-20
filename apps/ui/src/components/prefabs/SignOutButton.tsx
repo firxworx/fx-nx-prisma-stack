@@ -1,8 +1,9 @@
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 
+import { useIsMounted } from '@firx/react-hooks'
+
 import { useAuthSignOut } from '../../api/auth'
-import { useIsMounted } from '../../hooks/useIsMounted'
 import { ActionButton } from '../elements/inputs/ActionButton'
 
 export interface SignOutButtonProps {

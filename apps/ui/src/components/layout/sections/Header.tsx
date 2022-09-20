@@ -11,7 +11,7 @@ import type { NavigationLink } from '../../../types/navigation.types'
 import { useSessionContext } from '../../../context/SessionContextProvider'
 import { useAuthSignOut } from '../../../api/auth'
 import { UserProfileMenu } from '../menus/UserProfileMenu'
-import { useIsMounted } from '../../../hooks/useIsMounted'
+import { useIsMounted } from '@firx/react-hooks'
 
 export interface HeaderProps {
   navigationLinks: NavigationLink[]
