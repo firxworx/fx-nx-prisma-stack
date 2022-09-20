@@ -4,6 +4,11 @@
   "projects": {
     "api": "apps/api",
     "infra": "apps/infra",
+    "shared-data-common": "libs/shared/data/common",
+    "shared-data-op": "libs/shared/data/op",
+    "shared-nestjs-auth": "libs/shared/nestjs/auth",
+    "shared-react-forms": "libs/shared/react/forms",
+    "shared-react-hooks": "libs/shared/react/hooks",
     "ui": "apps/ui",
     "ui-e2e": "apps/ui-e2e"
   }

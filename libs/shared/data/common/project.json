@@ -1,0 +1,34 @@
+{
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/shared/data/common/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/shared/data/common/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/shared/data/common"],
+      "options": {
+        "jestConfig": "libs/shared/data/common/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "build": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/shared/data/common",
+        "tsConfig": "libs/shared/data/common/tsconfig.lib.json",
+        "packageJson": "libs/shared/data/common/package.json",
+        "main": "libs/shared/data/common/src/index.ts",
+        "assets": ["libs/shared/data/common/*.md"]
+      }
+    }
+  },
+  "tags": ["publish:public"]
+}

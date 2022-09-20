@@ -15,7 +15,13 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@firx/common-data": ["libs/shared/data/common/src/index.ts"],
+      "@firx/nestjs-auth": ["libs/shared/nestjs/auth/src/index.ts"],
+      "@firx/op-data": ["libs/shared/data/op/src/index.ts"],
+      "@firx/react-forms": ["libs/shared/react/forms/src/index.ts"],
+      "@firx/react-hooks": ["libs/shared/react/hooks/src/index.ts"]
+    }
   },
   "exclude": ["node_modules", "tmp", "notes", "examples", "scripts"]
 }

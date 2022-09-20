@@ -1,0 +1,46 @@
+{
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/shared/nestjs/auth/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/shared/nestjs/auth",
+        "tsConfig": "libs/shared/nestjs/auth/tsconfig.lib.json",
+        "packageJson": "libs/shared/nestjs/auth/package.json",
+        "main": "libs/shared/nestjs/auth/src/index.ts",
+        "assets": ["libs/shared/nestjs/auth/*.md"]
+      }
+    },
+    "publish": {
+      "executor": "@nrwl/workspace:run-commands",
+      "options": {
+        "command": "node tools/scripts/publish.mjs shared-nestjs-auth {args.ver} {args.tag}"
+      },
+      "dependsOn": [
+        {
+          "projects": "self",
+          "target": "build"
+        }
+      ]
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/shared/nestjs/auth/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/shared/nestjs/auth"],
+      "options": {
+        "jestConfig": "libs/shared/nestjs/auth/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": ["publish:public"]
+}
