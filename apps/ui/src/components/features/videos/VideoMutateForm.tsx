@@ -76,7 +76,7 @@ export const VideoMutateForm: React.FC<VideoMutateFormProps> = ({ uuid, video, o
 
   return (
     <FormProvider {...form}>
-      <form onSubmit={handleSubmit(handleMutationQuery)} className="p-4 mt-4 w-full">
+      <form onSubmit={handleSubmit(handleMutationQuery)} className="w-full">
         {isVideoMutationError && <div className="font-medium my-4">{String(videoMutationError)}</div>}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <FormInput

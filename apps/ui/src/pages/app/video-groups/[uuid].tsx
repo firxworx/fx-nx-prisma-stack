@@ -7,6 +7,7 @@ import { useVideoGroupQuery } from '../../../api/hooks/video-groups'
 import { useIsMounted } from '../../../hooks/useIsMounted'
 import { useCallback } from 'react'
 import { VideoGroupMultiForm } from '../../../components/features/videos/VideoGroupMultiForm'
+import { VideoActionGallery } from '../../../components/features/videos/VideoActionGallery'
 
 export const VideoGroupPage: NextPage = () => {
   const isMounted = useIsMounted()
@@ -32,11 +33,12 @@ export const VideoGroupPage: NextPage = () => {
         {isSuccess && videoGroup && (
           <>
             <div className="flex justify-center">
-              <div className="w-full sm:w-4/6">
-                <h2 className="mb-5 text-2xl font-normal tracking-tight text-action-primary-darkest">
-                  {videoGroup.name}
-                </h2>
+              <div className="w-full sm:w-4/6 space-y-4">
+                <h2 className="text-2xl font-normal tracking-tight text-action-primary-darkest">{videoGroup.name}</h2>
                 <VideoGroupMultiForm mutate={{ data: videoGroup, onSuccess: onSaveRedirectHandler }} />
+
+                <h2 className="text-2xl">WIP Video Action Gallery</h2>
+                <VideoActionGallery videos={videoGroup.videos} />
               </div>
             </div>
           </>

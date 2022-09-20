@@ -3,6 +3,8 @@ import { PageHeading } from '../../../components/elements/headings/PageHeading'
 
 import { useVideoGroupsQuery } from '../../../api/hooks/video-groups'
 import { Spinner } from '../../../components/elements/feedback/Spinner'
+import Link from 'next/link'
+import clsx from 'clsx'
 
 export const VideoGroupsPage: NextPage = (_props) => {
   const { data, isSuccess, isLoading, isError } = useVideoGroupsQuery()
@@ -15,12 +17,21 @@ export const VideoGroupsPage: NextPage = (_props) => {
         {isLoading && <Spinner />}
         {isSuccess && !!data?.length && (
           <ul className="space-y-2">
-            {data?.map((videoGroup) => (
-              <li key={videoGroup.uuid} className="p-4 border-2 rounded-md bg-slate-50 border-slate-200">
-                <div>
-                  <div>{videoGroup.name}</div>
-                  <div>{videoGroup.videos.map((video) => video.name).join(', ')}</div>
-                </div>
+            {data?.map((vg) => (
+              <li key={vg.uuid} className="group flex items-center justify-between">
+                <Link href={vg.uuid}>
+                  <a
+                    className={clsx(
+                      'p-4 flex-1 border-l-2 border-t-2 border-b-2 rounded-l-md border-slate-200',
+                      'text-action-primary hover:text-action-primary-darker hover:underline',
+                      'bg-slate-50 border-slate-200 group-hover:border-slate-300',
+                      'transition-colors',
+                    )}
+                  >
+                    <div>{vg.name}</div>
+                    <div>{vg.videos.map((video) => video.name).join(', ')}</div>
+                  </a>
+                </Link>
               </li>
             ))}
           </ul>

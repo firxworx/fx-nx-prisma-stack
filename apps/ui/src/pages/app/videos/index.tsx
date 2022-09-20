@@ -11,11 +11,15 @@ import { Spinner } from '../../../components/elements/feedback/Spinner'
 import { LinkButton } from '../../../components/elements/inputs/LinkButton'
 import { NavLink } from '../../../components/elements/inputs/NavLink'
 import { PageHeading } from '../../../components/elements/headings/PageHeading'
+import { VideoThumbnail } from 'apps/ui/src/components/features/videos/VideoThumbnail'
 
-export const VideoPlatformLogo: React.FC<{ platform?: VideoDto['platform'] }> = ({ platform }) => {
+export const VideoPlatformLogo: React.FC<{ platform?: VideoDto['platform']; appendClassName?: string }> = ({
+  platform,
+  appendClassName,
+}) => {
   switch (platform) {
     case 'YOUTUBE': {
-      return <AiOutlineYoutube className="h-6 w-auto" />
+      return <AiOutlineYoutube className={(clsx('h-6 w-auto'), appendClassName)} />
     }
     default: {
       return null
@@ -50,37 +54,33 @@ export const VideosPage: NextPage = (_props) => {
         {isError && <p>{LABELS.ERROR_FETCHING_DATA}</p>}
         {isLoading && <Spinner />}
         {isSuccess && !!data?.length && (
-          <ul className="space-y-2">
-            {data?.map((video) => (
-              <li key={video.uuid} className="group flex items-center justify-between">
-                <Link href={`/app/videos/${video.uuid}`}>
-                  <a
-                    className={clsx(
-                      'p-4 flex-1 border-l-2 border-t-2 border-b-2 rounded-l-md border-slate-200',
-                      'text-action-primary hover:text-action-primary-darker hover:underline',
-                      'bg-slate-50 border-slate-200 group-hover:border-slate-300',
-                      'transition-colors',
-                    )}
-                  >
-                    {video.name}
-                  </a>
-                </Link>
-                <Link href={`https://www.youtube.com/watch?v=${video.externalId}`}>
-                  <a
-                    className={clsx(
-                      'p-4 border-r-2 border-l-2 border-t-2 border-b-2 rounded-r-md',
-                      'text-action-primary hover:text-action-primary-darker',
-                      'bg-slate-50 group-hover:border-slate-300',
-                      'border-slate-200 hover:bg-yellow-50',
-                      'transition-colors',
-                    )}
-                  >
-                    <VideoPlatformLogo platform={video.platform} />
-                  </a>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <>
+            <div className="">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {data?.map((video) => (
+                  <Link key={video.uuid} href={`/app/videos/${video.uuid}`}>
+                    <a
+                      className={clsx(
+                        'group w-full rounded-md overflow-hidden',
+                        'ring-2 ring-slate-200 hover:ring-sky-200 hover:ring-2 transition-colors',
+                      )}
+                    >
+                      <div className="filter grayscale-50 group-hover:grayscale-0 transition-all">
+                        <VideoThumbnail externalId={video.externalId} />
+                      </div>
+                      <div className="flex items-center bg-slate-50 p-2 sm:p-4">
+                        <div className="flex-1">
+                          <div className="text-sm md:text-base">{video.name}</div>
+                          <div className="text-sm hidden sm:block font-light">{video.groups.length} groups</div>
+                        </div>
+                        {/* <VideoPlatformLogo platform={video.platform} /> */}
+                      </div>
+                    </a>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </>
         )}
         {isSuccess && !data?.length && (
           <div className="flex items-center border-2 border-dashed rounded-md p-4">

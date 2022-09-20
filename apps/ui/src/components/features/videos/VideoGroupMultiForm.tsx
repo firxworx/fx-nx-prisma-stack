@@ -42,7 +42,7 @@ const InnerForm: React.FC<{
   onSubmit: React.FormEventHandler<HTMLFormElement>
 }> = ({ isLoading, videoSelectOptions, onSubmit }) => {
   return (
-    <form onSubmit={onSubmit} className={clsx('p4 w-full', { ['animate-pulse']: isLoading })}>
+    <form onSubmit={onSubmit} className={clsx('w-full', { ['animate-pulse']: isLoading })}>
       <div className="grid grid-cols-1 gap-4">
         <FormInput name="name" label="Group Name" placeholder="Group Name" validationOptions={{ required: true }} />
         <FormInput name="description" label="Description" placeholder="Description" />

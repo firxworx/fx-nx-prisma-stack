@@ -100,7 +100,7 @@ export const VideoCreateForm: React.FC<VideoCreateFormProps> = ({ onSuccess }) =
 
   return (
     <FormProvider {...videoForm}>
-      <form onSubmit={handleVideoSubmit(handleCreateVideo)} className="p4 mt-4 w-full">
+      <form onSubmit={handleVideoSubmit(handleCreateVideo)} className="w-full">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <FormInput
             name="name"

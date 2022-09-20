@@ -5,19 +5,31 @@ import { Spinner } from '../../elements/feedback/Spinner'
 import { FormButton } from '../../elements/forms/FormButton'
 import { FormInput } from '../../elements/forms/FormInput'
 import { FormMultiListBox } from '../../elements/forms/FormMultiListBox'
-import type { CreateVideoGroupDto, UpdateVideoGroupDto } from '../../../types/videos.types'
+import type { CreateVideoGroupDto, UpdateVideoGroupDto, VideoGroupDto } from '../../../types/videos.types'
 import { useVideosQuery } from '../../../api/videos'
 
 export interface VideoGroupCreateFormValues extends CreateVideoGroupDto {}
 export interface VideoGroupMutateFormValues extends UpdateVideoGroupDto {}
 
 export interface VideoGroupFormProps {
+  edit?: {
+    data: VideoGroupDto
+  }
   reactHookForm: UseFormReturn<VideoGroupCreateFormValues, any>
   isLoading?: boolean
   onSubmit: SubmitHandler<VideoGroupCreateFormValues>
 }
 
-export const VideoGroupForm: React.FC<VideoGroupFormProps> = ({ reactHookForm, isLoading, onSubmit }) => {
+const mapVideoGroupDtoToFormData = (dto?: VideoGroupDto): VideoGroupMutateFormValues | undefined =>
+  dto
+    ? {
+        name: dto.name,
+        description: dto.description,
+        videos: dto.videos?.map((video) => video.uuid) ?? [],
+      }
+    : undefined
+
+export const VideoGroupForm: React.FC<VideoGroupFormProps> = ({ edit, reactHookForm, isLoading, onSubmit }) => {
   const { handleSubmit } = reactHookForm
 
   const { data: videos } = useVideosQuery()
