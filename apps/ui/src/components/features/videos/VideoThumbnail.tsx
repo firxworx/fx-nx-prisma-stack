@@ -53,8 +53,8 @@ export const VideoThumbnail: React.FC<VideoThumbnailProps> = ({ externalId }) =>
 
   return (
     <div
-      className={clsx('aspect-w-16 aspect-h-9 w-full isolate rounded-md overflow-hidden', {
-        ['animate-pulse bg-slate-200']: !isLoaded,
+      className={clsx('aspect-w-16 aspect-h-9 bg-slate-200', {
+        ['animate-pulse']: !isLoaded,
       })}
     >
       {!isError && !isLoaded && isValid === undefined && (
