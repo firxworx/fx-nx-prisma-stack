@@ -4,7 +4,7 @@ import React from 'react'
  * React hook that merges multiple refs into one. Returns the merged ref when given >1 refs as arguments.
  * From the MIT-licensed react-hook npm package <https://github.com/jaredLunde/react-hook>
  */
-function useMergedRef<T>(...refs: React.Ref<T>[]): React.RefCallback<T> {
+export function useMergedRef<T>(...refs: React.Ref<T>[]): React.RefCallback<T> {
   return React.useCallback(
     (element: T) => {
       for (let i = 0; i < refs.length; i++) {
@@ -17,5 +17,3 @@ function useMergedRef<T>(...refs: React.Ref<T>[]): React.RefCallback<T> {
     refs,
   )
 }
-
-export default useMergedRef

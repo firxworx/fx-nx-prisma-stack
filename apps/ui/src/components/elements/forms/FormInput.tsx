@@ -3,9 +3,9 @@ import clsx from 'clsx'
 import { useId } from '@reach/auto-id'
 import { type RegisterOptions, useFormContext } from 'react-hook-form'
 
-import { ExclamationCircleIcon } from '@heroicons/react/24/outline'
+import { useMergedRef } from '@firx/react-hooks'
 
-import useMergedRef from '../../../hooks/useMergedRef'
+import { ExclamationCircleIcon } from '@heroicons/react/24/outline'
 
 export interface FormInputProps extends React.ComponentPropsWithoutRef<'input'> {
   /** provide an explicit id for the input element (otherwise a server-render-friendly id will be generated). */
