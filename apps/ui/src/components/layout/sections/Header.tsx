@@ -191,7 +191,7 @@ const mobileNavPopOverButtonClassName = clsx(
 )
 
 const mobileNavButtonIconClassName =
-  'h-5 w-5 transition-colors text-slate-700 group-hover:text-action-primary group-focus:text-action-primary transition-colors'
+  'h-5 w-5 transition-colors text-slate-700 group-hover:text-action-primary group-focus:text-action-primary'
 
 const MobileNavMenuButton: React.FC = () => {
   return (
