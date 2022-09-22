@@ -1,1 +1,2 @@
 apps/api/src/generated/**/*
+.next/

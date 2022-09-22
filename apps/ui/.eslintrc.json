@@ -1,11 +1,16 @@
 {
   "extends": ["plugin:@nrwl/nx/react-typescript", "../../.eslintrc.json", "next", "next/core-web-vitals"],
   "ignorePatterns": ["!**/*"],
+  "settings": {
+    "next": {
+      "rootDir": "apps/ui/src/pages"
+    }
+  },
   "overrides": [
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
       "rules": {
-        "@next/next/no-html-link-for-pages": ["error", "apps/ui/pages"]
+        "@next/next/no-html-link-for-pages": ["error", "apps/ui/src/pages"]
       }
     },
     {
