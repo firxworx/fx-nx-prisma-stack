@@ -38,7 +38,7 @@ const userData: Omit<Prisma.UserCreateInput, 'password'>[] = [
   },
 ]
 
-async function main() {
+async function main(): Promise<void> {
   console.log(`Start seeding ...`)
 
   const password = await hash(INSECURE_SHARED_DEV_PASSWORD)

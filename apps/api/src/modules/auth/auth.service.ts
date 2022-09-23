@@ -310,7 +310,7 @@ export class AuthService {
   /**
    * Return Authentication and Refresh cookies with Max-Age 0 for sign-out.
    */
-  public buildSignOutCookies() {
+  public buildSignOutCookies(): [string, string] {
     const secureCookie = process.env.NODE_ENV === 'production' ? 'Secure; ' : ''
 
     return [

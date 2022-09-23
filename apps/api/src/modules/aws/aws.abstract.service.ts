@@ -8,13 +8,14 @@ export abstract class AwsAbstractService<AwsClient> {
   protected client: AwsClient
 
   protected constructor(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private readonly ClientClass: { new (...args: any[]): AwsClient },
     private readonly configService: ConfigService,
   ) {
     this.client = this.getClient()
   }
 
-  protected getAwsConfig() {
+  protected getAwsConfig(): AwsModuleConfig {
     const awsConfig = this.configService.get<AwsModuleConfig>('aws')
 
     if (!awsConfig) {
@@ -52,7 +53,7 @@ export abstract class AwsAbstractService<AwsClient> {
    * @param error
    * @returns rejected promise containing the original error
    */
-  protected handleError(error: unknown) {
+  protected handleError<T>(error: T): Promise<T> {
     const tsError = error instanceof Error ? error : undefined
     this.logger.error(tsError ? tsError.message : String(error), tsError?.stack)
 

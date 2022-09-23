@@ -24,8 +24,8 @@ export class AwsSesService extends AwsAbstractService<SESClient> {
     super(SESClient, configService)
   }
 
-  private getTruncatedSubject(subject: string) {
-    return `${subject.substr(0, 25)}${subject.length > 25 ? '...' : ''}`
+  private getTruncatedSubject(subject: string): string {
+    return `${subject.substring(0, 25)}${subject.length > 25 ? '...' : ''}`
   }
 
   private getBaseSendEmailParams(

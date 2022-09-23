@@ -18,7 +18,7 @@ export const mapEnvVarsToConfigOptionFlags = <T extends EnvVarToConfigKeyMap>(
   return Object.entries(keyMap).reduce((acc, [envVar, configKey]) => {
     const envValue = String(process.env[envVar])
 
-    if (!(envValue === 'ON' || 'OFF')) {
+    if (!(envValue === 'ON' || envValue === 'OFF')) {
       throw new Error(`Config Error: invalid value for env var ${envVar} - "ON" or "OFF" required`)
     }
 

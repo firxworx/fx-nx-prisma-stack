@@ -16,4 +16,6 @@ export const FX_KEY_IS_PUBLIC_ROUTE_HANDLER = 'FX_KEY_IS_PUBLIC_ROUTE_HANDLER' a
  *
  * @see https://docs.nestjs.com/security/authentication
  */
-export const PublicRouteHandler = () => SetMetadata(FX_KEY_IS_PUBLIC_ROUTE_HANDLER, true)
+export const PublicRouteHandler = (): void => {
+  SetMetadata(FX_KEY_IS_PUBLIC_ROUTE_HANDLER, true)
+}

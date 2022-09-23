@@ -25,16 +25,18 @@ const mockAuthConfig: AuthConfig = {
 }
 
 const MOCK_CONFIG_SERVICE = {
-  get(key: string) {
+  get(key: string): AuthConfig {
     switch (key) {
       case 'auth':
         return mockAuthConfig
+      default:
+        throw new Error(`Unimplemented mock config key: '${key}'`)
     }
   },
 }
 
 const MOCK_JWT_SERVICE = {
-  sign: () => '',
+  sign: (): string => '',
 }
 
 const getMockUser = (id: number, name: string, partialOverride?: Partial<User>): User => ({

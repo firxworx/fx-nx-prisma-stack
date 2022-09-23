@@ -20,9 +20,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
-        (request: Request) => {
+        (request: Request): string | null => {
           // cookies are added to request object by cookie-parser - @see main.ts
-          return request?.cookies?.Authentication
+          return request?.cookies?.Authentication ?? null
         },
       ]),
       secretOrKey,

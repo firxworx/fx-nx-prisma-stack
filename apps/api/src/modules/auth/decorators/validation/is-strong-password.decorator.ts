@@ -7,24 +7,24 @@ import {
 
 export const MESSAGES = {
   ERROR_PASSWORD_VALIDATION:
-    'Password must be between 8-128 characters long and include at least a lowercase letter, an uppercase letter, and a digit.',
+    'Password length must be 8-128 characters long and must include at least a lowercase letter, an uppercase letter, and a digit.',
 }
 
 /**
  * Strong password DTO validator that implements a `IsStrongPassword()` decorator for DTO classes that leverage
  * the class-validator library.
  *
- * Credit: @mattlehrer on GitHub (<https://github.com/mattlehrer/nest-starter-pg-auth>)
+ * Acknowledgement: adapted from MIT-license code by @mattlehrer (<https://github.com/mattlehrer/nest-starter-pg-auth>)
  */
 @ValidatorConstraint({ name: 'strongPassword', async: false })
 export class StrongPassword implements ValidatorConstraintInterface {
   /**
-   * Return a boolean indicating if the given password input is a string within the required length
-   * range and has at least one lowercase character, one uppercase character, and a digit.
+   * Return a boolean indicating if the given input is a string of 8-128 length inclusive that includes
+   * at least 1x lowercase, 1x uppercase, and 1x digit characters.
    *
-   * This method is called by the `IsStrongPassword()` decorator.
+   * This method is invoked by the `IsStrongPassword()` decorator.
    */
-  validate(password: string): boolean {
+  validate(password: unknown): boolean {
     return (
       typeof password === 'string' &&
       password.length >= 8 &&
@@ -39,11 +39,19 @@ export class StrongPassword implements ValidatorConstraintInterface {
 }
 
 /**
- * Validation decorator for DTO's that enforces a length between 8-100 characters and requires passwords to
- * have at least 1 lowercase, uppercase, and digit characters.
+ * Validation decorator for DTO property values that enforces: a string of length 8-128 inclusive that includes
+ * at least 1x lowercase, 1x uppercase, and 1x digit characters.
  */
-export function IsStrongPassword(validationOptions?: ValidationOptions): (object: any, propertyName: string) => void {
-  return function (object: any, propertyName: string): void {
+export function IsStrongPassword(
+  validationOptions?: ValidationOptions,
+): (object: unknown, propertyName: string) => void {
+  return function (object: InstanceType<new (...args: unknown[]) => unknown>, propertyName: string): void {
+    if (!(object instanceof Object)) {
+      throw new Error(
+        'IsStrongPassword validation decorator can only be applied to class properties (e.g. DTO classes).',
+      )
+    }
+
     registerDecorator({
       target: object.constructor,
       propertyName: propertyName,

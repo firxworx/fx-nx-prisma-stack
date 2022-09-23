@@ -12,7 +12,7 @@ const requiredEnvsKeyMap: Record<string, keyof ApiConfig['options']> = {
  * Support and conditionally remove any leading slash from the given base path: it is frequently
  * required in infra/IaC scenarios however must be omitted when specifying the global prefix for nestjs.
  */
-const normalizeBasePath = (input: string) => input.replace(/^\/+/, '')
+const normalizeBasePath = (input: string): string => input.replace(/^\/+/, '')
 
 export default registerAs('api', (): ApiConfig => {
   return {

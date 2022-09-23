@@ -9,6 +9,9 @@ import { ConfigService } from '@nestjs/config'
 
 import { AwsAbstractService } from './aws.abstract.service'
 
+/**
+ * WIP NestJS service for working with AWS EventBridge event buses in the current AWS environment.
+ */
 @Injectable()
 export class AwsEventBridgeService extends AwsAbstractService<EventBridgeClient> {
   protected readonly logger = new Logger(this.constructor.name)
@@ -92,12 +95,8 @@ export class AwsEventBridgeService extends AwsAbstractService<EventBridgeClient>
    * @see https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-putevent-size.html
    */
   public async putEvents(entries?: Array<PutEventsRequestEntry>): Promise<PutEventsCommandOutput> {
-    try {
-      const data = await this.client.send(new PutEventsCommand({ Entries: entries }))
+    const data = await this.client.send(new PutEventsCommand({ Entries: entries }))
 
-      return data // for unit tests
-    } catch (error: unknown) {
-      return this.handleError(error)
-    }
+    return data // for unit tests
   }
 }

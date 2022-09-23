@@ -2,8 +2,10 @@ import { ValidationPipe } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { Test, TestingModule } from '@nestjs/testing'
+
 import { User } from '@prisma/client'
-import { AuthConfig } from 'apps/api/src/config/types/auth-config.interface'
+
+import type { AuthConfig } from '../../../config/types/auth-config.interface'
 import { PrismaService } from '../../prisma/prisma.service'
 import { AuthController } from '../auth.controller'
 import { AuthService } from '../auth.service'
@@ -23,16 +25,18 @@ const mockAuthConfig: AuthConfig = {
 }
 
 const MOCK_CONFIG_SERVICE = {
-  get(key: string) {
+  get(key: string): AuthConfig {
     switch (key) {
       case 'auth':
         return mockAuthConfig
+      default:
+        throw new Error(`Unimplemented mock config key: '${key}'`)
     }
   },
 }
 
 const MOCK_JWT_SERVICE = {
-  sign: () => '',
+  sign: (): string => '',
 }
 
 const MOCK_USERS: User[] = ['Alice', 'Bob', 'Mallory'].map((name, index) => ({
