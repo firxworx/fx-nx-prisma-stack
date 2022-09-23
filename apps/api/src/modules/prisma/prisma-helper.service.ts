@@ -24,7 +24,7 @@ export class PrismaHelperService {
    *
    * All errors are logged. Any unsupported cases will be logged + returned without modification.
    */
-  handleError(error: unknown) {
+  handleError(error: unknown): NotFoundException | unknown {
     // `NotFoundError` is thrown by select queries e.g. when throw on error behavior is enabled
     if (error instanceof NotFoundError) {
       this.logger.warn(error.message)
