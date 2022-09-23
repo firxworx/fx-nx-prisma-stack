@@ -1,9 +1,9 @@
 // @temp until refactor to shared project lib
 
-import type { ApiObject } from './api-object.interface'
+import type { ApiBaseDto } from './api.types'
 import { VideoPlatform } from './enums/videos.enums'
 
-export interface VideoDto extends ApiObject {
+export interface VideoDto extends ApiBaseDto {
   name: string
   platform: VideoPlatform
   externalId: string
@@ -18,7 +18,7 @@ export interface CreateVideoDto extends Pick<VideoDto, 'name' | 'platform' | 'ex
 
 export interface UpdateVideoDto extends Partial<CreateVideoDto> {}
 
-export interface VideoGroupDto extends ApiObject {
+export interface VideoGroupDto extends ApiBaseDto {
   createdAt: Date
   updatedAt: Date // @todo handle dates response
   name: string
