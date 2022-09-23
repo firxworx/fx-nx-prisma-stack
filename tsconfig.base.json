@@ -23,5 +23,5 @@
       "@firx/react-hooks": ["libs/shared/react/hooks/src/index.ts"]
     }
   },
-  "exclude": ["node_modules", "tmp", "notes", "examples", "scripts"]
+  "exclude": ["node_modules", "tmp", "wip", "notes", "examples", "scripts"]
 }

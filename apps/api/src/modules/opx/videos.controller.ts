@@ -20,7 +20,7 @@ import { UpdateVideoDto } from './dto/update-video.dto'
 import { VideoDto } from './dto/video.dto'
 import { VideosService } from './videos.service'
 
-const CONTROLLER_NAME = 'videos'
+const CONTROLLER_NAME = 'opx/:boxProfileUuid/videos'
 
 @ApiTags(CONTROLLER_NAME)
 @Controller(CONTROLLER_NAME)
@@ -29,38 +29,48 @@ export class VideosController {
   constructor(private readonly videosService: VideosService) {}
 
   @Get()
-  async getVideos(@GetUser() user: SanitizedUser): Promise<VideoDto[]> {
-    return this.videosService.findAllByUser(user)
+  async getVideos(
+    @GetUser() user: SanitizedUser,
+    @Param('boxProfileUuid', new ParseUUIDPipe({ version: '4' })) boxProfileUuid: string,
+  ): Promise<VideoDto[]> {
+    return this.videosService.findAllByUserAndBoxProfile(user, boxProfileUuid)
   }
 
   @Get(':uuid')
   async getVideo(
     @GetUser() user: SanitizedUser,
+    @Param('boxProfileUuid', new ParseUUIDPipe({ version: '4' })) boxProfileUuid: string,
     @Param('uuid', new ParseUUIDPipe({ version: '4' })) uuid: string,
   ): Promise<VideoDto> {
-    return this.videosService.getOneByUser(user, uuid)
+    return this.videosService.getOneByUserAndBoxProfile(user, boxProfileUuid, uuid)
   }
 
   @Post()
-  async createVideo(@GetUser() user: SanitizedUser, @Body() dto: CreateVideoDto): Promise<VideoDto> {
-    return this.videosService.createByUser(user, dto)
+  async createVideo(
+    @GetUser() user: SanitizedUser,
+    @Param('boxProfileUuid', new ParseUUIDPipe({ version: '4' })) boxProfileUuid: string,
+    @Body() dto: CreateVideoDto,
+  ): Promise<VideoDto> {
+    return this.videosService.createByUser(user, boxProfileUuid, dto)
   }
 
   @Patch(':uuid')
   async updateVideo(
     @GetUser() user: SanitizedUser,
+    @Param('boxProfileUuid', new ParseUUIDPipe({ version: '4' })) boxProfileUuid: string,
     @Param('uuid', new ParseUUIDPipe({ version: '4' })) uuid: string,
     @Body() dto: UpdateVideoDto,
   ): Promise<VideoDto> {
-    return this.videosService.updateByUser(user, uuid, dto)
+    return this.videosService.updateByUser(user, boxProfileUuid, uuid, dto)
   }
 
   @Delete(':uuid')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteVideo(
     @GetUser() user: SanitizedUser,
+    @Param('boxProfileUuid', new ParseUUIDPipe({ version: '4' })) boxProfileUuid: string,
     @Param('uuid', new ParseUUIDPipe({ version: '4' })) uuid: string,
   ): Promise<void> {
-    return this.videosService.deleteByUser(user, uuid)
+    return this.videosService.deleteByUserAndBoxProfile(user, boxProfileUuid, uuid)
   }
 }

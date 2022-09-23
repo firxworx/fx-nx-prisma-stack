@@ -20,7 +20,7 @@ import { UpdateVideoGroupDto } from './dto/update-video-group.dto'
 import { VideoGroupDto } from './dto/video-group.dto'
 import { VideoGroupsService } from './video-groups.service'
 
-const CONTROLLER_NAME = 'video-groups'
+const CONTROLLER_NAME = 'opx/:boxProfileUuid/video-groups'
 
 @ApiTags(CONTROLLER_NAME)
 @Controller(CONTROLLER_NAME)
@@ -29,38 +29,48 @@ export class VideoGroupsController {
   constructor(private readonly videosGroupsService: VideoGroupsService) {}
 
   @Get()
-  async getVideoGroups(@GetUser() user: SanitizedUser): Promise<VideoGroupDto[]> {
-    return this.videosGroupsService.findAllByUser(user)
+  async getVideoGroups(
+    @GetUser() user: SanitizedUser,
+    @Param('boxProfileUuid', new ParseUUIDPipe({ version: '4' })) boxProfileUuid: string,
+  ): Promise<VideoGroupDto[]> {
+    return this.videosGroupsService.findAllByUserAndBoxProfile(user, boxProfileUuid)
   }
 
   @Get(':uuid')
   async getVideoGroup(
     @GetUser() user: SanitizedUser,
+    @Param('boxProfileUuid', new ParseUUIDPipe({ version: '4' })) boxProfileUuid: string,
     @Param('uuid', new ParseUUIDPipe({ version: '4' })) uuid: string,
   ): Promise<VideoGroupDto> {
-    return this.videosGroupsService.getOneByUser(user, uuid)
+    return this.videosGroupsService.getOneByUserAndBoxProfile(user, boxProfileUuid, uuid)
   }
 
   @Post()
-  async createVideoGroup(@GetUser() user: SanitizedUser, @Body() dto: CreateVideoGroupDto): Promise<VideoGroupDto> {
-    return this.videosGroupsService.createByUser(user, dto)
+  async createVideoGroup(
+    @GetUser() user: SanitizedUser,
+    @Param('boxProfileUuid', new ParseUUIDPipe({ version: '4' })) boxProfileUuid: string,
+    @Body() dto: CreateVideoGroupDto,
+  ): Promise<VideoGroupDto> {
+    return this.videosGroupsService.createByUser(user, boxProfileUuid, dto)
   }
 
   @Patch(':uuid')
   async updateVideoGroup(
     @GetUser() user: SanitizedUser,
+    @Param('boxProfileUuid', new ParseUUIDPipe({ version: '4' })) boxProfileUuid: string,
     @Param('uuid', new ParseUUIDPipe({ version: '4' })) uuid: string,
     @Body() dto: UpdateVideoGroupDto,
   ): Promise<VideoGroupDto> {
-    return this.videosGroupsService.updateByUser(user, uuid, dto)
+    return this.videosGroupsService.updateByUser(user, boxProfileUuid, uuid, dto)
   }
 
   @Delete(':uuid')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteVideoGroup(
     @GetUser() user: SanitizedUser,
+    @Param('boxProfileUuid', new ParseUUIDPipe({ version: '4' })) boxProfileUuid: string,
     @Param('uuid', new ParseUUIDPipe({ version: '4' })) uuid: string,
   ): Promise<void> {
-    return this.videosGroupsService.deleteByUser(user, uuid)
+    return this.videosGroupsService.deleteByUserAndBoxProfile(user, boxProfileUuid, uuid)
   }
 }

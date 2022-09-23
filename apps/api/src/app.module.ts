@@ -12,7 +12,6 @@ import stripeConfig from './config/stripe.config'
 
 import { AuthModule } from './modules/auth/auth.module'
 import { PrismaModule } from './modules/prisma/prisma.module'
-import { VideosModule } from './modules/videos/videos.module'
 import { AppConfig } from './config/types/app-config.interface'
 import { LoggingInterceptor } from './interceptors/logging.interceptor'
 import { LoggerConfig } from './config/types/logger-config.interface'
@@ -20,6 +19,7 @@ import { HealthModule } from './modules/health/health.module'
 import { StripeModule } from './modules/stripe/stripe.module'
 import { assertNonNullable } from './types/type-assertions/assert-non-nullable'
 import { AwsModule } from './modules/aws/aws.module'
+import { OpxModule } from './modules/opx/opx.module'
 
 @Module({
   imports: [
@@ -43,7 +43,7 @@ import { AwsModule } from './modules/aws/aws.module'
     AuthModule,
     AwsModule,
     StripeModule,
-    VideosModule,
+    OpxModule,
   ],
   controllers: [],
   providers: [

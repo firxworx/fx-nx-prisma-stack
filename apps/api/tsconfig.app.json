@@ -8,6 +8,6 @@
     "target": "es2015",
     "strict": true
   },
-  "exclude": ["jest.config.ts", "**/*.spec.ts", "**/*.test.ts"],
+  "exclude": ["jest.config.ts", "**/*.spec.ts", "**/*.test.ts", "wip"],
   "include": ["**/*.ts"]
 }

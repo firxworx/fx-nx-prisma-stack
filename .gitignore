@@ -38,10 +38,13 @@ cdk.context.json
 # process
 /notes
 /.draft
+/wip
+/apps/**/*/wip
+/libs/**/*/wip
+/scripts/**/*/wip
 
 # dev workflow
 /db-dumps
-/scripts/wip
 
 #############################################
 # Generated nx
