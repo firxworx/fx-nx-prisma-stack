@@ -1,0 +1,10 @@
+export type ApiQueryProps =
+  | 'data'
+  | 'status'
+  | 'error'
+  | 'isLoading'
+  | 'isFetching'
+  | 'isSuccess'
+  | 'isError'
+  | 'isRefetchError'
+  | 'refetch'

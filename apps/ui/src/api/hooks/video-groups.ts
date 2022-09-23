@@ -1,4 +1,12 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+  useMutation,
+  UseMutationOptions,
+  UseMutationResult,
+  useQuery,
+  useQueryClient,
+  type UseQueryResult,
+} from '@tanstack/react-query'
+import type { ApiDeleteRequestDto, ApiMutateRequestDto } from '../../types/api.types'
 
 import type { CreateVideoGroupDto, UpdateVideoGroupDto, VideoGroupDto } from '../../types/videos.types'
 import {
@@ -9,6 +17,8 @@ import {
   fetchVideoGroupsFiltered,
   updateVideoGroup,
 } from '../fetchers/video-groups'
+import { ApiDeletionProps, ApiMutationProps } from '../types/mutation.types'
+import { ApiQueryProps } from '../types/query.types'
 
 const VIDEO_GROUPS_KEY_BASE = 'videoGroups' as const
 
@@ -41,93 +51,104 @@ const videoGroupQueryKeys = {
   delete: () => [{ ...videoGroupQueryKeys.all[0], operation: 'delete' }] as const,
 }
 
-export function useVideoGroupsQuery() {
-  const { data, status, error, isLoading, isFetching, isSuccess, isError, refetch } = useQuery(
+export function useVideoGroupsQuery(): Pick<UseQueryResult<VideoGroupDto[]>, ApiQueryProps> {
+  const { data, status, error, isLoading, isFetching, isSuccess, isError, isRefetchError, refetch } = useQuery(
     videoGroupQueryKeys.all,
     fetchVideoGroups,
   )
-  return { data, status, error, refetch, isLoading, isFetching, isSuccess, isError }
+
+  return { data, status, error, isLoading, isFetching, isSuccess, isError, isRefetchError, refetch }
 }
 
-export function useVideoGroupsFilteredQuery(filterSortPaginateParams: string) {
-  const { data, status, error, isLoading, isSuccess, isError } = useQuery(
-    videoGroupQueryKeys.listData(filterSortPaginateParams),
-    () => fetchVideoGroupsFiltered(filterSortPaginateParams),
-  )
-  return { data, status, error, isLoading, isSuccess, isError }
+export function useVideoGroupsFilteredQuery(
+  filterSortPaginateParams: string,
+): Pick<UseQueryResult<VideoGroupDto[]>, ApiQueryProps> {
+  const { data, status, error, isLoading, isFetching, isSuccess, isError, isRefetchError, refetch } = useQuery<
+    VideoGroupDto[]
+  >(videoGroupQueryKeys.listData(filterSortPaginateParams), () => fetchVideoGroupsFiltered(filterSortPaginateParams))
+
+  return { data, status, error, isLoading, isFetching, isSuccess, isError, isRefetchError, refetch }
 }
 
-export function useVideoGroupQuery(uuid: string | undefined) {
-  const { data, status, error, isLoading, isSuccess, isError } = useQuery(
-    videoGroupQueryKeys.detail(uuid),
-    () => fetchVideoGroup(uuid),
-    {
+export function useVideoGroupQuery(uuid: string | undefined): Pick<UseQueryResult<VideoGroupDto>, ApiQueryProps> {
+  const { data, status, error, isLoading, isFetching, isSuccess, isError, isRefetchError, refetch } =
+    useQuery<VideoGroupDto>(videoGroupQueryKeys.detail(uuid), () => fetchVideoGroup(uuid), {
       enabled: !!uuid?.length,
-    },
-  )
+    })
 
-  return { data, status, error, isLoading, isSuccess, isError }
+  return { data, status, error, isLoading, isFetching, isSuccess, isError, isRefetchError, refetch }
 }
 
-export function useVideoGroupCreateQuery(queryArgs?: VideoGroupCreateQueryArgs) {
+export function useVideoGroupCreateQuery(
+  options?: UseMutationOptions<VideoGroupDto, Error, CreateVideoGroupDto>,
+): Pick<UseMutationResult<VideoGroupDto, Error, CreateVideoGroupDto>, ApiMutationProps> {
   const queryClient = useQueryClient()
 
-  const { mutate, mutateAsync, reset, error, isSuccess, isLoading, isError } = useMutation(
-    videoGroupQueryKeys.create(),
-    createVideoGroup,
-    {
-      onSuccess: (data, variables, context) => {
-        if (typeof queryArgs?.onSuccess === 'function') {
-          queryArgs.onSuccess(data, variables, context)
-        }
+  const { mutate, mutateAsync, data, reset, error, isSuccess, isLoading, isError } = useMutation<
+    VideoGroupDto,
+    Error,
+    CreateVideoGroupDto
+  >(videoGroupQueryKeys.create(), createVideoGroup, {
+    onSuccess: (data, variables, context) => {
+      if (typeof options?.onSuccess === 'function') {
+        options.onSuccess(data, variables, context)
+      }
 
-        // optimistic update local query cache with values
-        const { uuid, ...restData } = data
-        queryClient.setQueryData(videoGroupQueryKeys.detail(data.uuid), restData)
-      },
+      // optimistic update local query cache with values
+      const { uuid, ...restData } = data
+      queryClient.setQueryData(videoGroupQueryKeys.detail(uuid), restData)
     },
-  )
+  })
 
-  return { mutate, mutateAsync, reset, error, isSuccess, isLoading, isError }
+  return { mutate, mutateAsync, data, reset, error, isSuccess, isLoading, isError }
 }
 
-export function useVideoGroupMutateQuery(queryArgs?: VideoGroupMutateQueryArgs) {
+export function useVideoGroupMutateQuery(
+  options?: UseMutationOptions<VideoGroupDto, Error, ApiMutateRequestDto<UpdateVideoGroupDto>>,
+): Pick<UseMutationResult<VideoGroupDto, Error, ApiMutateRequestDto<UpdateVideoGroupDto>>, ApiMutationProps> {
   const queryClient = useQueryClient()
 
-  const { mutate, mutateAsync, reset, error, isSuccess, isLoading, isError } = useMutation(
-    videoGroupQueryKeys.mutate(),
-    updateVideoGroup,
-    {
-      onSuccess: async (data, variables, context) => {
-        if (typeof queryArgs?.onSuccess === 'function') {
-          queryArgs.onSuccess(data, variables, context)
-        }
+  const { mutate, mutateAsync, data, reset, error, isSuccess, isLoading, isError } = useMutation<
+    VideoGroupDto,
+    Error,
+    ApiMutateRequestDto<UpdateVideoGroupDto>
+  >(videoGroupQueryKeys.mutate(), updateVideoGroup, {
+    onSuccess: async (data, variables, context) => {
+      if (typeof options?.onSuccess === 'function') {
+        options.onSuccess(data, variables, context)
+      }
 
-        // @todo optimistic update with previous + changed values (merged) prior to refetch?
+      // @todo optimistic update with previous + changed values (merged) prior to refetch?
 
-        const invalidateItems: Promise<void> = queryClient.invalidateQueries(videoGroupQueryKeys.all)
-        const invalidateItem: Promise<void> = queryClient.invalidateQueries(videoGroupQueryKeys.detail(variables.uuid))
+      const invalidateItems: Promise<void> = queryClient.invalidateQueries(videoGroupQueryKeys.all)
+      const invalidateItem: Promise<void> = queryClient.invalidateQueries(videoGroupQueryKeys.detail(variables.uuid))
 
-        // refetch data -- ensure a Promise is returned so the outcome is awaited
-        return Promise.all([invalidateItems, invalidateItem])
-      },
+      // refetch data -- ensure a Promise is returned so the outcome is awaited
+      return Promise.all([invalidateItems, invalidateItem])
     },
-  )
+  })
 
-  return { mutate, mutateAsync, reset, error, isSuccess, isLoading, isError }
+  return { mutate, mutateAsync, data, reset, error, isSuccess, isLoading, isError }
 }
 
-export function useVideoGroupDeleteQuery(queryArgs?: VideoGroupDeleteQueryArgs) {
+export function useVideoGroupDeleteQuery(
+  options?: UseMutationOptions<void, Error, ApiDeleteRequestDto, unknown>,
+): Pick<UseMutationResult<void, Error, ApiDeleteRequestDto, unknown>, ApiDeletionProps> {
   const queryClient = useQueryClient()
 
-  const { mutate, mutateAsync, reset, error, isSuccess, isLoading, isError } = useMutation(
+  const { mutate, mutateAsync, reset, error, isSuccess, isLoading, isError } = useMutation<
+    void,
+    Error,
+    ApiDeleteRequestDto,
+    unknown
+  >(
     videoGroupQueryKeys.delete(),
     deleteVideoGroup,
     // @todo experimenting with rollback type functionality -- check docs + examples in case there are other patterns
     {
       onSuccess: async (data, variables, context) => {
-        if (typeof queryArgs?.onSuccess === 'function') {
-          queryArgs.onSuccess(data, variables, context)
+        if (typeof options?.onSuccess === 'function') {
+          options.onSuccess(data, variables, context)
         }
 
         // refetch data -- ensure a Promise is returned so the outcome is awaited

@@ -1,8 +1,15 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+  UseMutateAsyncFunction,
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type UseQueryResult,
+} from '@tanstack/react-query'
 import { useCallback } from 'react'
 import { useSessionContext } from '../context/SessionContextProvider'
 import type { AuthUser } from '../types/auth.types'
 import { apiFetch } from './lib/api-fetch'
+import { ApiMutation } from './types/mutation.types'
 
 // @todo create shared lib with interfaces of api responses
 
@@ -47,7 +54,9 @@ export async function fetchSession(): Promise<AuthUser> {
   return apiFetch<AuthUser>(authQueryEndpointRoutes.session)
 }
 
-export function useAuthSessionQuery(enabled: boolean) {
+export function useAuthSessionQuery(
+  enabled: boolean,
+): UseQueryResult<AuthUser, unknown> & { invalidate: () => Promise<void>; remove: () => void } {
   const queryClient = useQueryClient()
 
   const invalidate = useCallback(async (): Promise<void> => {
@@ -91,7 +100,9 @@ export async function signIn({ email, password }: AuthSignInCredentials): Promis
  * Hook that provides facilities to sign in to the back-end API via `AuthSignInCredentials`.
  * The user's session context is fetched and cached on successful sign in.
  */
-export function useAuthSignIn() {
+export function useAuthSignIn(): {
+  signIn: UseMutateAsyncFunction<void, Error, AuthSignInCredentials, unknown>
+} & ApiMutation {
   const session = useSessionContext()
 
   const signInMutation = useMutation<void, Error, AuthSignInCredentials>(authQueryKeys.signIn, signIn, {
@@ -125,11 +136,11 @@ export async function signOut(): Promise<void> {
  * Hook that provides facilities to sign out from the back-end API.
  * The query client's response cache is cleared on successful sign-out.
  */
-export function useAuthSignOut() {
+export function useAuthSignOut(): { signOut: UseMutateAsyncFunction<void, unknown, void, unknown> } & ApiMutation {
   const queryClient = useQueryClient()
   const session = useSessionContext()
 
-  const signOutMutation = useMutation(authQueryKeys.signOut, signOut, {
+  const signOutMutation = useMutation<void, Error, void, unknown>(authQueryKeys.signOut, signOut, {
     retry: false,
     onSuccess: () => {
       if (!session) {

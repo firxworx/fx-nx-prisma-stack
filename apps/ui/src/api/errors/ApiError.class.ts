@@ -18,7 +18,7 @@ export class ApiError extends Error {
     this.status = status
   }
 
-  getErrorMessage() {
+  getErrorMessage(): string {
     return `API error (${this.status}): ${this.message}`
   }
 }

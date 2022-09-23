@@ -1,6 +1,7 @@
 import { apiFetch } from '../lib/api-fetch'
 
 import type { CreateVideoGroupDto, UpdateVideoGroupDto, VideoGroupDto } from '../../types/videos.types'
+import type { ApiDeleteRequestDto, ApiMutateRequestDto } from '../../types/api.types'
 
 export interface VideoGroupMutationQueryArgs {
   onSuccess?: () => void
@@ -27,7 +28,7 @@ export async function fetchVideoGroupsFiltered(params: string): Promise<VideoGro
   )
 }
 
-export async function fetchVideoGroup(uuid: string | undefined): Promise<VideoGroupDto> {
+export async function fetchVideoGroup(uuid?: string): Promise<VideoGroupDto> {
   return apiFetch<VideoGroupDto>(`${VIDEO_GROUPS_REST_ENDPOINT}/${uuid}`, {
     method: 'GET',
   })
@@ -43,14 +44,14 @@ export async function createVideoGroup(data: CreateVideoGroupDto): Promise<Video
 export async function updateVideoGroup({
   uuid,
   ...restData
-}: { uuid: string | undefined } & UpdateVideoGroupDto): Promise<VideoGroupDto> {
+}: ApiMutateRequestDto<UpdateVideoGroupDto>): Promise<VideoGroupDto> {
   return apiFetch<VideoGroupDto>(`${VIDEO_GROUPS_REST_ENDPOINT}/${uuid}`, {
     method: 'PATCH',
     body: JSON.stringify(restData),
   })
 }
 
-export async function deleteVideoGroup({ uuid }: { uuid: string | undefined }): Promise<void> {
+export async function deleteVideoGroup({ uuid }: ApiDeleteRequestDto): Promise<void> {
   await apiFetch<void>(`${VIDEO_GROUPS_REST_ENDPOINT}/${uuid}`, {
     method: 'DELETE',
   })

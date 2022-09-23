@@ -82,7 +82,7 @@ export async function projectFetch(path: string, options?: RequestInit): Promise
  * @see CustomApp `pages/_app.tsx` for global query error handling + error boundary
  */
 export async function apiFetch<T>(path: string, options?: RequestInit, isRetryAttempt?: boolean): Promise<T>
-export async function apiFetch(path: string, options?: RequestInit, isRetryAttempt?: boolean) {
+export async function apiFetch(path: string, options?: RequestInit, isRetryAttempt?: boolean): Promise<unknown> {
   try {
     const response = await projectFetch(path, options)
 

@@ -13,7 +13,7 @@ export class AuthError extends Error {
     this.status = 401
   }
 
-  getErrorMessage() {
+  getErrorMessage(): string {
     return `Unauthorized (${this.status}): ${this.message}`
   }
 }

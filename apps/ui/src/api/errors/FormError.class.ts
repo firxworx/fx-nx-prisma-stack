@@ -16,7 +16,7 @@ export class FormError extends Error {
     this.data = data
   }
 
-  getErrorMessage() {
+  getErrorMessage(): string {
     return `Form submit error (${this.status}): ${this.message}`
   }
 }
