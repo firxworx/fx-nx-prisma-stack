@@ -93,7 +93,7 @@ const ComboBoxItemsButton: React.FC<ComboBoxItemsButtonProps> = ({
       )}
     >
       <span className="block">
-        {!!(selectedItems && selectedItems.length) ? (
+        {selectedItems && !!selectedItems.length ? (
           <ul className={clsx('inline-flex space-x-2 list-none py-1.5', { ['opacity-70']: disabled })}>
             {selectedItems.map((item) => (
               <li key={`${item.value}-${item.label}`}>
@@ -196,7 +196,7 @@ const ComboBoxFilterQuerySelectionButton: React.FC<ComboBoxFilterQuerySelectionB
  * Has a few UI/UX ideas in it such as showing selections in 'pill' style w/ deselect.
  *
  * @todo push for even tighter generics + types for FormMultiComboBox
- * @todo
+ * @todo helperText + errors for FormMultiComboBox
  */
 export const FormMultiComboBox: React.FC<FormMultiComboBoxProps> = ({
   label,
@@ -247,7 +247,7 @@ export const FormMultiComboBox: React.FC<FormMultiComboBoxProps> = ({
           return item.label.toLowerCase().includes(filterQuery.toLowerCase())
         })
 
-  const handleFilterQueryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFilterQueryChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     setFilterQuery(event.target.value)
   }
 
@@ -257,7 +257,7 @@ export const FormMultiComboBox: React.FC<FormMultiComboBoxProps> = ({
         event.stopPropagation()
         field.onChange(field.value.filter((item: FormMultiComboBoxOption) => item.value !== value))
       },
-    [field.onChange, field.value],
+    [field],
   )
 
   return (
@@ -303,7 +303,7 @@ export const FormMultiComboBox: React.FC<FormMultiComboBoxProps> = ({
           leave="transition ease-in duration-100"
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
-          afterLeave={() => setFilterQuery('')}
+          afterLeave={(): void => setFilterQuery('')}
         >
           <ComboBox.Options
             // static
@@ -321,7 +321,7 @@ export const FormMultiComboBox: React.FC<FormMultiComboBoxProps> = ({
               filteredItems.map((item) => (
                 <ComboBox.Option
                   key={`${item.value}-${item.label}`}
-                  className={({ active }) =>
+                  className={({ active }): string =>
                     clsx(
                       'relative cursor-default select-none py-2 pl-10 pr-4 overflow-hidden',
                       active ? 'bg-blue-600 text-white' : 'text-palette-form-input',
@@ -329,7 +329,7 @@ export const FormMultiComboBox: React.FC<FormMultiComboBoxProps> = ({
                   }
                   value={item}
                 >
-                  {({ active, selected }) => (
+                  {({ active, selected }): JSX.Element => (
                     <>
                       <span className={clsx('block truncate', selected ? 'font-medium' : 'font-normal')}>
                         {item.label}

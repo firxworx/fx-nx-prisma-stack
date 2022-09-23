@@ -9,6 +9,7 @@ export interface FormButtonProps
     React.ComponentPropsWithoutRef<'button'> {
   /**
    * Explicitly set the underlying `button` element's `type` prop to protect against cross-browser corner-cases.
+   * FormButton default type is "submit".
    */
   type: React.ComponentPropsWithoutRef<'button'>['type']
 }
@@ -42,6 +43,7 @@ export const FormButton: React.FC<FormButtonProps> = ({
 
   return (
     <button
+      type={type ?? 'submit'}
       className={clsx(
         'fx-button-base',
         {

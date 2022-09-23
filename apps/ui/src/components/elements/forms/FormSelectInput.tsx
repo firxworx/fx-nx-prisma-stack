@@ -1,8 +1,8 @@
+import React, { useId } from 'react'
 import clsx from 'clsx'
-import React from 'react'
 import { RegisterOptions, useFormContext } from 'react-hook-form'
+
 import { ExclamationCircleIcon } from '@heroicons/react/24/outline'
-import { useId } from '@reach/auto-id'
 
 export interface FormSelectInputProps extends React.ComponentPropsWithoutRef<'select'> {
   id?: string
@@ -13,6 +13,10 @@ export interface FormSelectInputProps extends React.ComponentPropsWithoutRef<'se
   type?: string
   readOnly?: boolean
   hideLabel?: boolean
+
+  /** disable display of error (does not disable error validation; useful if parent component will handle error display) */
+  hideError?: boolean
+
   validation?: RegisterOptions
   children?: React.ReactNode // made ? for FormSelectInput2
 }
@@ -25,25 +29,31 @@ export interface FormSelectInputProps extends React.ComponentPropsWithoutRef<'se
  *
  * @see {@link https://react-hook-form.com/api/useformcontext}
  */
-export const FormSelectInput = ({
+export const FormSelectInput: React.FC<FormSelectInputProps> = ({
+  id,
   name,
   label,
   helperText,
   placeholder,
   readOnly = false,
+  hideError = false,
   hideLabel = false,
   children,
   validation,
   ...restProps
-}: FormSelectInputProps) => {
+}) => {
   const {
     register,
     formState: { isSubmitting, errors },
     watch,
   } = useFormContext()
 
-  const id = useId(restProps.id)
-  const value = id ? watch(id) : undefined
+  const safeId = useId()
+  const componentId = id ?? safeId
+
+  const value = watch(componentId)
+
+  const showError = errors[name] && !hideError
 
   // add `disabled` and `selected` attribute to option tag -- applies when SelectInput.readOnly is true
   const readOnlyChildren = React.Children.map<React.ReactNode, React.ReactNode>(children, (child) => {
@@ -62,7 +72,7 @@ export const FormSelectInput = ({
       </label>
       <div className="relative mt-1">
         <select
-          id={id}
+          id={componentId}
           disabled={restProps.disabled || isSubmitting}
           {...register(name, validation)}
           defaultValue="" // default blank -- overridden by `...restProps` if provided
@@ -93,10 +103,12 @@ export const FormSelectInput = ({
           </div>
         )}
       </div>
-      <div className="mt-1">
-        {helperText && <p className="text-xs text-slate-500">{helperText}</p>}
-        {errors[name] && <span className="text-sm text-error-600">{String(errors[name]?.message)}</span>}
-      </div>
+      {(helperText || showError) && (
+        <div className="mt-1">
+          {helperText && <p className="text-xs text-slate-500">{helperText}</p>}
+          {errors[name] && <span className="text-sm text-error-600">{String(errors[name]?.message)}</span>}
+        </div>
+      )}
     </div>
   )
 }

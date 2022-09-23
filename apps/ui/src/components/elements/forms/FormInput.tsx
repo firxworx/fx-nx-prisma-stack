@@ -1,6 +1,5 @@
-import * as React from 'react'
+import React, { useId } from 'react'
 import clsx from 'clsx'
-import { useId } from '@reach/auto-id'
 import { type RegisterOptions, useFormContext } from 'react-hook-form'
 
 import { useMergedRef } from '@firx/react-hooks'
@@ -25,7 +24,7 @@ export interface FormInputProps extends React.ComponentPropsWithoutRef<'input'> 
   /** disable display of the input's label */
   hideLabel?: boolean
   /** disable display of error (does not disable error validation; useful if parent component will handle error display) */
-  hideError?: boolean
+  hideErrorMessage?: boolean
   /** manual validation options passed to react-hook-form; it is encouraged to use a yup resolver instead */
   validationOptions?: RegisterOptions
   /** append className to the component's wrapper div; useful for adding margins, flex/grid controls, etc. */
@@ -43,13 +42,14 @@ export interface FormInputProps extends React.ComponentPropsWithoutRef<'input'> 
 export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
   (
     {
+      id,
       name,
       label,
       placeholder,
       helperText,
       type = 'text',
       readOnly = false,
-      hideError = false,
+      hideErrorMessage = false,
       hideLabel = false,
       validationOptions,
       appendClassName,
@@ -62,21 +62,23 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
       formState: { isSubmitting, errors },
     } = useFormContext()
 
-    const id = useId(restProps.id) // @todo consider revision w/ introduction of useId() in React 18+
+    const safeId = useId()
+    const componentId = id ?? safeId
 
     const { ref: formRef, ...registerProps } = register(name, validationOptions)
     const mergedRef = useMergedRef(forwardedRef, formRef)
 
     const isDisabled = restProps.disabled || isSubmitting
+    const showErrorMessage = errors[name] && !hideErrorMessage
 
     return (
       <div className={clsx('group', appendClassName)}>
-        <label htmlFor={id} className={clsx(hideLabel ? 'sr-only' : 'fx-form-label mb-1')}>
+        <label htmlFor={componentId} className={clsx(hideLabel ? 'sr-only' : 'fx-form-label mb-1')}>
           {label}
         </label>
         <div className="relative">
           <input
-            id={id}
+            id={componentId}
             ref={mergedRef}
             disabled={isDisabled}
             {...registerProps}
@@ -100,26 +102,28 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
             aria-label={hideLabel ? label : undefined}
             aria-invalid={errors[name] ? 'true' : 'false'}
           />
-          {!hideError && errors[name] && (
+          {errors[name] && (
             <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
               <ExclamationCircleIcon className="h-5 w-5 text-error-500" aria-hidden />
             </div>
           )}
         </div>
-        <div className="mt-1 text-left">
-          {helperText && <div className="text-xs text-slate-500">{helperText}</div>}
-          {!hideError && errors[name] && (
-            <div className="text-sm text-error-600">
-              {errors[name]?.type === 'required' && !errors[name]?.message
-                ? 'Field is required'
-                : errors[name]?.type === 'pattern' && !errors[name]?.message
-                ? 'Invalid value'
-                : String(errors[name]?.message)
-                ? String(errors[name]?.message)
-                : 'Invalid input'}
-            </div>
-          )}
-        </div>
+        {(helperText || showErrorMessage) && (
+          <div className="mt-1 text-left">
+            {helperText && <div className="text-xs text-slate-500">{helperText}</div>}
+            {errors[name] && (
+              <div className="text-sm text-error-600">
+                {errors[name]?.type === 'required' && !errors[name]?.message
+                  ? 'Field is required'
+                  : errors[name]?.type === 'pattern' && !errors[name]?.message
+                  ? 'Invalid value'
+                  : String(errors[name]?.message)
+                  ? String(errors[name]?.message)
+                  : 'Invalid input'}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     )
   },
