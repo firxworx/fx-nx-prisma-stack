@@ -219,12 +219,12 @@ export class StaticUi extends FxBaseConstruct {
       },
 
       // conditionally include additional behaviors for `api/*` route that forwards requests to back-end api
-      ...(!!props.api
+      ...(props.api
         ? { additionalBehaviors: this.getDistributionAdditionalBehaviorsForApi(props.api.targetDomainName) }
         : {}),
 
       // redirect unknown routes back to index.html if configuration is for an SPA
-      ...(!!props.options?.isSinglePageApp
+      ...(props.options?.isSinglePageApp
         ? {
             errorResponses: [403, 404].map((httpStatus) => ({
               httpStatus,

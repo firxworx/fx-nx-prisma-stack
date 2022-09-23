@@ -209,7 +209,7 @@ export class AlbFargateApi extends FxBaseConstruct {
 
     if (!/v\d+/.test(props.api.version)) {
       throw new Error(
-        `${errorPrefix} API version value must match /v\d+/ e.g. 'v1', 'v2', etc. Received: '${props.api.version}'`,
+        `${errorPrefix} API version value must match regex /v\\d+/ e.g. 'v1', 'v2', etc. Received: '${props.api.version}'`,
       )
     }
 

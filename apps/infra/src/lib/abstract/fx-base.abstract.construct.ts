@@ -15,15 +15,15 @@ export abstract class FxBaseConstruct extends Construct {
     this.projectTag = parent.getProjectTag()
   }
 
-  protected getProjectTag() {
+  protected getProjectTag(): string {
     return this._parent.getProjectTag()
   }
 
-  protected getDeployStage() {
+  protected getDeployStage(): string {
     return this._parent.getDeployStage()
   }
 
-  protected getDeployStageTag() {
+  protected getDeployStageTag(): string {
     return this._parent.getDeployStageTag()
   }
 }
