@@ -10,7 +10,8 @@
       "options": {
         "root": "apps/ui",
         "outputPath": "dist/apps/ui",
-        "generatePackageJson": true
+        "generatePackageJson": true,
+        "postcssConfig": "apps/ui/postcss.config.js"
       },
       "configurations": {
         "development": {
