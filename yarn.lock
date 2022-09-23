@@ -2888,13 +2888,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@headlessui/react@npm:^1.7.1":
-  version: 1.7.1
-  resolution: "@headlessui/react@npm:1.7.1"
+"@headlessui/react@npm:^1.7.2":
+  version: 1.7.2
+  resolution: "@headlessui/react@npm:1.7.2"
   peerDependencies:
     react: ^16 || ^17 || ^18
     react-dom: ^16 || ^17 || ^18
-  checksum: cb553e1c772cbb83088694c812b5a81a7107a0cb3fca097a15146e8a1fd6b369ae628df32a2d009f2d7c2943d32c88a99d0d2bbbfbd075ce8651a32e3d035960
+  checksum: 8889d7a1984c955c0034d8aed3211a91b90238ddecf116490bd892cae79c2983d8832ab450d387991d3330f5d5f1e4aa8d8e1ceb1ff2227960f76c89c0cc1e0a
   languageName: node
   linkType: hard
 
@@ -4281,32 +4281,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@reach/auto-id@npm:^0.17.0":
-  version: 0.17.0
-  resolution: "@reach/auto-id@npm:0.17.0"
-  dependencies:
-    "@reach/utils": 0.17.0
-    tslib: ^2.3.0
-  peerDependencies:
-    react: ^16.8.0 || 17.x
-    react-dom: ^16.8.0 || 17.x
-  checksum: 30bb0e591fbf0a2a6124ea6b07e6cec254ec0483c326492e824a19df8d2e2fcb3a5708cc47e1221fb64b9e63e4497966deb37732916d330a0693c541d9d1b35d
-  languageName: node
-  linkType: hard
-
-"@reach/utils@npm:0.17.0":
-  version: 0.17.0
-  resolution: "@reach/utils@npm:0.17.0"
-  dependencies:
-    tiny-warning: ^1.0.3
-    tslib: ^2.3.0
-  peerDependencies:
-    react: ^16.8.0 || 17.x
-    react-dom: ^16.8.0 || 17.x
-  checksum: b9ee31b5d07e7f204f3605be3fa45448c9817937a3364d894054c57de9113d417014019d21ad895aebf848a43c20988924d069ba926c0cb20d6f2e8654d7a11e
-  languageName: node
-  linkType: hard
-
 "@rollup/plugin-babel@npm:^5.3.0":
   version: 5.3.1
   resolution: "@rollup/plugin-babel@npm:5.3.1"
@@ -4641,7 +4615,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/match-sorter-utils@npm:^8.0.0-alpha.82, @tanstack/match-sorter-utils@npm:^8.1.1":
+"@tanstack/match-sorter-utils@npm:^8.1.1":
   version: 8.1.1
   resolution: "@tanstack/match-sorter-utils@npm:8.1.1"
   dependencies:
@@ -4650,34 +4624,32 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/query-core@npm:4.2.3":
-  version: 4.2.3
-  resolution: "@tanstack/query-core@npm:4.2.3"
-  checksum: b37efdc32b1731575eba398eda3b7a4cd3ed25ee1032d5200124c37ab4e58711d310e2e29e9e51284553a7c03c85e55cf8da6833bc3b1e215e0e43e7399ab3ca
+"@tanstack/query-core@npm:4.3.8":
+  version: 4.3.8
+  resolution: "@tanstack/query-core@npm:4.3.8"
+  checksum: 25ea16db7632f5acc7c80e60b9f1410cf9df430240ec5077a1607c3ffea14db2c78db800f7bc70efafd7ce26f7216cda767824fa279049cc9c7e40ac1818f38e
   languageName: node
   linkType: hard
 
-"@tanstack/react-query-devtools@npm:^4.2.3":
-  version: 4.2.3
-  resolution: "@tanstack/react-query-devtools@npm:4.2.3"
+"@tanstack/react-query-devtools@npm:^4.3.9":
+  version: 4.3.9
+  resolution: "@tanstack/react-query-devtools@npm:4.3.9"
   dependencies:
-    "@tanstack/match-sorter-utils": ^8.0.0-alpha.82
-    "@types/use-sync-external-store": ^0.0.3
+    "@tanstack/match-sorter-utils": ^8.1.1
     use-sync-external-store: ^1.2.0
   peerDependencies:
-    "@tanstack/react-query": 4.2.3
+    "@tanstack/react-query": 4.3.9
     react: ^16.8.0 || ^17.0.0 || ^18.0.0
     react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
-  checksum: debc4b006cf9b26aa484dd7e31b80086f58adfd0fcaafb8131561ce97daeaae3171d6c460d3cc8d0910254918cb5c40dd7fc6e59fa9521bdc92a32cb3469f6ae
+  checksum: 00f22dd2fc79873fba51be2f6561d87ac825a4bf58aa4a90f4aba8bbc025b3d6d513ed31b09d10234aba6fcc717abbe41aef6b5806f098bd260460bcaa2063e2
   languageName: node
   linkType: hard
 
-"@tanstack/react-query@npm:^4.2.3":
-  version: 4.2.3
-  resolution: "@tanstack/react-query@npm:4.2.3"
+"@tanstack/react-query@npm:^4.3.9":
+  version: 4.3.9
+  resolution: "@tanstack/react-query@npm:4.3.9"
   dependencies:
-    "@tanstack/query-core": 4.2.3
-    "@types/use-sync-external-store": ^0.0.3
+    "@tanstack/query-core": 4.3.8
     use-sync-external-store: ^1.2.0
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0
@@ -4688,7 +4660,7 @@ __metadata:
       optional: true
     react-native:
       optional: true
-  checksum: 0a38ae05271e1669c6efd5cc77608103b6dfde577ecdc88c3f0e72953aea11c102c9b5a49fa2ca822f260a68f9f9646c5e847e7d87c99117b2c2e3b1356cbc8b
+  checksum: 1f77aadda55722519458185b4db5378d05d95bcbe9f7c4fda0ef82121a975223ede1a56729db6030984b336e533c04b1c7aa8fed344e5c52ec73a0486b65f8e7
   languageName: node
   linkType: hard
 
@@ -5259,7 +5231,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-transition-group@npm:^4":
+"@types/react-transition-group@npm:^4.4.5":
   version: 4.4.5
   resolution: "@types/react-transition-group@npm:4.4.5"
   dependencies:
@@ -5394,13 +5366,6 @@ __metadata:
   version: 4.0.2
   resolution: "@types/tough-cookie@npm:4.0.2"
   checksum: e055556ffdaa39ad85ede0af192c93f93f986f4bd9e9426efdc2948e3e2632db3a4a584d4937dbf6d7620527419bc99e6182d3daf2b08685e710f2eda5291905
-  languageName: node
-  linkType: hard
-
-"@types/use-sync-external-store@npm:^0.0.3":
-  version: 0.0.3
-  resolution: "@types/use-sync-external-store@npm:0.0.3"
-  checksum: 161ddb8eec5dbe7279ac971531217e9af6b99f7783213566d2b502e2e2378ea19cf5e5ea4595039d730aa79d3d35c6567d48599f69773a02ffcff1776ec2a44e
   languageName: node
   linkType: hard
 
@@ -10008,7 +9973,7 @@ __metadata:
     "@aws-sdk/node-http-handler": ^3.171.0
     "@aws-sdk/s3-request-presigner": ^3.171.0
     "@faker-js/faker": ^7.5.0
-    "@headlessui/react": ^1.7.1
+    "@headlessui/react": ^1.7.2
     "@headlessui/tailwindcss": ^0.1.1
     "@heroicons/react": ^2.0.11
     "@hookform/resolvers": ^2.9.8
@@ -10035,14 +10000,13 @@ __metadata:
     "@nrwl/web": 14.6.5
     "@nrwl/workspace": 14.6.5
     "@prisma/client": ^4.3.1
-    "@reach/auto-id": ^0.17.0
     "@tailwindcss/aspect-ratio": ^0.4.2
     "@tailwindcss/forms": ^0.5.3
     "@tailwindcss/line-clamp": ^0.4.2
     "@tailwindcss/typography": ^0.5.7
     "@tanstack/match-sorter-utils": ^8.1.1
-    "@tanstack/react-query": ^4.2.3
-    "@tanstack/react-query-devtools": ^4.2.3
+    "@tanstack/react-query": ^4.3.9
+    "@tanstack/react-query-devtools": ^4.3.9
     "@tanstack/react-table": ^8.5.13
     "@testing-library/react": 13.4.0
     "@types/aws-lambda": ^8.10.103
@@ -10061,7 +10025,7 @@ __metadata:
     "@types/prettier": ^2.7.0
     "@types/react": 18.0.19
     "@types/react-dom": 18.0.6
-    "@types/react-transition-group": ^4
+    "@types/react-transition-group": ^4.4.5
     "@types/source-map-support": ^0.5.6
     "@types/supertest": ^2.0.12
     "@types/validator": ^13.7.6
@@ -10118,7 +10082,7 @@ __metadata:
     react-async-hook: ^4.0.0
     react-dom: 18.2.0
     react-error-boundary: ^3.1.4
-    react-hook-form: ^7.35.0
+    react-hook-form: ^7.36.0
     react-icons: ^4.4.0
     react-modal-hook: ^3.0.2
     react-test-renderer: 18.2.0
@@ -10134,7 +10098,7 @@ __metadata:
     ts-jest: 28.0.8
     ts-node: 10.9.1
     tslib: ^2.3.0
-    typescript: ~4.7.2
+    typescript: ~4.7.4
     validator: ^13.7.0
     yarn: ^1.22.19
     zod: ^3.19.1
@@ -15017,12 +14981,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-hook-form@npm:^7.35.0":
-  version: 7.35.0
-  resolution: "react-hook-form@npm:7.35.0"
+"react-hook-form@npm:^7.36.0":
+  version: 7.36.0
+  resolution: "react-hook-form@npm:7.36.0"
   peerDependencies:
     react: ^16.8.0 || ^17 || ^18
-  checksum: e0e78de4a08fdae9eebf248ddefd99ff35d4964ef2815006704ae4a43972786f62dede3847b41e29d3e89ea6cb16c8f5837b1e00238aa65f7c38cb52aabcaf5b
+  checksum: f863487416b9f73c3d3c682360b7a01819b8dd14ca5430e49473a64ad723b91747e03c00b942741aae677abeb1ad2eea623887610af41a6b1e4ca8ae13ee8028
   languageName: node
   linkType: hard
 
@@ -16835,13 +16799,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tiny-warning@npm:^1.0.3":
-  version: 1.0.3
-  resolution: "tiny-warning@npm:1.0.3"
-  checksum: da62c4acac565902f0624b123eed6dd3509bc9a8d30c06e017104bedcf5d35810da8ff72864400ad19c5c7806fc0a8323c68baf3e326af7cb7d969f846100d71
-  languageName: node
-  linkType: hard
-
 "tmp@npm:~0.2.1":
   version: 0.2.1
   resolution: "tmp@npm:0.2.1"
@@ -17169,7 +17126,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:~4.7.2":
+"typescript@npm:~4.7.4":
   version: 4.7.4
   resolution: "typescript@npm:4.7.4"
   bin:
@@ -17179,7 +17136,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@~4.7.2#~builtin<compat/typescript>":
+"typescript@patch:typescript@~4.7.4#~builtin<compat/typescript>":
   version: 4.7.4
   resolution: "typescript@patch:typescript@npm%3A4.7.4#~builtin<compat/typescript>::version=4.7.4&hash=a1c5e5"
   bin:
