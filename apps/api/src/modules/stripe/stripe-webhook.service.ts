@@ -13,13 +13,14 @@ export class StripeWebhookService implements OnApplicationBootstrap {
     private readonly metadataScanner: MetadataScanner,
   ) {}
 
+  // @todo tighten types
   protected webhookHandlers: any[] = []
 
-  onApplicationBootstrap() {
+  onApplicationBootstrap(): void {
     this.loadWebhookHandler()
   }
 
-  async handleWebhook(event: Stripe.Event) {
+  async handleWebhook(event: Stripe.Event): Promise<unknown> {
     const handler = this.webhookHandlers.find((handler) => handler.eventType == event.type)
 
     if (handler) {
@@ -27,7 +28,7 @@ export class StripeWebhookService implements OnApplicationBootstrap {
     }
   }
 
-  private loadWebhookHandler() {
+  private loadWebhookHandler(): void {
     const providers = this.discoveryService.getProviders()
 
     return providers
@@ -43,10 +44,13 @@ export class StripeWebhookService implements OnApplicationBootstrap {
       })
   }
 
-  private setWebhookHandler(instance: any, methodKey: any) {
+  // @todo tighten types
+  private setWebhookHandler(instance: any, methodKey: any): void {
     const eventType = this.reflector.get(StripeModuleToken.STRIPE_EVENT_KEY, instance[methodKey])
 
-    if (!eventType) return
+    if (!eventType) {
+      return
+    }
 
     this.webhookHandlers.push({
       eventType,
