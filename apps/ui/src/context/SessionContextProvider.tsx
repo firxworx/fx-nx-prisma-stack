@@ -18,7 +18,7 @@ export const SessionContextProvider: React.FC<{
   children: (isSessionReady: boolean) => React.ReactElement
 }> = ({ children }) => {
   const [isQueryEnabled, setIsQueryEnabled] = useState<boolean>(true)
-  const { data: profile, refetch, error, status, invalidate, remove, ...rest } = useAuthSessionQuery(isQueryEnabled)
+  const { data: profile, refetch, error, status, invalidate, remove } = useAuthSessionQuery(isQueryEnabled) // ...rest
 
   useEffect(() => {
     if (typeof window !== 'undefined') {

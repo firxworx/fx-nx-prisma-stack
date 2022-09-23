@@ -140,7 +140,7 @@ const MobileNavMenu: React.FC<
   }, [isSignOutSuccess, isMounted, routerPush])
 
   // @todo listen for router events for navigation change -- more idiomatic and explicit vs. click events
-  const handleMenuLinkClick = () => {
+  const handleMenuLinkClick = (): void => {
     if (isMenuOpen) {
       onMenuItemClick()
     }
@@ -172,7 +172,9 @@ const MobileNavMenu: React.FC<
               type="button"
               className={clsx('flex items-center justify-start text-sky-700', linkClassName)}
               role="menuitem"
-              onClick={() => signOut()}
+              onClick={(): void => {
+                signOut() // async fire+forget
+              }}
             >
               <ArrowLeftOnRectangleIcon className="inline-block h-5 w-5 mr-2" aria-hidden />
               <span>Sign Out</span>
@@ -245,7 +247,7 @@ export const PlaceholderHeader: React.FC = () => {
 export const Header: React.FC<HeaderProps> = ({ navigationLinks }) => {
   return (
     <Popover as="header" className={headerClassName}>
-      {({ open, close }) => (
+      {({ open, close }): JSX.Element => (
         <>
           <nav className={navClassName} aria-label="Main">
             <div className="flex items-center flex-1">

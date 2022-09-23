@@ -84,7 +84,7 @@ export const getYouTubeThumbUrl = (videoId: string, quality: YouTubeVideoQuality
 export const isValidYouTubeVideoId = async (videoId: string): Promise<boolean> => {
   const thumbWidth = await new Promise((resolve, reject) => {
     const img = new Image()
-    img.onload = () => resolve(img.width)
+    img.onload = (): void => resolve(img.width)
     img.onerror = reject
     img.src = getYouTubeThumbUrl(videoId, YouTubeVideoQuality.MED)
   })

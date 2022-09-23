@@ -1,9 +1,9 @@
-import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
-import { getYouTubeThumbUrl, YouTubeVideoQuality } from 'apps/ui/src/lib/videos/youtube'
-import clsx from 'clsx'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
+import clsx from 'clsx'
 
 import { Spinner } from '../../elements/feedback/Spinner'
+import { getYouTubeThumbUrl, YouTubeVideoQuality } from '../../../lib/videos/youtube'
 
 export interface VideoThumbnailProps {
   externalId: string
@@ -49,7 +49,7 @@ export const VideoThumbnail: React.FC<VideoThumbnailProps> = ({ externalId }) =>
         imgElCurrent.removeEventListener('error', handleImageError)
       }
     }
-  }, [])
+  }, [handleImageLoaded, handleImageError])
 
   return (
     <div
@@ -67,6 +67,9 @@ export const VideoThumbnail: React.FC<VideoThumbnailProps> = ({ externalId }) =>
           <ExclamationTriangleIcon className="h-6 w-6 text-slate-500" />
         </div>
       )}
+      {/* @todo deal with fackin' nextjs and is Image element (it does not pass a ref due to implementation) */}
+      {/* @see https://nextjs.org/docs/api-reference/next/image#onloadingcomplete for alternative */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         ref={imgRef}
         src={getYouTubeThumbUrl(externalId, YouTubeVideoQuality.MED)}

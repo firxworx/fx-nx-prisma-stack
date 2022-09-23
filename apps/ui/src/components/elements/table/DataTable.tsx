@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useMemo, useState } from 'react'
+import React, { ChangeEvent, useMemo } from 'react'
 import { Cell, ColumnDef, flexRender, getCoreRowModel, Row, useReactTable } from '@tanstack/react-table'
 import { debounce } from 'lodash'
 
@@ -18,11 +18,14 @@ type BaseRowData<T extends IdentifierType> = T extends string
 // type DataTableHeaders<T extends BaseRowData<IdentifierType>> = Record<keyof T, string>
 // type CustomRenderers<T extends BaseRowData<IdentifierType>> = Partial<Record<keyof T, (it: T) => React.ReactNode>>
 
+// @see https://github.com/TanStack/table/issues/4241
+// if `columns` isn't typed w/ `ColumnDef`
+
 interface DataTableProps<T extends BaseRowData<IdentifierType>> {
   namespace: string // kf
 
   data: T[]
-  columns: ColumnDef<T>[]
+  columns: ColumnDef<T>[] // ColumnDef<T>[]
   // headers: DataTableHeaders<T>
   // customRenderers?: CustomRenderers<T>
 
@@ -35,7 +38,7 @@ interface DataTableProps<T extends BaseRowData<IdentifierType>> {
   pageCount?: number
   page?: (page: number) => void
   search?: (search: string) => void
-  onClickRow?: (cell: Cell<any, unknown>, row: Row<any>) => void
+  onRowClick?: (cell: Cell<T, unknown>, row: Row<T>) => void // @todo take note during upcoming/roadmap table pass
   searchLabel?: string
 }
 
@@ -47,6 +50,10 @@ const typedMemo: <T>(c: T) => T = React.memo
  *
  * Note the function syntax (vs. arrow function) is used for typing purposes when used alongside
  * React.memo via `typedMemo()` above.
+ *
+ * Note issue below with `ColumnDef` typing:
+ *
+ * @see {@link https://github.com/TanStack/table/issues/4241}
  */
 export const DataTableComponent = function <T extends BaseRowData<IdentifierType>>({
   namespace,
@@ -57,11 +64,11 @@ export const DataTableComponent = function <T extends BaseRowData<IdentifierType
   headerComponent,
   pageCount,
   search,
-  onClickRow,
+  onRowClick,
   page,
   searchLabel = 'Search',
-}: DataTableProps<T>) {
-  const [paginationPage, setPaginationPage] = useState(1)
+}: DataTableProps<T>): JSX.Element {
+  // const [paginationPage, setPaginationPage] = useState(1)
 
   const memoizedData = useMemo(() => data, [data])
   const memoizedColumns = useMemo(() => columns, [columns])
@@ -82,7 +89,7 @@ export const DataTableComponent = function <T extends BaseRowData<IdentifierType
 
   const noDataFound = !isFetching && (!memoizedData || memoizedData.length === 0)
 
-  const handleSearchChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleSearchChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
     search && search(event.target.value)
   }
 
@@ -135,7 +142,7 @@ export const DataTableComponent = function <T extends BaseRowData<IdentifierType
                 <tr key={row.id}>
                   {row.getVisibleCells().map((cell) => (
                     <td
-                      onClick={() => onClickRow?.(cell, row)}
+                      onClick={(): void => onRowClick?.(cell, row)}
                       key={cell.id}
                       className="px-3 py-3 text-sm leading-4 break-words"
                     >

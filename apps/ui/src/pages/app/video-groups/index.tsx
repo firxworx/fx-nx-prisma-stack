@@ -24,7 +24,7 @@ export const VideoGroupsPage: NextPage = (_props) => {
     (hideModal) => (
       <VideoGroupMultiForm
         create={{
-          onSuccess: () => {
+          onSuccess: (): void => {
             hideModal()
             refetch()
           },

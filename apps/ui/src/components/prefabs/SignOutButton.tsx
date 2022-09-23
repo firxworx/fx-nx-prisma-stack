@@ -33,7 +33,7 @@ export const SignOutButton: React.FC<SignOutButtonProps> = ({ signOutRedirectPat
     }
   }, [isSuccess, isMounted, routerPush, onSignOut, signOutRedirectPath])
 
-  const handleSignOut = async () => {
+  const handleSignOut = async (): Promise<void> => {
     if (!isMounted()) {
       return
     }

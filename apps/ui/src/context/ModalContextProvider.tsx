@@ -39,7 +39,7 @@ export function useModalContext(
   modalBodyProps: ModalBodyProps,
   contents: React.ReactElement | ((hideModal: () => void) => React.ReactElement),
   refreshDeps?: unknown[],
-) {
+): ReturnType<typeof useModal> {
   const modalBodyPropsRef = useRef(modalBodyProps)
   modalBodyPropsRef.current = modalBodyProps
 

@@ -23,7 +23,8 @@ export class ErrorBoundary extends React.Component<Props, State> {
   }
 
   // @todo - add logging to error platform to ErrorBoundary e.g. logErrorToService(error, info)
-  componentDidCatch(error: Error, info: ErrorInfo) {
+  // @todo also refer to _app for error boundary lib added later + consolidate to one solution for error boundary
+  componentDidCatch(error: Error, info: ErrorInfo): void {
     console.error(error, info)
   }
 

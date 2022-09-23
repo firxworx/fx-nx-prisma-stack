@@ -1,7 +1,6 @@
-import React, { useRef, useState, useEffect } from 'react'
+import React, { useRef, useState, useEffect, useId } from 'react'
 import clsx from 'clsx'
 import { Transition } from '@headlessui/react'
-import { useId } from '@reach/auto-id'
 import FocusTrap from 'focus-trap-react'
 
 import { ModalBodyVariantIcon } from './body-parts/ModalBodyVariantIcon'
@@ -77,8 +76,8 @@ export const ModalBody: React.FC<React.PropsWithChildren<ModalBodyProps & ModalB
     setTimeout(() => setFocusActive(true), 0)
   }, [])
 
-  // isomorphic-friendly id for aria/a11y purposes @todo revise to use the new React 18+ useId hook
-  const modalId = useId()
+  // isomorphic-friendly id for aria/a11y purposes
+  const modalHeadingId = useId()
 
   // bug warning (2021-04):
   // Transition component's `beforeEnter` may double-fire on first use on a fresh page load when used with show=true, appear=true
@@ -101,7 +100,9 @@ export const ModalBody: React.FC<React.PropsWithChildren<ModalBodyProps & ModalB
         <Transition
           appear
           show={!!show}
-          afterEnter={() => setTimeout(() => setHasEntered(true), 5)}
+          afterEnter={(): void => {
+            setTimeout(() => setHasEntered(true), 5)
+          }}
           afterLeave={onExited}
           enter="ease-out duration-300"
           enterFrom="opacity-0 translate-y-4 sm:translate-y-12 sm:scale-95"
@@ -114,10 +115,11 @@ export const ModalBody: React.FC<React.PropsWithChildren<ModalBodyProps & ModalB
           <FocusTrap
             active={focusActive}
             focusTrapOptions={{
-              fallbackFocus: () => {
+              fallbackFocus: (): HTMLDivElement => {
                 if (!modalRef.current) {
                   throw new Error('Container ref not set on modal body')
                 }
+
                 return modalRef.current
               },
               clickOutsideDeactivates: variant !== ModalVariant.ALERT,
@@ -135,7 +137,7 @@ export const ModalBody: React.FC<React.PropsWithChildren<ModalBodyProps & ModalB
               )}
               role="dialog"
               aria-modal
-              aria-labelledby={variant !== ModalVariant.BLANK ? modalId : undefined}
+              aria-labelledby={variant !== ModalVariant.BLANK ? modalHeadingId : undefined}
             >
               {variant !== ModalVariant.ALERT && (
                 <div className="absolute top-0 right-0 hidden pt-4 pr-4 sm:block">
@@ -150,7 +152,7 @@ export const ModalBody: React.FC<React.PropsWithChildren<ModalBodyProps & ModalB
                     <div>
                       <ModalBodyVariantIcon variant={variant} />
                       <div>
-                        <h3 className="text-lg font-medium leading-6 text-center text-slate-900" id={modalId}>
+                        <h3 className="text-lg font-medium leading-6 text-center text-slate-900" id={modalHeadingId}>
                           {title}
                         </h3>
                         <div className="mt-2 text-base text-slate-500">{children}</div>

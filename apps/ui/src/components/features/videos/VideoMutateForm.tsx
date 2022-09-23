@@ -64,7 +64,7 @@ export const VideoMutateForm: React.FC<VideoMutateFormProps> = ({ uuid, video, o
         console.error(error instanceof Error ? error.message : String(error))
       }
     },
-    [uuid, isMounted],
+    [uuid, isMounted, mutateAsync],
   )
 
   const videoGroupSelectOptions: { value: string; label: string }[] = useMemo(() => {

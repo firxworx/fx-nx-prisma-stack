@@ -55,7 +55,7 @@ export const VideoCreateForm: React.FC<VideoCreateFormProps> = ({ onSuccess }) =
         console.error(error instanceof Error ? error.message : String(error))
       }
     },
-    [isMounted],
+    [isMounted, createVideoAsync],
   )
 
   const handleCreateVideoGroup: (hideModal: () => void) => SubmitHandler<VideoGroupCreateFormValues> =
@@ -129,7 +129,7 @@ export const VideoCreateForm: React.FC<VideoCreateFormProps> = ({ onSuccess }) =
             label="Video Groups"
             options={videoGroupSelectOptions}
             appendClassName="sm:col-span-2"
-            onAddItemClick={() => {
+            onAddItemClick={(): void => {
               resetVideoGroupForm()
               showModal()
             }}

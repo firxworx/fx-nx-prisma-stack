@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { useSessionContext } from '../../context/SessionContextProvider'
 import { Spinner } from '../elements/feedback/Spinner'
 
-export const SessionLoadingScreen = () => {
+export const SessionLoadingScreen: React.FC = () => {
   const { push: routerPush } = useRouter()
   const session = useSessionContext()
 

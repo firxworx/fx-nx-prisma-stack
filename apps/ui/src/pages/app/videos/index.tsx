@@ -11,7 +11,7 @@ import { Spinner } from '../../../components/elements/feedback/Spinner'
 import { LinkButton } from '../../../components/elements/inputs/LinkButton'
 import { NavLink } from '../../../components/elements/inputs/NavLink'
 import { PageHeading } from '../../../components/elements/headings/PageHeading'
-import { VideoThumbnail } from 'apps/ui/src/components/features/videos/VideoThumbnail'
+import { VideoThumbnail } from '../../../components/features/videos/VideoThumbnail'
 
 export const VideoPlatformLogo: React.FC<{ platform?: VideoDto['platform']; appendClassName?: string }> = ({
   platform,

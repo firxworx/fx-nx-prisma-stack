@@ -9,6 +9,7 @@ export interface ActionButtonProps
     Exclude<React.HTMLAttributes<HTMLButtonElement>, 'type' | 'className'> {
   /**
    * Button `type` is explicitly included and required to protect against corner-case differences across browsers.
+   * ActionButton default type is "button".
    */
   type?: React.ComponentPropsWithoutRef<'button'>['type']
 }
@@ -21,6 +22,7 @@ export interface ActionButtonProps
  * @see LinkButton for a nextjs-compatible anchor (link) styled as a button.
  */
 export const ActionButton: React.FC<PropsWithChildren<ActionButtonProps>> = ({
+  type,
   variant,
   border,
   appendClassName,
@@ -34,6 +36,7 @@ export const ActionButton: React.FC<PropsWithChildren<ActionButtonProps>> = ({
 
   return (
     <button
+      type={type ?? 'button'}
       className={clsx(
         'fx-button-base',
         {

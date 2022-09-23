@@ -37,6 +37,7 @@ export const PUBLIC_NAV_LINKS = [
 export const AUTHENTICATED_NAV_LINKS = [
   { title: 'App', href: DEFAULT_AUTHENTICATED_ROUTE },
   { title: 'Videos', href: '/app/videos' },
+  { title: 'Video Groups', href: '/app/video-groups' },
   { title: 'About', href: '/about' },
 ]
 
@@ -45,14 +46,14 @@ const LABELS = {
   ERROR_BOUNDARY_TRY_AGAIN_ACTION: 'Try again',
 }
 
-const isPublicRoute = (routerPath: string) =>
+const isPublicRoute = (routerPath: string): boolean =>
   routerPath === '/'
     ? true
     : PUBLIC_ROUTES_WHITELIST.concat(['/500', '/404']).some((route) =>
         route === '/' ? false : routerPath.startsWith(route),
       )
 
-function CustomApp({ Component, pageProps, router }: AppProps) {
+function CustomApp({ Component, pageProps, router }: AppProps): JSX.Element {
   const { push: routerPush } = useRouter()
   const { reset } = useQueryErrorResetBoundary()
 
@@ -65,19 +66,19 @@ function CustomApp({ Component, pageProps, router }: AppProps) {
             // retry: true,
             // refetchOnWindowFocus: true,
             // useErrorBoundary: true,
-            useErrorBoundary: (error: unknown) => {
+            useErrorBoundary: (error: unknown): boolean => {
               return error instanceof AuthError // e.g. error.response?.status >= 500
             },
           },
           mutations: {
             // useErrorBoundary: false
-            useErrorBoundary: (error: unknown) => {
+            useErrorBoundary: (error: unknown): boolean => {
               return error instanceof AuthError // e.g. error.response?.status >= 500
             },
           },
         },
         queryCache: new QueryCache({
-          onError: (error: unknown, _query) => {
+          onError: (error: unknown, _query): void => {
             // @todo add notifications/toasts for network errors e.g. toast.error(error.message)
 
             if (error instanceof AuthError) {
@@ -116,17 +117,19 @@ function CustomApp({ Component, pageProps, router }: AppProps) {
       </Head>
       <ErrorBoundary
         onReset={reset}
-        fallbackRender={({ resetErrorBoundary }) => (
+        fallbackRender={({ resetErrorBoundary }): JSX.Element => (
           <div>
             <span>{LABELS.ERROR_BOUNDARY_MESSAGE}</span>
-            <ActionButton onClick={() => resetErrorBoundary()}>{LABELS.ERROR_BOUNDARY_TRY_AGAIN_ACTION}</ActionButton>
+            <ActionButton onClick={(): void => resetErrorBoundary()}>
+              {LABELS.ERROR_BOUNDARY_TRY_AGAIN_ACTION}
+            </ActionButton>
           </div>
         )}
       >
         <QueryClientProvider client={queryClient}>
           <ModalContextProvider>
             <SessionContextProvider>
-              {(isSessionReady) => (
+              {(isSessionReady): JSX.Element => (
                 <>
                   {isPublicRoute(router.asPath) ? (
                     <AppLayout navigationLinks={isSessionReady ? AUTHENTICATED_NAV_LINKS : PUBLIC_NAV_LINKS}>

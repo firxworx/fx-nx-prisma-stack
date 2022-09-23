@@ -82,7 +82,7 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({ name }) => {
           <div className="divide-y divide-slate-200">
             {menuItems.map((item) => (
               <Menu.Item key={item}>
-                {({ active }) => (
+                {({ active }): JSX.Element => (
                   <button
                     className={clsx('group flex items-center w-full px-3 py-2 hover:bg-slate-100', {
                       'text-slate-600': !active,

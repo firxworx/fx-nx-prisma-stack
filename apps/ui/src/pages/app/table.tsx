@@ -1,8 +1,10 @@
 import type { NextPage } from 'next'
+import '@tanstack/react-table'
 import { createColumnHelper, type ColumnDef } from '@tanstack/react-table'
 
 import { DataTable } from '../../components/elements/table/DataTable'
-import { VideoDto, VideoPlatform } from '../../types/videos.types'
+import type { VideoDto } from '../../types/videos.types'
+import { VideoPlatform } from '../../types/enums/videos.enums'
 
 const data: VideoDto[] = [
   {
@@ -117,15 +119,22 @@ const data: VideoDto[] = [
 
 const columnHelper = createColumnHelper<VideoDto>()
 
+// @see issue https://github.com/TanStack/table/issues/4241
+//
 // ColumnDef<VideoDto, string>[] // @todo tighter types
+// ColumnDef<VideoDto, any>[]
+// ColumnDef<VideoDto, VideoPlatform | string>[]
+// const columns = [
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const columns: ColumnDef<VideoDto, any>[] = [
   columnHelper.accessor('name', {
     header: () => 'Name',
   }),
   columnHelper.accessor('platform', {
     header: () => 'Platform',
-    cell: ({ cell }) => {
-      return <span>{cell.getValue()}</span>
+    cell: (props) => {
+      return <span>{props.getValue()}</span>
     },
   }),
   columnHelper.accessor('externalId', {

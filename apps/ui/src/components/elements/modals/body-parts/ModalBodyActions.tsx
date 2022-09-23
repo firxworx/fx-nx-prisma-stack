@@ -17,7 +17,7 @@ export const ModalBodyActions: React.FC<ModalBodyActionsProps> = ({ action, acti
             'bg-action-primary hover:bg-action-primary-darker',
             'fx-focus-ring-form',
           )}
-          onClick={() => {
+          onClick={(): void => {
             action()
             hideModal()
           }}

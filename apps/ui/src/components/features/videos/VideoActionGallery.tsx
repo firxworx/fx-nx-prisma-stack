@@ -4,7 +4,9 @@ import clsx from 'clsx'
 import { VideoDto } from '../../../types/videos.types'
 import { VideoThumbnail } from './VideoThumbnail'
 
-// WIP video thumbnail icon gallery w/ support for onClick actions
+/**
+ * **WIP** video thumbnail icon gallery w/ support for onClick actions
+ */
 
 export interface VideoActionGalleryProps {
   videos: Exclude<VideoDto, 'video'>[]
@@ -40,7 +42,7 @@ export const VideoItem: React.FC<VideoItemProps> = ({ video }) => {
         <button
           type="button"
           className={clsx('absolute group h-full w-full inset-0 flex justify-end', 'focus:outline-none')}
-          onClick={() => alert('hello')}
+          onClick={(): void => alert('hello')}
         >
           <div className="p-2">
             <VideoItemDeleteButton />
@@ -57,7 +59,7 @@ export const VideoItem: React.FC<VideoItemProps> = ({ video }) => {
   )
 }
 
-export const AddVideoItem: React.FC<{}> = () => {
+export const AddVideoItem: React.FC = () => {
   return (
     <button
       type="button"

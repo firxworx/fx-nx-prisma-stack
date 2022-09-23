@@ -15,21 +15,22 @@ export interface VideoGroupFormProps {
   edit?: {
     data: VideoGroupDto
   }
-  reactHookForm: UseFormReturn<VideoGroupCreateFormValues, any>
+  reactHookForm: UseFormReturn<VideoGroupCreateFormValues>
   isLoading?: boolean
   onSubmit: SubmitHandler<VideoGroupCreateFormValues>
 }
 
-const mapVideoGroupDtoToFormData = (dto?: VideoGroupDto): VideoGroupMutateFormValues | undefined =>
-  dto
-    ? {
-        name: dto.name,
-        description: dto.description,
-        videos: dto.videos?.map((video) => video.uuid) ?? [],
-      }
-    : undefined
+// const mapVideoGroupDtoToFormData = (dto?: VideoGroupDto): VideoGroupMutateFormValues | undefined =>
+//   dto
+//     ? {
+//         name: dto.name,
+//         description: dto.description,
+//         videos: dto.videos?.map((video) => video.uuid) ?? [],
+//       }
+//     : undefined
 
-export const VideoGroupForm: React.FC<VideoGroupFormProps> = ({ edit, reactHookForm, isLoading, onSubmit }) => {
+export const VideoGroupForm: React.FC<VideoGroupFormProps> = ({ reactHookForm, isLoading, onSubmit }) => {
+  // edit
   const { handleSubmit } = reactHookForm
 
   const { data: videos } = useVideosQuery()
