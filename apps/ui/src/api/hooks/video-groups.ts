@@ -6,9 +6,12 @@ import {
   useQueryClient,
   type UseQueryResult,
 } from '@tanstack/react-query'
-import type { ApiDeleteRequestDto, ApiMutateRequestDto } from '../../types/api.types'
 
+import type { ApiDeleteRequestDto, ApiMutateRequestDto } from '../../types/api.types'
 import type { CreateVideoGroupDto, UpdateVideoGroupDto, VideoGroupDto } from '../../types/videos.types'
+import type { ApiDeletionProps, ApiMutationProps } from '../types/mutation.types'
+import type { ApiQueryProps } from '../types/query.types'
+
 import {
   createVideoGroup,
   deleteVideoGroup,
@@ -17,24 +20,8 @@ import {
   fetchVideoGroupsFiltered,
   updateVideoGroup,
 } from '../fetchers/video-groups'
-import { ApiDeletionProps, ApiMutationProps } from '../types/mutation.types'
-import { ApiQueryProps } from '../types/query.types'
 
 const VIDEO_GROUPS_KEY_BASE = 'videoGroups' as const
-
-export interface VideoGroupCreateQueryArgs {
-  onSuccess?: (data: VideoGroupDto, variables: CreateVideoGroupDto, context: unknown) => void
-}
-
-export interface VideoGroupMutateQueryArgs {
-  onSuccess?: (data: VideoGroupDto, variables: UpdateVideoGroupDto, context: unknown) => void
-}
-
-export interface VideoGroupDeleteQueryArgs {
-  onSuccess?: (data: void, variables: { uuid?: string }, context: unknown) => void
-}
-
-// export type VideoGroupQueryEndpoint = 'all' | 'details' | 'detail' | 'create' | 'mutate' | 'delete'
 
 /**
  * Query keys for video groups API queries.
@@ -50,6 +37,20 @@ const videoGroupQueryKeys = {
   mutate: () => [{ ...videoGroupQueryKeys.all[0], operation: 'mutate' }] as const,
   delete: () => [{ ...videoGroupQueryKeys.all[0], operation: 'delete' }] as const,
 }
+
+export interface VideoGroupCreateQueryArgs {
+  onSuccess?: (data: VideoGroupDto, variables: CreateVideoGroupDto, context: unknown) => void
+}
+
+export interface VideoGroupMutateQueryArgs {
+  onSuccess?: (data: VideoGroupDto, variables: UpdateVideoGroupDto, context: unknown) => void
+}
+
+export interface VideoGroupDeleteQueryArgs {
+  onSuccess?: (data: void, variables: { uuid?: string }, context: unknown) => void
+}
+
+// export type VideoGroupQueryEndpoint = 'all' | 'details' | 'detail' | 'create' | 'mutate' | 'delete'
 
 export function useVideoGroupsQuery(): Pick<UseQueryResult<VideoGroupDto[]>, ApiQueryProps> {
   const { data, status, error, isLoading, isFetching, isSuccess, isError, isRefetchError, refetch } = useQuery(

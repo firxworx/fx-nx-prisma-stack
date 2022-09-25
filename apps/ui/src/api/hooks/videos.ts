@@ -9,11 +9,11 @@ import {
   UseQueryResult,
 } from '@tanstack/react-query'
 
-import { apiFetch } from './lib/api-fetch'
-import type { VideoDto, CreateVideoDto, UpdateVideoDto } from '../types/videos.types'
-import { ApiQueryProps } from './types/query.types'
-import { ApiDeletionProps, ApiMutationProps } from './types/mutation.types'
-import { ApiDeleteRequestDto, ApiMutateRequestDto } from '../types/api.types'
+import type { VideoDto, CreateVideoDto, UpdateVideoDto } from '../../types/videos.types'
+import type { ApiQueryProps } from '../types/query.types'
+import type { ApiDeletionProps, ApiMutationProps } from '../types/mutation.types'
+import type { ApiDeleteRequestDto, ApiMutateRequestDto } from '../../types/api.types'
+import { createVideo, deleteVideo, getVideo, getVideos, getVideosData, updateVideo } from '../fetchers/videos'
 
 export interface MutationQueryArgs {
   onSuccess?: () => void
@@ -33,46 +33,6 @@ const videoQueryKeys = {
   create: () => [{ ...videoQueryKeys.all[0], operation: 'create' }] as const,
   mutate: () => [{ ...videoQueryKeys.all[0], operation: 'mutate' }] as const,
   delete: () => [{ ...videoQueryKeys.all[0], operation: 'delete' }] as const,
-}
-
-export async function getVideos(): Promise<VideoDto[]> {
-  return apiFetch<VideoDto[]>(`/videos`, {
-    method: 'GET',
-  })
-}
-
-export async function getVideosData(params: string): Promise<VideoDto[]> {
-  return apiFetch<VideoDto[]>(`/videos${params ? `${params}?sortFilterPaginationParams` : ''}`, {
-    method: 'GET',
-  })
-}
-
-export async function getVideo(uuid?: string): Promise<VideoDto> {
-  return apiFetch<VideoDto>(`/videos/${uuid}`, {
-    method: 'GET',
-  })
-}
-
-// @todo implement the videos array and refactor types to shared lib
-export async function createVideo(data: CreateVideoDto): Promise<VideoDto> {
-  return apiFetch<VideoDto>(`/videos`, {
-    method: 'POST',
-    body: JSON.stringify(data),
-  })
-}
-
-// @todo implement the videos array and refactor types to shared lib
-export async function updateVideo({ uuid, ...restData }: ApiMutateRequestDto<UpdateVideoDto>): Promise<VideoDto> {
-  return apiFetch<VideoDto>(`/videos/${uuid}`, {
-    method: 'PATCH',
-    body: JSON.stringify(restData),
-  })
-}
-
-export async function deleteVideo({ uuid }: ApiDeleteRequestDto): Promise<void> {
-  await apiFetch<void>(`/videos/${uuid}`, {
-    method: 'DELETE',
-  })
 }
 
 export function useVideosQuery(): Pick<UseQueryResult<VideoDto[]>, ApiQueryProps> {
