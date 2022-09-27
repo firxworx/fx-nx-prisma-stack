@@ -2,6 +2,7 @@ import clsx from 'clsx'
 
 export interface SpinnerProps {
   size?: 'sm' | 'md' | 'lg'
+  color?: 'default' | 'brand'
   appendClassName?: string
 }
 
@@ -14,7 +15,7 @@ export interface SpinnerProps {
  * Provide additional classNames with the `appendClassName` prop, which is useful for customizing
  * the color of the spinner (e.g `text-slate-500`).
  */
-export const Spinner: React.FC<SpinnerProps> = ({ size, appendClassName }) => {
+export const Spinner: React.FC<SpinnerProps> = ({ size, color, appendClassName }) => {
   return (
     <div className="flex items-center" role="status" aria-label="Loading...">
       <svg
@@ -24,6 +25,8 @@ export const Spinner: React.FC<SpinnerProps> = ({ size, appendClassName }) => {
             'h-5 w-5': size === 'sm',
             'h-6 w-6': size === 'md',
             'h-8 w-8': size === 'lg',
+            'text-slate-600': color === 'default',
+            'text-brand-primary': color === 'brand',
           },
           appendClassName,
         )}

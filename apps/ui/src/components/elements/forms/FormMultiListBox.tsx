@@ -50,7 +50,7 @@ export const FormMultiListBox: React.FC<FormMultiListBoxProps> = ({
   const { field } = useController({ name, ...restReactHookFormProps }) // { name, control, rule, defaultValue }
 
   return (
-    <div>
+    <div className={appendClassName}>
       <Listbox
         name={field.name}
         value={field.value ?? []}
@@ -60,7 +60,7 @@ export const FormMultiListBox: React.FC<FormMultiListBoxProps> = ({
         multiple
         as="div"
         disabled={disabled}
-        className={clsx('w-full', appendClassName)}
+        className="w-full"
       >
         {({ open }): JSX.Element => (
           <>
@@ -101,14 +101,15 @@ export const FormMultiListBox: React.FC<FormMultiListBoxProps> = ({
                   </span>
                 </Listbox.Button>
                 {typeof onAddItemClick === 'function' && (
-                  <div className="flex items-center">
+                  <div className="flex items-stretch">
                     <ActionButton
                       variant="outline"
                       border="thin"
                       appendClassName="min-w-content ml-2"
                       onClick={onAddItemClick}
                     >
-                      <PlusIcon className="h-5 w-5" />
+                      <span className="sr-only">Add Item</span>
+                      <PlusIcon className="h-5 w-5" aria-hidden="true" />
                     </ActionButton>
                   </div>
                 )}

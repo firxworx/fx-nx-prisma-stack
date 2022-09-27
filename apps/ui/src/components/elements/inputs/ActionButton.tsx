@@ -15,8 +15,10 @@ export interface ActionButtonProps
 }
 
 /**
- * Reusable button component with a standard set of styles for different variants.
- * Renders an actual HTML `button` element with explicitly defined default `type` "button".
+ * Reusable button[type=button] component with a standard set of styles for different variants that matches the
+ * look-and-feel of `FormButton` + `LinkButton` components.
+ *
+ * Intended for standalone buttons with `onClick` or similar event handlers defined.
  *
  * @see FormButton for a button component integrated with react-hook-form.
  * @see LinkButton for a nextjs-compatible anchor (link) styled as a button.
