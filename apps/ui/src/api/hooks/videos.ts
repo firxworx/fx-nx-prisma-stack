@@ -13,11 +13,18 @@ import type { VideoDto, CreateVideoDto, UpdateVideoDto } from '../../types/video
 import type { ApiQueryProps } from '../types/query.types'
 import type { ApiDeletionProps, ApiMutationProps } from '../types/mutation.types'
 import type { ApiDeleteRequestDto, ApiMutateRequestDto } from '../../types/api.types'
-import { createVideo, deleteVideo, getVideo, getVideos, getVideosData, updateVideo } from '../fetchers/videos'
+import {
+  fetchCreateVideo,
+  fetchDeleteVideo,
+  fetchVideo,
+  fetchVideos,
+  fetchMutateVideo,
+  fetchVideosWithConstraints,
+} from '../fetchers/videos'
+import type { ApiParentContext } from '../types/common.types'
+import type { BoxProfileChildQueryContext } from '../../types/box-profiles.types'
 
-export interface MutationQueryArgs {
-  onSuccess?: () => void
-}
+type ParentContext = ApiParentContext<BoxProfileChildQueryContext>
 
 const VIDEOS_KEY_BASE = 'videos' as const
 
@@ -27,7 +34,7 @@ const VIDEOS_KEY_BASE = 'videos' as const
 const videoQueryKeys = {
   all: [{ scope: VIDEOS_KEY_BASE }] as const,
   lists: () => [{ ...videoQueryKeys.all[0], operation: 'list' }] as const,
-  listData: (filterSortPaginateParams: string) => [{ ...videoQueryKeys.lists()[0], filterSortPaginateParams }] as const,
+  listData: (sortFilterPaginateParams: string) => [{ ...videoQueryKeys.lists()[0], sortFilterPaginateParams }] as const,
   details: () => [{ ...videoQueryKeys.all, operation: 'detail' }] as const,
   detail: (uuid: string | undefined) => [{ ...videoQueryKeys.details()[0], uuid }] as const,
   create: () => [{ ...videoQueryKeys.all[0], operation: 'create' }] as const,
@@ -35,44 +42,53 @@ const videoQueryKeys = {
   delete: () => [{ ...videoQueryKeys.all[0], operation: 'delete' }] as const,
 }
 
-export function useVideosQuery(): Pick<UseQueryResult<VideoDto[]>, ApiQueryProps> {
-  const { data, status, error, isLoading, isFetching, isSuccess, isError, isRefetchError, refetch } = useQuery(
-    videoQueryKeys.all,
-    getVideos,
-  )
+export function useVideosQuery(pctx: ParentContext): Pick<UseQueryResult<VideoDto[]>, ApiQueryProps> {
+  const { data, status, error, isLoading, isFetching, isSuccess, isError, isRefetchError, refetch } = useQuery<
+    VideoDto[]
+  >(videoQueryKeys.all, () => fetchVideos({ parentContext: pctx?.parentContext }), {
+    enabled: !!pctx?.parentContext?.boxProfileUuid?.length,
+  })
   return { data, status, error, isLoading, isFetching, isSuccess, isError, isRefetchError, refetch }
 }
 
-export function useVideosDataQuery(filterSortPaginateParams: string): Pick<UseQueryResult<VideoDto[]>, ApiQueryProps> {
-  const { data, status, error, isLoading, isFetching, isSuccess, isError, isRefetchError, refetch } = useQuery(
-    videoQueryKeys.listData(filterSortPaginateParams),
-    () => getVideosData(filterSortPaginateParams),
-  )
-  return { data, status, error, isLoading, isFetching, isSuccess, isError, isRefetchError, refetch }
-}
-
-export function useVideoQuery(uuid: string | undefined): Pick<UseQueryResult<VideoDto>, ApiQueryProps> {
-  const { data, status, error, isLoading, isFetching, isSuccess, isError, isRefetchError, refetch } = useQuery(
-    videoQueryKeys.detail(uuid),
-    () => getVideo(uuid),
+export function useVideosDataQuery({
+  parentContext,
+  sortFilterPaginateParams,
+}: ParentContext & { sortFilterPaginateParams: string }): Pick<UseQueryResult<VideoDto[]>, ApiQueryProps> {
+  const { data, status, error, isLoading, isFetching, isSuccess, isError, isRefetchError, refetch } = useQuery<
+    VideoDto[]
+  >(
+    videoQueryKeys.listData(sortFilterPaginateParams),
+    () => fetchVideosWithConstraints({ parentContext: parentContext, sortFilterPaginateParams }),
     {
-      enabled: !!uuid?.length,
+      enabled: !!parentContext?.boxProfileUuid?.length,
     },
   )
+  return { data, status, error, isLoading, isFetching, isSuccess, isError, isRefetchError, refetch }
+}
+
+export function useVideoQuery({
+  parentContext,
+  uuid,
+}: ParentContext & { uuid: string | undefined }): Pick<UseQueryResult<VideoDto>, ApiQueryProps> {
+  const { data, status, error, isLoading, isFetching, isSuccess, isError, isRefetchError, refetch } =
+    useQuery<VideoDto>(videoQueryKeys.detail(uuid), () => fetchVideo({ parentContext: parentContext, uuid }), {
+      enabled: !!uuid?.length && !!parentContext?.boxProfileUuid?.length,
+    })
 
   return { data, status, error, isLoading, isFetching, isSuccess, isError, isRefetchError, refetch }
 }
 
 export function useVideoCreateQuery(
-  options?: UseMutationOptions<VideoDto, Error, CreateVideoDto>,
-): Pick<UseMutationResult<VideoDto, Error, CreateVideoDto>, ApiMutationProps> {
+  options?: UseMutationOptions<VideoDto, Error, CreateVideoDto & ParentContext>,
+): Pick<UseMutationResult<VideoDto, Error, CreateVideoDto & ParentContext>, ApiMutationProps> {
   const queryClient = useQueryClient()
 
   const { mutate, mutateAsync, data, reset, error, isSuccess, isLoading, isError } = useMutation<
     VideoDto,
     Error,
-    CreateVideoDto
-  >(videoQueryKeys.create(), createVideo, {
+    CreateVideoDto & ParentContext
+  >(videoQueryKeys.create(), fetchCreateVideo, {
     onSuccess: (data, variables, context) => {
       if (typeof options?.onSuccess === 'function') {
         options.onSuccess(data, variables, context)
@@ -87,16 +103,16 @@ export function useVideoCreateQuery(
   return { mutate, mutateAsync, data, reset, error, isSuccess, isLoading, isError }
 }
 
-export function useVideoMutationQuery(
-  options?: UseMutationOptions<VideoDto, Error, ApiMutateRequestDto<UpdateVideoDto>>,
-): Pick<UseMutationResult<VideoDto, Error, ApiMutateRequestDto<UpdateVideoDto>>, ApiMutationProps> {
+export function useVideoMutateQuery(
+  options?: UseMutationOptions<VideoDto, Error, ApiMutateRequestDto<UpdateVideoDto> & ParentContext>,
+): Pick<UseMutationResult<VideoDto, Error, ApiMutateRequestDto<UpdateVideoDto> & ParentContext>, ApiMutationProps> {
   const queryClient = useQueryClient()
 
   const { mutate, mutateAsync, data, reset, error, isSuccess, isLoading, isError } = useMutation<
     VideoDto,
     Error,
-    ApiMutateRequestDto<UpdateVideoDto>
-  >(videoQueryKeys.mutate(), updateVideo, {
+    ApiMutateRequestDto<UpdateVideoDto> & ParentContext
+  >(videoQueryKeys.mutate(), fetchMutateVideo, {
     onSuccess: async (data, variables, context) => {
       if (typeof options?.onSuccess === 'function') {
         options.onSuccess(data, variables, context)
@@ -120,18 +136,18 @@ interface DeleteQueryContext {
 }
 
 export function useVideoDeleteQuery(
-  options?: UseMutationOptions<void, Error, ApiDeleteRequestDto, unknown>,
-): Pick<UseMutationResult<void, Error, ApiDeleteRequestDto, DeleteQueryContext>, ApiDeletionProps> {
+  options?: UseMutationOptions<void, Error, ApiDeleteRequestDto & ParentContext, unknown>,
+): Pick<UseMutationResult<void, Error, ApiDeleteRequestDto & ParentContext, DeleteQueryContext>, ApiDeletionProps> {
   const queryClient = useQueryClient()
 
   const { mutate, mutateAsync, reset, error, isSuccess, isLoading, isError } = useMutation<
     void,
     Error,
-    ApiDeleteRequestDto,
+    ApiDeleteRequestDto & ParentContext,
     DeleteQueryContext
   >(
     videoQueryKeys.delete(),
-    deleteVideo,
+    fetchDeleteVideo,
     // @todo experimenting with rollback type functionality -- check docs + examples in case there are other patterns
     {
       onSuccess: async (data, variables, context) => {

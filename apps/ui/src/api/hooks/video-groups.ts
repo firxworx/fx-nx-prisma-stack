@@ -17,9 +17,13 @@ import {
   deleteVideoGroup,
   fetchVideoGroup,
   fetchVideoGroups,
-  fetchVideoGroupsFiltered,
+  fetchVideoGroupsWithConstraints,
   updateVideoGroup,
 } from '../fetchers/video-groups'
+import type { ApiParentContext } from '../types/common.types'
+import type { BoxProfileChildQueryContext } from '../../types/box-profiles.types'
+
+type ParentContext = ApiParentContext<BoxProfileChildQueryContext>
 
 const VIDEO_GROUPS_KEY_BASE = 'videoGroups' as const
 
@@ -27,68 +31,72 @@ const VIDEO_GROUPS_KEY_BASE = 'videoGroups' as const
  * Query keys for video groups API queries.
  */
 const videoGroupQueryKeys = {
+  // all query key base
   all: [{ scope: VIDEO_GROUPS_KEY_BASE }] as const,
-  lists: () => [{ ...videoGroupQueryKeys.all[0], operation: 'list' }] as const,
-  listData: (filterSortPaginateParams: string) =>
-    [{ ...videoGroupQueryKeys.lists()[0], filterSortPaginateParams }] as const,
-  details: () => [{ ...videoGroupQueryKeys.all, operation: 'detail' }] as const,
+
+  // operation-specific query keys
+  list: () => [{ ...videoGroupQueryKeys.all[0], operation: 'list' }] as const,
+  listData: (sortFilterPaginateParams: string) =>
+    [{ ...videoGroupQueryKeys.list()[0], sortFilterPaginateParams }] as const,
+  details: () => [{ ...videoGroupQueryKeys.all[0], operation: 'detail' }] as const,
   detail: (uuid: string | undefined) => [{ ...videoGroupQueryKeys.details()[0], uuid }] as const,
   create: () => [{ ...videoGroupQueryKeys.all[0], operation: 'create' }] as const,
   mutate: () => [{ ...videoGroupQueryKeys.all[0], operation: 'mutate' }] as const,
   delete: () => [{ ...videoGroupQueryKeys.all[0], operation: 'delete' }] as const,
 }
 
-export interface VideoGroupCreateQueryArgs {
-  onSuccess?: (data: VideoGroupDto, variables: CreateVideoGroupDto, context: unknown) => void
-}
-
-export interface VideoGroupMutateQueryArgs {
-  onSuccess?: (data: VideoGroupDto, variables: UpdateVideoGroupDto, context: unknown) => void
-}
-
-export interface VideoGroupDeleteQueryArgs {
-  onSuccess?: (data: void, variables: { uuid?: string }, context: unknown) => void
-}
-
 // export type VideoGroupQueryEndpoint = 'all' | 'details' | 'detail' | 'create' | 'mutate' | 'delete'
 
-export function useVideoGroupsQuery(): Pick<UseQueryResult<VideoGroupDto[]>, ApiQueryProps> {
+export function useVideoGroupsQuery(pctx: ParentContext): Pick<UseQueryResult<VideoGroupDto[]>, ApiQueryProps> {
   const { data, status, error, isLoading, isFetching, isSuccess, isError, isRefetchError, refetch } = useQuery(
-    videoGroupQueryKeys.all,
-    fetchVideoGroups,
+    videoGroupQueryKeys.list(),
+    () => fetchVideoGroups({ parentContext: pctx?.parentContext }),
+    {
+      enabled: !!pctx?.parentContext?.boxProfileUuid?.length,
+    },
   )
 
   return { data, status, error, isLoading, isFetching, isSuccess, isError, isRefetchError, refetch }
 }
 
-export function useVideoGroupsFilteredQuery(
-  filterSortPaginateParams: string,
-): Pick<UseQueryResult<VideoGroupDto[]>, ApiQueryProps> {
+export function useVideoGroupsDataQuery({
+  parentContext,
+  sortFilterPaginateParams,
+}: ParentContext & { sortFilterPaginateParams: string }): Pick<UseQueryResult<VideoGroupDto[]>, ApiQueryProps> {
   const { data, status, error, isLoading, isFetching, isSuccess, isError, isRefetchError, refetch } = useQuery<
     VideoGroupDto[]
-  >(videoGroupQueryKeys.listData(filterSortPaginateParams), () => fetchVideoGroupsFiltered(filterSortPaginateParams))
+  >(
+    videoGroupQueryKeys.listData(sortFilterPaginateParams),
+    () => fetchVideoGroupsWithConstraints({ parentContext, sortFilterPaginateParams }),
+    {
+      enabled: !!parentContext.boxProfileUuid?.length,
+    },
+  )
 
   return { data, status, error, isLoading, isFetching, isSuccess, isError, isRefetchError, refetch }
 }
 
-export function useVideoGroupQuery(uuid: string | undefined): Pick<UseQueryResult<VideoGroupDto>, ApiQueryProps> {
+export function useVideoGroupQuery({
+  parentContext,
+  uuid,
+}: ParentContext & { uuid: string | undefined }): Pick<UseQueryResult<VideoGroupDto>, ApiQueryProps> {
   const { data, status, error, isLoading, isFetching, isSuccess, isError, isRefetchError, refetch } =
-    useQuery<VideoGroupDto>(videoGroupQueryKeys.detail(uuid), () => fetchVideoGroup(uuid), {
-      enabled: !!uuid?.length,
+    useQuery<VideoGroupDto>(videoGroupQueryKeys.detail(uuid), () => fetchVideoGroup({ parentContext, uuid }), {
+      enabled: !!uuid?.length && !!parentContext?.boxProfileUuid?.length,
     })
 
   return { data, status, error, isLoading, isFetching, isSuccess, isError, isRefetchError, refetch }
 }
 
 export function useVideoGroupCreateQuery(
-  options?: UseMutationOptions<VideoGroupDto, Error, CreateVideoGroupDto>,
-): Pick<UseMutationResult<VideoGroupDto, Error, CreateVideoGroupDto>, ApiMutationProps> {
+  options?: UseMutationOptions<VideoGroupDto, Error, CreateVideoGroupDto & ParentContext>,
+): Pick<UseMutationResult<VideoGroupDto, Error, CreateVideoGroupDto & ParentContext>, ApiMutationProps> {
   const queryClient = useQueryClient()
 
   const { mutate, mutateAsync, data, reset, error, isSuccess, isLoading, isError } = useMutation<
     VideoGroupDto,
     Error,
-    CreateVideoGroupDto
+    CreateVideoGroupDto & ParentContext
   >(videoGroupQueryKeys.create(), createVideoGroup, {
     onSuccess: (data, variables, context) => {
       if (typeof options?.onSuccess === 'function') {
@@ -105,14 +113,17 @@ export function useVideoGroupCreateQuery(
 }
 
 export function useVideoGroupMutateQuery(
-  options?: UseMutationOptions<VideoGroupDto, Error, ApiMutateRequestDto<UpdateVideoGroupDto>>,
-): Pick<UseMutationResult<VideoGroupDto, Error, ApiMutateRequestDto<UpdateVideoGroupDto>>, ApiMutationProps> {
+  options?: UseMutationOptions<VideoGroupDto, Error, ApiMutateRequestDto<UpdateVideoGroupDto> & ParentContext>,
+): Pick<
+  UseMutationResult<VideoGroupDto, Error, ApiMutateRequestDto<UpdateVideoGroupDto> & ParentContext>,
+  ApiMutationProps
+> {
   const queryClient = useQueryClient()
 
   const { mutate, mutateAsync, data, reset, error, isSuccess, isLoading, isError } = useMutation<
     VideoGroupDto,
     Error,
-    ApiMutateRequestDto<UpdateVideoGroupDto>
+    ApiMutateRequestDto<UpdateVideoGroupDto> & ParentContext
   >(videoGroupQueryKeys.mutate(), updateVideoGroup, {
     onSuccess: async (data, variables, context) => {
       if (typeof options?.onSuccess === 'function') {
@@ -140,7 +151,7 @@ export function useVideoGroupDeleteQuery(
   const { mutate, mutateAsync, reset, error, isSuccess, isLoading, isError } = useMutation<
     void,
     Error,
-    ApiDeleteRequestDto,
+    ApiDeleteRequestDto & ParentContext,
     unknown
   >(
     videoGroupQueryKeys.delete(),

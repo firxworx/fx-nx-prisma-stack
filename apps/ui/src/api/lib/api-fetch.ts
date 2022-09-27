@@ -145,7 +145,7 @@ export async function apiFetch(path: string, options?: RequestInit, isRetryAttem
 
     try {
       // parse responses that are not http-204 (no content) as json (return {} in 204 case for truthy result)
-      const json = response.status === 204 ? {} : await response.json()
+      const json = response.status === 204 ? ({} as Record<string, never>) : await response.json()
       return json
     } catch (error: unknown) {
       return Promise.reject(
