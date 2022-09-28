@@ -18,7 +18,7 @@ export interface CreateVideoGroupFormValues extends CreateVideoGroupDto {}
 export interface MutateVideoGroupFormValues extends UpdateVideoGroupDto {}
 
 // @todo tighter types so only one of create or mutate can be specified
-export interface VideoGroupMultiFormProps extends ApiParentContext<BoxProfileChildQueryContext> {
+export interface VideoGroupFormProps extends ApiParentContext<BoxProfileChildQueryContext> {
   create?: {
     onSuccess?: (data: VideoGroupDto, variables: CreateVideoGroupFormValues, context: unknown) => void
   }
@@ -63,7 +63,7 @@ const InnerForm: React.FC<{
  *
  * Specify one of the `create` or `mutate` objects via props, including an optional `onSuccess()` callback.
  */
-export const VideoGroupMultiForm: React.FC<VideoGroupMultiFormProps> = ({ parentContext, create, mutate }) => {
+export const VideoGroupForm: React.FC<VideoGroupFormProps> = ({ parentContext, create, mutate }) => {
   const isMounted = useIsMounted()
 
   const videoGroupCreateForm = useForm<CreateVideoGroupFormValues>()
