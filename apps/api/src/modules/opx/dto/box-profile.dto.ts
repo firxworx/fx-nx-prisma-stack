@@ -26,13 +26,15 @@ export class BoxProfileDto {
   @Expose()
   urlCode!: string
 
-  @Expose()
-  @Type(() => VideoDto)
-  videos!: VideoDto[]
+  // @temp disabled to debug (videos + videoGroups in box profile dto)
 
-  @Expose()
-  @Type(() => VideoGroupDto)
-  videoGroups!: VideoGroupDto[]
+  // @Expose()
+  // @Type(() => VideoDto)
+  // videos!: VideoDto[]
+
+  // @Expose()
+  // @Type(() => VideoGroupDto)
+  // videoGroups!: VideoGroupDto[]
 
   // @todo add phraseGroups to BoxProfile DTO
 
@@ -65,18 +67,19 @@ export class BoxProfileDto {
       }
     }, {} as Partial<BoxProfile>)
 
-    // map prisma's overly-nested query result (due to many-to-many) to response DTO
-    // the sort is because it doesn't appear currently possible to sort nested results w/ select (only via raw sql query)
-    const videosField =
-      partial.videos?.map((vg) => new VideoDto(vg.video)).sort((a, b) => a.name.localeCompare(b.name)) ?? []
+    // @temp debug
+    // // map prisma's overly-nested query result (due to many-to-many) to response DTO
+    // // the sort is because it doesn't appear currently possible to sort nested results w/ select (only via raw sql query)
+    // const videosField =
+    //   partial.videos?.map((vg) => new VideoDto(vg.video)).sort((a, b) => a.name.localeCompare(b.name)) ?? []
 
-    const videoGroupsField =
-      partial.videoGroups?.map((vg) => new VideoGroupDto(vg.videoGroup)).sort((a, b) => a.name.localeCompare(b.name)) ??
-      []
+    // const videoGroupsField =
+    //   partial.videoGroups?.map((vg) => new VideoGroupDto(vg.videoGroup)).sort((a, b) => a.name.localeCompare(b.name)) ??
+    //   []
 
     Object.assign(this, boxProfileFields, {
-      videos: videosField,
-      videoGroups: videoGroupsField,
+      // videos: videosField,
+      // videoGroups: videoGroupsField,
     })
   }
 }

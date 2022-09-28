@@ -1,5 +1,5 @@
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common'
-import { v4 as uuidv4 } from 'uuid'
+import { nanoid } from 'nanoid/async'
 
 import type { AuthUser } from '../auth/types/auth-user.type'
 import { PrismaService } from '../prisma/prisma.service'
@@ -7,8 +7,13 @@ import { BoxProfileDto } from './dto/box-profile.dto'
 import { CreateBoxProfileDto } from './dto/create-box-profile.dto'
 import { UpdateBoxProfileDto } from './dto/update-box-profile.dto'
 
+/*
+ * note: running w/ nanoid nanoid@^3.0.0 until nx has more elegant built-in support for esm
+ *       @see https://github.com/nrwl/nx/pull/10414
+ */
+
 @Injectable()
-export class BoxProfileService {
+export class BoxService {
   private logger = new Logger(this.constructor.name)
 
   public BOX_PROFILE_PUBLIC_FIELDS = [
@@ -88,11 +93,13 @@ export class BoxProfileService {
 
   async createByUser(user: AuthUser, dto: CreateBoxProfileDto): Promise<BoxProfileDto> {
     // @todo shorten box profile id's (nanoid?) and add + handle unique constraint violation
+    const urlCode = await nanoid(10)
+
     const boxProfile = await this.prisma.boxProfile.create({
       select: this.getBoxProfileDtoSelectClause(),
       data: {
         ...dto,
-        urlCode: uuidv4(),
+        urlCode,
         user: {
           connect: {
             id: user.id,
@@ -128,7 +135,7 @@ export class BoxProfileService {
 
     const whereCondition = this.getIdentifierWhereCondition(identifier)
 
-    await this.prisma.video.delete({
+    await this.prisma.boxProfile.delete({
       where: whereCondition,
     })
 

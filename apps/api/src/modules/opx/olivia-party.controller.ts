@@ -15,7 +15,7 @@ import { ApiTags } from '@nestjs/swagger'
 import { GetUser } from '../auth/decorators/get-user.decorator'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { SanitizedUser } from '../auth/types/sanitized-user.type'
-import { BoxProfileService } from './box-profile.service'
+import { BoxService } from './box.service'
 import { BoxProfileDto } from './dto/box-profile.dto'
 import { CreateBoxProfileDto } from './dto/create-box-profile.dto'
 import { UpdateBoxProfileDto } from './dto/update-box-profile.dto'
@@ -26,11 +26,11 @@ const CONTROLLER_NAME = 'opx'
 @Controller(CONTROLLER_NAME)
 @UseGuards(JwtAuthGuard)
 export class OliviaPartyController {
-  constructor(private readonly boxProfileService: BoxProfileService) {}
+  constructor(private readonly boxService: BoxService) {}
 
   @Get()
   async getBoxProfiles(@GetUser() user: SanitizedUser): Promise<BoxProfileDto[]> {
-    return this.boxProfileService.findAllByUser(user)
+    return this.boxService.findAllByUser(user)
   }
 
   @Get(':uuid')
@@ -38,12 +38,12 @@ export class OliviaPartyController {
     @GetUser() user: SanitizedUser,
     @Param('uuid', new ParseUUIDPipe({ version: '4' })) uuid: string,
   ): Promise<BoxProfileDto> {
-    return this.boxProfileService.getOneByUser(user, uuid)
+    return this.boxService.getOneByUser(user, uuid)
   }
 
   @Post()
   async createBoxProfile(@GetUser() user: SanitizedUser, @Body() dto: CreateBoxProfileDto): Promise<BoxProfileDto> {
-    return this.boxProfileService.createByUser(user, dto)
+    return this.boxService.createByUser(user, dto)
   }
 
   @Patch(':uuid')
@@ -52,7 +52,7 @@ export class OliviaPartyController {
     @Param('uuid', new ParseUUIDPipe({ version: '4' })) uuid: string,
     @Body() dto: UpdateBoxProfileDto,
   ): Promise<BoxProfileDto> {
-    return this.boxProfileService.updateByUser(user, uuid, dto)
+    return this.boxService.updateByUser(user, uuid, dto)
   }
 
   @Delete(':uuid')
@@ -61,6 +61,6 @@ export class OliviaPartyController {
     @GetUser() user: SanitizedUser,
     @Param('uuid', new ParseUUIDPipe({ version: '4' })) uuid: string,
   ): Promise<void> {
-    return this.boxProfileService.deleteByUser(user, uuid)
+    return this.boxService.deleteByUser(user, uuid)
   }
 }

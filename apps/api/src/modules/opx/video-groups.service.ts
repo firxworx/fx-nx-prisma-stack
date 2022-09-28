@@ -108,7 +108,7 @@ export class VideoGroupsService {
   ): Promise<VideoGroupDto> {
     const whereCondition = this.getIdentifierWhereCondition(identifier)
 
-    const item = await this.prisma.video.findFirstOrThrow({
+    const item = await this.prisma.videoGroup.findFirstOrThrow({
       select: videoGroupDtoPrismaSelectClause,
       where: {
         boxProfile: {

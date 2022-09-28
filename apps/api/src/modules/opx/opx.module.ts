@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common'
 
 import { PrismaModule } from '../prisma/prisma.module'
-import { BoxProfileService } from './box-profile.service'
+import { BoxService } from './box.service'
 import { OliviaPartyController } from './olivia-party.controller'
 import { VideoGroupsController } from './video-groups.controller'
 import { VideoGroupsService } from './video-groups.service'
@@ -12,7 +12,7 @@ import { VideosService } from './videos.service'
 
 @Module({
   imports: [PrismaModule],
-  providers: [BoxProfileService, VideosService, VideoGroupsService],
+  providers: [BoxService, VideosService, VideoGroupsService],
   controllers: [OliviaPartyController, VideosController, VideoGroupsController],
 })
 export class OpxModule {}

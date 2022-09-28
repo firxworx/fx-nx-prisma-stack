@@ -36,6 +36,7 @@ export class VideoDto implements VideoResponse {
   groups!: VideoGroupDto[]
 
   constructor(partial: Partial<Video & { groups: { videoGroup: Partial<VideoGroup> }[] }>) {
+    console.log('creating partial video.dto.ts', JSON.stringify(partial, null, 2))
     const VIDEO_MODEL_DTO_FIELDS = ['uuid', 'createdAt', 'updatedAt', 'name', 'platform', 'externalId'] as const
 
     const videoFields = VIDEO_MODEL_DTO_FIELDS.reduce((acc, fieldName) => {

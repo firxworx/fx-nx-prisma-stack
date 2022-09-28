@@ -14,6 +14,7 @@ import { UpdateVideoDto } from './dto/update-video.dto'
 import { videoDtoPrismaOrderByClause, videoDtoPrismaSelectClause } from './prisma/queries'
 import { VideoGroupsService } from './video-groups.service'
 import { VideoDto } from './dto/video.dto'
+import { PrismaUtilsService } from '../prisma/prisma-utils.service'
 
 @Injectable()
 export class VideosService {
@@ -21,9 +22,10 @@ export class VideosService {
 
   constructor(
     private readonly prisma: PrismaService,
+    private readonly prismaUtilsService: PrismaUtilsService,
 
     @Inject(forwardRef(() => VideoGroupsService))
-    private videoGroupsService: VideoGroupsService,
+    private readonly videoGroupsService: VideoGroupsService,
   ) {}
 
   private getIdentifierWhereCondition(identifier: string | number): { uuid: string } | { id: number } {
@@ -99,20 +101,24 @@ export class VideosService {
   ): Promise<VideoDto> {
     const whereCondition = this.getIdentifierWhereCondition(identifier)
 
-    const item = await this.prisma.video.findFirstOrThrow({
-      select: videoDtoPrismaSelectClause,
-      where: {
-        boxProfile: {
-          uuid: boxProfileUuid,
-          user: {
-            id: user.id,
+    try {
+      const item = await this.prisma.video.findFirstOrThrow({
+        select: videoDtoPrismaSelectClause,
+        where: {
+          boxProfile: {
+            uuid: boxProfileUuid,
+            user: {
+              id: user.id,
+            },
           },
+          ...whereCondition,
         },
-        ...whereCondition,
-      },
-    })
+      })
 
-    return new VideoDto(item)
+      return new VideoDto(item)
+    } catch (error: unknown) {
+      throw this.prismaUtilsService.processError(error)
+    }
   }
 
   async createByUser(user: AuthUser, boxProfileUuid: string, dto: CreateVideoDto): Promise<VideoDto> {
