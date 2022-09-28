@@ -57,6 +57,15 @@ module.exports = {
             darkest: colors.sky[900],
           },
         },
+        brand: {
+          primary: {
+            lightest: colors.sky[500],
+            lighter: colors.sky[600],
+            DEFAULT: colors.sky[700],
+            darker: colors.sky[800],
+            darkest: colors.sky[900],
+          },
+        },
         palette: {
           form: {
             border: {
@@ -80,7 +89,7 @@ module.exports = {
           },
         },
         error: {
-          DEFAULT: '#cb4848',
+          DEFAULT: '#a72e2e',
           50: '#fdf3f3',
           100: '#fbe5e5',
           200: '#f8d0d0',
@@ -147,6 +156,9 @@ module.exports = {
         },
         [formInputTargets]: {
           '@apply fx-form-input': {},
+        },
+        strong: {
+          '@apply font-medium text-slate-800': {},
         },
         // [formInputFocusTargets]: {
         // }
