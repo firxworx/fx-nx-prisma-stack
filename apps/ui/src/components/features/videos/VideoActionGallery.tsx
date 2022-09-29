@@ -1,6 +1,8 @@
+import React, { useCallback } from 'react'
+import clsx from 'clsx'
+
 import { XMarkIcon } from '@heroicons/react/20/solid'
 import { PlusIcon } from '@heroicons/react/24/outline'
-import clsx from 'clsx'
 import { VideoDto } from '../../../types/videos.types'
 import { VideoThumbnail } from './VideoThumbnail'
 
@@ -10,86 +12,259 @@ import { VideoThumbnail } from './VideoThumbnail'
 
 export interface VideoActionGalleryProps {
   videos: Exclude<VideoDto, 'video'>[]
+  onVideoClick: (videoUuid: string, event: React.MouseEvent<HTMLDivElement>) => void
+  onAddVideoClick?: React.MouseEventHandler<HTMLButtonElement>
+  onDeleteVideoClick?: (videoUuid: string, event: React.MouseEvent<HTMLButtonElement>) => void
 }
 
 export interface VideoItemProps {
   video: Pick<VideoDto, 'name' | 'externalId' | 'platform'>
+  onVideoClick?: React.MouseEventHandler<HTMLDivElement>
+  onDeleteVideoClick?: React.MouseEventHandler<HTMLButtonElement>
 }
 
-export const VideoItemDeleteButton: React.FC = () => {
+export interface VideoDeleteButtonProps {
+  variant: 'full' | 'top-right-corner'
+  onClick?: React.MouseEventHandler<HTMLButtonElement>
+}
+
+export interface VideoCaptionProps {
+  video: VideoItemProps['video']
+}
+
+/**
+ * Inner-component (child) of video item delete button with border + 'x' icon.
+ */
+export const VideoDeleteIconButton: React.FC = () => {
   return (
     <div
       className={clsx(
-        'flex items-center justify-center p-2 border-2 rounded-md',
-        'bg-white text-error',
-        'border-error group-hover:bg-error-200 group-focus:bg-error-200',
+        'flex items-center justify-center p-2 border rounded-md',
+        'bg-slate-100 group-hover:bg-white text-error-600 bg-opacity-85',
+        'border-error-600 border-opacity-90 group-hover:border-opacity-100',
+        'group-hover:bg-opacity-100 group-focus:bg-white',
         'transition-colors group-focus-visible:ring-2 group-focus-visible:ring-sky-200',
       )}
     >
-      <span className="sr-only">Delete Video from Group</span>
+      <span className="sr-only">Delete Video</span>
       <XMarkIcon className="h-5 w-5" aria-hidden="true" />
     </div>
   )
 }
 
-export const VideoItem: React.FC<VideoItemProps> = ({ video }) => {
+/**
+ * Delete button for individual videos in the gallery.
+ * Implemented with absolute positioning so a parent with relative positioning is required.
+ *
+ * Set `variant` to 'top-right-corner' for top right, and 'full' for a full-height + full-width overlay.
+ */
+export const VideoDeleteButton: React.FC<VideoDeleteButtonProps> = ({ variant, onClick }) => {
+  const handleClick: React.MouseEventHandler<HTMLButtonElement> = (event) => {
+    if (typeof onClick === 'function') {
+      onClick(event)
+    }
+
+    event.stopPropagation()
+  }
+
+  if (variant === 'top-right-corner') {
+    return (
+      <button type="button" className="absolute group isolate top-0 right-0" onClick={handleClick}>
+        <div className="p-1 xs:p-2">
+          <VideoDeleteIconButton />
+        </div>
+      </button>
+    )
+  }
+
+  if (variant === 'full') {
+    return (
+      <button
+        type="button"
+        className={clsx('absolute group isolate h-full w-full inset-0 flex justify-end', 'focus:outline-none')}
+        onClick={handleClick}
+      >
+        <VideoDeleteIconButton />
+      </button>
+    )
+  }
+
+  return null
+}
+
+/**
+ * Grayscale + opacity filter for video gallery item thumbnails.
+ */
+const GrayFilter: React.FC<React.PropsWithChildren> = ({ children }) => (
+  <div className="opacity-75 group-hover:opacity-100 filter grayscale-75 group-hover:grayscale-0 w-full h-full transition-all">
+    {children}
+  </div>
+)
+
+/**
+ * Full height + width absolute positioned "cover box" wrapper for video items in a gallery.
+ * Renders a border with consistent round corners and _no_ 1-2px gaps (although there is minor
+ * but tolerable spillover from underlying elements at different scales).
+ *
+ * This component is a workaround for having borders around video items that render with gaps,
+ * presumably due to grid + 16:9 ratio, which appears only when borders are applied.
+ */
+const AbsoluteRoundBorder: React.FC<React.PropsWithChildren> = ({ children }) => {
   return (
-    <div className={clsx('w-full isolate rounded-md overflow-hidden', 'ring-2 ring-slate-300')}>
-      <div className="relative transition-all">
-        <div className="opacity-75 filter grayscale-75">
-          <VideoThumbnail externalId={video.externalId} />
-        </div>
-        <button
-          type="button"
-          className={clsx('absolute group h-full w-full inset-0 flex justify-end', 'focus:outline-none')}
-          onClick={(): void => alert('hello')}
-        >
-          <div className="p-2">
-            <VideoItemDeleteButton />
-          </div>
-        </button>
-      </div>
-      <div className="flex items-center bg-slate-50 p-2 sm:p-4">
-        <div className="flex-1">
-          <div className="text-sm md:text-base">{video.name}</div>
-        </div>
-        {/* <VideoPlatformLogo platform={video.platform} /> */}
-      </div>
+    <div
+      className={clsx(
+        'absolute h-full w-full inset-0',
+        'flex justify-center items-end',
+        'rounded-md border',
+        'border-slate-200 group-hover:border-slate-300',
+      )}
+    >
+      {children}
     </div>
   )
 }
 
-export const AddVideoItem: React.FC = () => {
+/**
+ * Video thumb caption that displays video name.
+ */
+const VideoCaption: React.FC<VideoCaptionProps> = ({ video }) => (
+  <div
+    className={clsx(
+      'absolute bottom-0 left-0 right-0 text-sm sm:text-base px-2 py-2 sm:px-4 sm:py-4 bg-slate-700 bg-opacity-85',
+      'group-hover:bg-opacity-60 transition-all',
+      'rounded-bl-md rounded-br-md',
+      'border-b border-l border-r border-slate-200 group-hover:border-slate-400',
+      'text-white',
+    )}
+  >
+    <span className="group-hover:[text-shadow:_0_1px_0_rgb(0_0_0_/_40%)]">{video.name}</span>
+  </div>
+)
+
+/**
+ * Thumbnail-size action button styled as a skeleton video item.
+ * Faciliates having an 'Add Video' button as the last item in a video gallery.
+ */
+export const VideoGalleryAddVideoButton: React.FC<{ onClick: React.MouseEventHandler<HTMLButtonElement> }> = ({
+  onClick,
+}) => {
   return (
     <button
       type="button"
       className={clsx(
-        'group w-full rounded-md aspect-w-16 aspect-h-9 isolate overflow-hidden border-2',
-        'border-slate-300 bg-slate-100 hover:bg-sky-50 fx-focus-ring',
-        'transition-all cursor-pointer',
+        'group w-full rounded-md aspect-w-16 aspect-h-9 isolate overflow-hidden border',
+        'bg-slate-100 border-slate-200 hover:border-slate-300 hover:bg-slate-200',
+        'transition-all cursor-pointer fx-focus-ring',
       )}
+      onClick={onClick}
     >
       <div
         className={clsx(
           'flex flex-col items-center justify-center px-4',
-          'transition-colors text-action-primary-darker',
+          'transition-colors text-action-primary-darker group-hover:text-action-primary-darkest',
         )}
       >
-        <PlusIcon className="block h-6 w-6 text-base flex-shrink-0" />
+        <PlusIcon className="block h-6 w-6 flex-shrink-0 text-base" />
         <div className="text-sm md:text-base">Add Video</div>
       </div>
     </button>
   )
 }
 
-export const VideoActionGallery: React.FC<VideoActionGalleryProps> = ({ videos }) => {
-  return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-      {videos?.map((video) => (
-        <VideoItem key={video.uuid} video={video} />
-      ))}
+/**
+ * Individual video item in a video gallery featuring a caption and a delete button.
+ */
+export const VideoItem: React.FC<VideoItemProps> = ({ video, onVideoClick, onDeleteVideoClick }) => {
+  const handleVideoClick: React.MouseEventHandler<HTMLDivElement> = useCallback(
+    (event) => {
+      if (typeof onVideoClick === 'function') {
+        onVideoClick(event)
+      }
+    },
+    [onVideoClick],
+  )
 
-      <AddVideoItem />
+  const handleDeleteVideoClick: React.MouseEventHandler<HTMLButtonElement> = useCallback(
+    (event) => {
+      if (typeof onDeleteVideoClick === 'function') {
+        onDeleteVideoClick(event)
+      }
+    },
+    [onDeleteVideoClick],
+  )
+
+  return (
+    <div className="flex justify-center items-center w-full">
+      <div
+        className={clsx(
+          'relative w-full aspect-w-16 aspect-h-9', // object-cover
+        )}
+      >
+        <div className="cursor-pointer">
+          <div className="rounded-md overflow-hidden h-full" onClick={handleVideoClick}>
+            <div className="group h-full">
+              <GrayFilter>
+                <VideoThumbnail externalId={video.externalId} />
+              </GrayFilter>
+              <VideoCaption video={video} />
+              <AbsoluteRoundBorder />
+            </div>
+            {typeof onDeleteVideoClick === 'function' && (
+              <VideoDeleteButton variant="top-right-corner" onClick={handleDeleteVideoClick} />
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export const VideoActionGallery: React.FC<VideoActionGalleryProps> = ({
+  videos,
+  onVideoClick,
+  onAddVideoClick,
+  onDeleteVideoClick,
+}) => {
+  const handleVideoClick = useCallback(
+    (videoUuid: string): React.MouseEventHandler<HTMLDivElement> =>
+      (event) => {
+        if (typeof onVideoClick === 'function') {
+          onVideoClick(videoUuid, event)
+        }
+      },
+    [onVideoClick],
+  )
+
+  const handleDeleteVideoClick = useCallback(
+    (videoUuid: string): React.MouseEventHandler<HTMLButtonElement> =>
+      (event) => {
+        if (typeof onDeleteVideoClick === 'function') {
+          onDeleteVideoClick(videoUuid, event)
+        }
+      },
+    [onDeleteVideoClick],
+  )
+
+  const handleAddVideoClick: React.MouseEventHandler<HTMLButtonElement> = useCallback(
+    (event) => {
+      if (typeof onAddVideoClick === 'function') {
+        onAddVideoClick(event)
+      }
+    },
+    [onAddVideoClick],
+  )
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-4">
+      {videos?.map((video) => (
+        <VideoItem
+          key={video.uuid}
+          video={video}
+          onVideoClick={handleVideoClick(video.uuid)}
+          onDeleteVideoClick={handleDeleteVideoClick(video.uuid)}
+        />
+      ))}
+      {typeof onAddVideoClick === 'function' && <VideoGalleryAddVideoButton onClick={handleAddVideoClick} />}
     </div>
   )
 }

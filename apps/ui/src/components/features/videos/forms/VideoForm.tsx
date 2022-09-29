@@ -1,19 +1,18 @@
 import React, { useMemo } from 'react'
 import { FormProvider, SubmitHandler, useForm } from 'react-hook-form'
-// import clsx from 'clsx'
 
 import { useIsMounted } from '@firx/react-hooks'
 
-import { Spinner } from '../../elements/feedback/Spinner'
-import { FormButton } from '../../elements/forms/FormButton'
-import { FormInput } from '../../elements/forms/FormInput'
-import { FormMultiListBox } from '../../elements/forms/FormMultiListBox'
-import type { CreateVideoDto, UpdateVideoDto, VideoDto } from '../../../types/videos.types'
-import { useVideoCreateQuery, useVideoMutateQuery } from '../../../api/hooks/videos'
-import { useVideoGroupsQuery } from '../../../api/hooks/video-groups'
-import { ApiParentContext } from '../../../api/types/common.types'
-import { BoxProfileChildQueryContext } from '../../../types/box-profiles.types'
-import { FormListBox } from '../../elements/forms/FormListBox'
+import { Spinner } from '../../../elements/feedback/Spinner'
+import { FormButton } from '../../../elements/forms/FormButton'
+import { FormInput } from '../../../elements/forms/FormInput'
+import { FormMultiListBox } from '../../../elements/forms/FormMultiListBox'
+import type { CreateVideoDto, UpdateVideoDto, VideoDto } from '../../../../types/videos.types'
+import { useVideoCreateQuery, useVideoMutateQuery } from '../../../../api/hooks/videos'
+import { useVideoGroupsQuery } from '../../../../api/hooks/video-groups'
+import { ApiParentContext } from '../../../../api/types/common.types'
+import { BoxProfileChildQueryContext } from '../../../../types/box-profiles.types'
+import { FormListBox } from '../../../elements/forms/FormListBox'
 
 export interface CreateVideoFormValues extends CreateVideoDto {}
 export interface MutateVideoFormValues extends UpdateVideoDto {}
@@ -59,6 +58,7 @@ const InnerForm: React.FC<{
         <FormListBox
           name="platform"
           label="Platform"
+          placeholder="Platform"
           options={[
             { value: 'YOUTUBE', label: 'YouTube' },
             { value: 'VIMEO', label: 'Vimeo' },

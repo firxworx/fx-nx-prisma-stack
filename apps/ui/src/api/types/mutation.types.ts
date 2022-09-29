@@ -8,7 +8,7 @@ export type ApiMutationProps =
   | 'isError'
   | 'data'
 
-export type ApiDeletionProps = Exclude<'data', ApiMutationProps>
+export type ApiDeleteHookProps = Exclude<ApiMutationProps, 'data'>
 
 export interface ApiMutation {
   error: Error | null

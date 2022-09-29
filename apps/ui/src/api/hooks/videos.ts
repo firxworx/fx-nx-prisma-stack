@@ -11,7 +11,7 @@ import {
 
 import type { VideoDto, CreateVideoDto, UpdateVideoDto } from '../../types/videos.types'
 import type { ApiQueryProps } from '../types/query.types'
-import type { ApiDeletionProps, ApiMutationProps } from '../types/mutation.types'
+import type { ApiDeleteHookProps, ApiMutationProps } from '../types/mutation.types'
 import type { ApiDeleteRequestDto, ApiMutateRequestDto } from '../../types/api.types'
 import {
   fetchCreateVideo,
@@ -30,12 +30,18 @@ const VIDEOS_KEY_BASE = 'videos' as const
 
 /**
  * Query keys for videos API query functions.
+ *
+ * A design decision influenced by @tkdodo is to use a single object for all react-query keys,
+ * specified as the only element in the query keys array.
+ *
+ * @see {@link https://twitter.com/TkDodo/status/1448216950732169216}
  */
 const videoQueryKeys = {
   all: [{ scope: VIDEOS_KEY_BASE }] as const,
-  lists: () => [{ ...videoQueryKeys.all[0], operation: 'list' }] as const,
-  listData: (sortFilterPaginateParams: string) => [{ ...videoQueryKeys.lists()[0], sortFilterPaginateParams }] as const,
-  details: () => [{ ...videoQueryKeys.all, operation: 'detail' }] as const,
+  listItems: () => [{ ...videoQueryKeys.all[0], operation: 'listItems' }] as const,
+  listItemsWithConstraints: (sortFilterPaginateParams: string) =>
+    [{ ...videoQueryKeys.listItems()[0], constraints: sortFilterPaginateParams }] as const,
+  details: () => [{ ...videoQueryKeys.all[0], operation: 'detail' }] as const,
   detail: (uuid: string | undefined) => [{ ...videoQueryKeys.details()[0], uuid }] as const,
   create: () => [{ ...videoQueryKeys.all[0], operation: 'create' }] as const,
   mutate: () => [{ ...videoQueryKeys.all[0], operation: 'mutate' }] as const,
@@ -45,7 +51,7 @@ const videoQueryKeys = {
 export function useVideosQuery(pctx: ParentContext): Pick<UseQueryResult<VideoDto[]>, ApiQueryProps> {
   const { data, status, error, isLoading, isFetching, isSuccess, isError, isRefetchError, refetch } = useQuery<
     VideoDto[]
-  >(videoQueryKeys.all, () => fetchVideos({ parentContext: pctx?.parentContext }), {
+  >(videoQueryKeys.listItems(), () => fetchVideos({ parentContext: pctx?.parentContext }), {
     enabled: !!pctx?.parentContext?.boxProfileUuid?.length,
   })
   return { data, status, error, isLoading, isFetching, isSuccess, isError, isRefetchError, refetch }
@@ -58,7 +64,7 @@ export function useVideosDataQuery({
   const { data, status, error, isLoading, isFetching, isSuccess, isError, isRefetchError, refetch } = useQuery<
     VideoDto[]
   >(
-    videoQueryKeys.listData(sortFilterPaginateParams),
+    videoQueryKeys.listItemsWithConstraints(sortFilterPaginateParams),
     () => fetchVideosWithConstraints({ parentContext: parentContext, sortFilterPaginateParams }),
     {
       enabled: !!parentContext?.boxProfileUuid?.length,
@@ -121,7 +127,7 @@ export function useVideoMutateQuery(
       // @todo optimistic update with previous + changed values (merged) prior to refetch?
 
       const invalidateItems = queryClient.invalidateQueries(videoQueryKeys.all)
-      const invalidateItem = queryClient.invalidateQueries(videoQueryKeys.detail(variables.uuid))
+      const invalidateItem: Promise<unknown> = queryClient.invalidateQueries(videoQueryKeys.detail(variables.uuid))
 
       // refetch data -- ensure a Promise is returned so the outcome is awaited
       return Promise.all([invalidateItems, invalidateItem])
@@ -137,7 +143,7 @@ interface DeleteQueryContext {
 
 export function useVideoDeleteQuery(
   options?: UseMutationOptions<void, Error, ApiDeleteRequestDto & ParentContext, unknown>,
-): Pick<UseMutationResult<void, Error, ApiDeleteRequestDto & ParentContext, DeleteQueryContext>, ApiDeletionProps> {
+): Pick<UseMutationResult<void, Error, ApiDeleteRequestDto & ParentContext, DeleteQueryContext>, ApiDeleteHookProps> {
   const queryClient = useQueryClient()
 
   const { mutate, mutateAsync, reset, error, isSuccess, isLoading, isError } = useMutation<
@@ -150,36 +156,44 @@ export function useVideoDeleteQuery(
     fetchDeleteVideo,
     // @todo experimenting with rollback type functionality -- check docs + examples in case there are other patterns
     {
-      onSuccess: async (data, variables, context) => {
+      onSuccess: async (data, vars, context) => {
         if (typeof options?.onSuccess === 'function') {
-          options.onSuccess(data, variables, context)
+          options.onSuccess(data, vars, context)
         }
-
-        // refetch data -- ensure a Promise is returned so the outcome is awaited
-        return queryClient.invalidateQueries(videoQueryKeys.detail(variables.uuid))
       },
       onMutate: async ({ uuid }) => {
         // cancel any outgoing refetch queries to avoid overwriting optimistic update
         await queryClient.cancelQueries(videoQueryKeys.all)
 
         // snapshot previous value to enable rollback onError()
-        const previous = queryClient.getQueryData<VideoDto[]>(videoQueryKeys.all)
+        const previous = queryClient.getQueryData<VideoDto[]>(videoQueryKeys.listItems())
+        console.log('previous value:', JSON.stringify(previous, null, 2))
+        const removed = previous?.filter((item) => item.uuid !== uuid)
+        console.log('removed value', JSON.stringify(removed, null, 2))
 
         // optimistically update to the new value
+        // (note: could refactor to use updater func which receives old datas)
         if (previous) {
-          queryClient.setQueryData<VideoDto[]>(videoQueryKeys.all, {
-            // @todo revise to base query keys for sort/filter/paginated data
-            ...previous.filter((item) => item.uuid !== uuid),
-          })
+          queryClient.setQueryData<VideoDto[]>(videoQueryKeys.listItems(), removed)
         }
 
         return { previous }
       },
-      onError: (_error, _variables, context) => {
+      // optimistic rollback functionality experiment
+      // @see https://tanstack.com/query/v4/docs/reference/QueryClient#queryclientsetquerydata
+      onError: (_error, _vars, context) => {
         // rollback on failure using the context returned by onMutate()
+        // @todo revise to base query keys for sort/filter/paginated data (video api hook)
         if (context && context?.previous) {
-          queryClient.setQueryData<VideoDto[]>(videoQueryKeys.all, context.previous) // @todo revise to base query keys for sort/filter/paginated data (video api hook)
+          queryClient.setQueryData<VideoDto[]>(videoQueryKeys.listItems(), context.previous)
         }
+      },
+      onSettled: (_data, _error, vars, _context) => {
+        const invalidateItems = queryClient.invalidateQueries(videoQueryKeys.all)
+        queryClient.removeQueries(videoQueryKeys.detail(vars.uuid))
+
+        // refetch data (react-query will await before proceeding if return value is a promise)
+        return invalidateItems
       },
     },
   )

@@ -10,14 +10,14 @@ export interface SpinnerProps {
  * Animated loading spinner implemented with svg + css animation, adapted from an example
  * in the tailwindcss documentation for its 'animate' utilities.
  *
- * Specify `size` 'sm', 'md' (default), or 'lg'. They are respectively 5, 6, and 8 tailwind units.
+ * Specify `size` 'sm', 'md' (default), or 'lg': each are respectively 5, 6, or 8 tailwind units.
  *
  * Provide additional classNames with the `appendClassName` prop, which is useful for customizing
  * the color of the spinner (e.g `text-slate-500`).
  */
 export const Spinner: React.FC<SpinnerProps> = ({ size, color, appendClassName }) => {
   return (
-    <div className="flex items-center" role="status" aria-label="Loading...">
+    <div className="flex items-center" role="status" aria-label="Loading…">
       <svg
         className={clsx(
           'animate-spin',
@@ -26,14 +26,14 @@ export const Spinner: React.FC<SpinnerProps> = ({ size, color, appendClassName }
             'h-6 w-6': size === 'md',
             'h-8 w-8': size === 'lg',
             'text-slate-600': color === 'default',
-            'text-brand-primary': color === 'brand',
+            'text-brand-primary-darkest': color === 'brand',
           },
           appendClassName,
         )}
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
         viewBox="0 0 24 24"
-        aria-hidden
+        aria-hidden="true"
       >
         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
         <path
@@ -48,5 +48,4 @@ export const Spinner: React.FC<SpinnerProps> = ({ size, color, appendClassName }
 
 Spinner.defaultProps = {
   size: 'md',
-  appendClassName: 'text-slate-500',
 }

@@ -12,7 +12,7 @@ import { getYouTubeVideoUrl } from '../../../../../lib/videos/youtube'
 import { getRouterParamValue } from '../../../../../lib/router'
 import { FormContainer } from '../../../../../components/elements/forms/FormContainer'
 import { Heading } from '../../../../../components/elements/headings/Heading'
-import { VideoForm } from '../../../../../components/features/videos/VideoForm'
+import { VideoForm } from '../../../../../components/features/videos/forms/VideoForm'
 
 export const ManageVideoPage: NextPage = () => {
   const { push: routerPush, query: routerQuery } = useRouter()

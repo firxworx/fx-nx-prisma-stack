@@ -12,7 +12,7 @@ import { PageHeading } from '../../../../components/elements/headings/PageHeadin
 import { getRouterParamValue } from '../../../../lib/router'
 import { ActionButton } from '../../../../components/elements/inputs/ActionButton'
 import { useModalContext } from '../../../../context/ModalContextProvider'
-import { VideoGroupForm } from '../../../../components/features/videos/VideoGroupForm'
+import { VideoGroupForm } from '../../../../components/features/videos/forms/VideoGroupForm'
 import { ModalVariant } from '../../../../components/elements/modals/ModalBody'
 
 import type { ApiParentContext } from '../../../../api/types/common.types'
@@ -66,7 +66,7 @@ export const ManageVideosIndexPage: NextPage = () => {
         Set a Video Group as <strong>Active</strong> to load it on your Box&apos;s <strong>Video Player Mode</strong>.
       </p>
       <Link href={`/app/[box]/videos/gallery`} as={`/app/${boxProfileUuid}/videos/gallery`}>
-        <a className="block mt-6">Gallery</a>
+        <a className="block mt-6 font-medium text-brand-primary-darker">Go to Video Gallery (temp)</a>
       </Link>
       <div className="flex justify-end mb-4">
         <ActionButton variant="outline" onClick={showModal}>

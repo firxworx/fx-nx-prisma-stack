@@ -6,7 +6,7 @@ import { PageHeading } from '../../../../../components/elements/headings/PageHea
 import { getRouterParamValue } from '../../../../../lib/router'
 import { FormContainer } from '../../../../../components/elements/forms/FormContainer'
 import { Heading } from '../../../../../components/elements/headings/Heading'
-import { VideoForm } from '../../../../../components/features/videos/VideoForm'
+import { VideoForm } from '../../../../../components/features/videos/forms/VideoForm'
 
 export const ManageVideoCreatePage: NextPage = () => {
   const { push: routerPush, query: routerQuery } = useRouter()
