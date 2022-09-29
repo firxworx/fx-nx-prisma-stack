@@ -7,17 +7,18 @@ import { getYouTubeThumbUrl, YouTubeVideoQuality } from '../../../lib/videos/you
 
 export interface VideoThumbnailProps {
   externalId: string
+  appendClassName?: string
   // platform: VideoPlatform // @future support additional video platforms
 }
 
-export const VideoThumbnail: React.FC<VideoThumbnailProps> = ({ externalId }) => {
+export const VideoThumbnail: React.FC<VideoThumbnailProps> = ({ externalId, appendClassName }) => {
   const imgRef = useRef<HTMLImageElement>(null)
 
   const [isValid, setIsValid] = useState<boolean | undefined>(undefined)
   const [isLoaded, setIsLoaded] = useState<boolean>(false)
   const [isError, setIsError] = useState<boolean>(false)
 
-  console.log('[isValid, isLoaded, isError]', [isValid, isLoaded, isError])
+  // console.log('[isValid, isLoaded, isError]', [isValid, isLoaded, isError])
 
   const handleImageLoaded = useCallback(() => {
     setIsLoaded(true)
@@ -53,18 +54,23 @@ export const VideoThumbnail: React.FC<VideoThumbnailProps> = ({ externalId }) =>
 
   return (
     <div
-      className={clsx('aspect-w-16 aspect-h-9 bg-slate-200', {
-        ['animate-pulse']: !isLoaded,
-      })}
+      className={clsx(
+        'flex w-full h-full',
+        {
+          // aspect-w-16 aspect-h-9
+          ['animate-pulse']: !isLoaded,
+        },
+        appendClassName,
+      )}
     >
       {!isError && !isLoaded && isValid === undefined && (
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-center flex-1">
           <Spinner />
         </div>
       )}
       {(isError || isValid === false) && (
-        <div className="flex items-center justify-center">
-          <ExclamationTriangleIcon className="h-6 w-6 text-slate-500" />
+        <div className="flex items-center justify-center flex-1">
+          <ExclamationTriangleIcon className="h-6 w-6 text-slate-500" aria-hidden="true" />
         </div>
       )}
       {/* @todo deal with fackin' nextjs and is Image element (it does not pass a ref due to implementation) */}
@@ -75,7 +81,7 @@ export const VideoThumbnail: React.FC<VideoThumbnailProps> = ({ externalId }) =>
         src={getYouTubeThumbUrl(externalId, YouTubeVideoQuality.MED)}
         alt="Video Thumbnail"
         style={isLoaded && isValid ? { display: 'inline-block' } : { display: 'none' }}
-        className={clsx('object-cover', {
+        className={clsx('object-fit w-full', {
           ['inline-block']: isLoaded && isValid,
           ['hidden']: !isLoaded || !isValid || isError,
         })}
