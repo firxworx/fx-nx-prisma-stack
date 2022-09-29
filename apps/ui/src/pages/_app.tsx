@@ -23,6 +23,7 @@ import { SessionContextProvider } from '../context/SessionContextProvider'
 import { ActionButton } from '../components/elements/inputs/ActionButton'
 import { PlaceholderLayout } from '../components/layout/PlaceholderLayout'
 import { ModalContextProvider } from '../context/ModalContextProvider'
+import { ApiError } from '../api/errors/ApiError.class'
 
 export const SIGN_IN_ROUTE = '/sign-in'
 export const DEFAULT_AUTHENTICATED_ROUTE = '/app'
@@ -63,6 +64,13 @@ function CustomApp({ Component, pageProps, router }: AppProps): JSX.Element {
         defaultOptions: {
           queries: {
             suspense: false,
+            retry: (_failCount, error): boolean => {
+              if (error instanceof ApiError && error.status === 404) {
+                return false
+              }
+
+              return true
+            },
             // retry: true,
             // refetchOnWindowFocus: true,
             // useErrorBoundary: true,
