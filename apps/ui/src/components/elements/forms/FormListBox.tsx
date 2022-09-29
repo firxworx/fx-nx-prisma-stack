@@ -19,9 +19,13 @@ export interface FormListBoxProps extends UseControllerProps {
   options: FormListBoxOption[]
   hideLabel?: boolean
   appendClassName?: string
-  // placeholder?: string
+  placeholder?: string
   // readOnly?: boolean
   // validation?: RegisterOptions
+}
+
+const LABELS = {
+  DEFAULT_PLACEHOLDER_PREFIX: 'Select', // usage example: 'Select Language'
 }
 
 /**
@@ -40,7 +44,7 @@ export const FormListBox: React.FC<FormListBoxProps> = ({
   options,
   hideLabel = false,
   appendClassName,
-  // placeholder,
+  placeholder,
   // readOnly = false,
   // validation,
   ...restReactHookFormProps
@@ -71,7 +75,9 @@ export const FormListBox: React.FC<FormListBoxProps> = ({
                     ['text-palette-form-placeholder']: !field.value,
                   })}
                 >
-                  {field.value ? options.find((option) => option.value === field.value)?.label : `Select ${label}`}
+                  {field.value
+                    ? options.find((option) => option.value === field.value)?.label
+                    : placeholder ?? `${LABELS.DEFAULT_PLACEHOLDER_PREFIX} ${label}`}
                 </span>
                 <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                   <ChevronUpDownIcon

@@ -32,6 +32,7 @@ module.exports = {
       },
       opacity: {
         5: '0.05',
+        85: '0.85',
       },
       grayscale: {
         25: '25%',
@@ -194,7 +195,7 @@ module.exports = {
           '@apply border-slate-200 bg-slate-200 text-slate-400 cursor-not-allowed': {},
         },
         'button.fx-button-outline-primary, a.fx-button-outline-primary': {
-          '@apply bg-transparent border-sky-800 text-sky-800 hover:bg-sky-100 hover:border-sky-900 hover:text-sky-900':
+          '@apply bg-transparent border-sky-800 text-sky-800 hover:bg-slate-100 hover:border-sky-900 hover:text-sky-900':
             {},
         },
         'button.fx-button-outline-primary-disabled, a.fx-button-outline-primary-disabled': {
