@@ -1,5 +1,5 @@
 export class AuthError extends Error {
-  private readonly status: number
+  public readonly status: number
 
   constructor(message?: string) {
     // Error will break the prototype chain here (see next line)

@@ -3,7 +3,7 @@
  * `AuthError` or `FormError`.
  */
 export class ApiError extends Error {
-  private readonly status: number
+  public readonly status: number
 
   constructor(message: string, status: number) {
     // Error will break the prototype chain here (see next line)
