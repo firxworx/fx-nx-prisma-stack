@@ -80,14 +80,16 @@ export function useVideoCreateQuery(
     Error,
     CreateVideoDto & ParentContext
   >(fetchCreateVideo, {
-    onSuccess: (data, variables, context) => {
-      if (typeof options?.onSuccess === 'function') {
-        options.onSuccess(data, variables, context)
-      }
-
-      // optimistic update local query cache with values
+    onSuccess: (data, vars, context) => {
+      // update query cache with response data
       const { uuid, ...restData } = data
       queryClient.setQueryData(cacheKeys.detail.unique(uuid), restData)
+
+      queryClient.invalidateQueries(cacheKeys.list.all())
+
+      if (typeof options?.onSuccess === 'function') {
+        options.onSuccess(data, vars, context)
+      }
     },
   })
 
@@ -106,10 +108,14 @@ export function useVideoMutateQuery(
   >(fetchMutateVideo, {
     onSuccess: async (data, vars, context) => {
       queryClient.setQueryData(cacheKeys.detail.unique(vars.uuid), data)
+      const promise = queryClient.invalidateQueries(cacheKeys.list.all())
 
       if (typeof options?.onSuccess === 'function') {
-        return options.onSuccess(data, vars, context)
+        options.onSuccess(data, vars, context)
       }
+
+      // react-query will await outcome if a promise is returned
+      return promise
     },
   })
 
@@ -121,7 +127,7 @@ interface VideoDeleteQueryContext {
 }
 
 export function useVideoDeleteQuery(
-  options?: UseMutationOptions<void, Error, ApiDeleteRequestDto & ParentContext, unknown>,
+  options?: UseMutationOptions<void, Error, ApiDeleteRequestDto & ParentContext, VideoDeleteQueryContext>,
 ): Pick<
   UseMutationResult<void, Error, ApiDeleteRequestDto & ParentContext, VideoDeleteQueryContext>,
   ApiDeleteHookProps
@@ -133,44 +139,38 @@ export function useVideoDeleteQuery(
     Error,
     ApiDeleteRequestDto & ParentContext,
     VideoDeleteQueryContext
-  >(
-    fetchDeleteVideo,
-    // @todo experimenting with rollback type functionality -- check docs + examples in case there are other patterns
-    {
-      onSuccess: async (data, vars, context) => {
-        if (typeof options?.onSuccess === 'function') {
-          options.onSuccess(data, vars, context)
-        }
-      },
-      onMutate: async ({ uuid }) => {
-        // cancel any outstanding refetch queries to avoid overwriting optimistic update
-        await queryClient.cancelQueries(cacheKeys.all())
+  >(fetchDeleteVideo, {
+    onSuccess: async (data, vars, context) => {
+      // remove deleted item's data from cache
+      queryClient.removeQueries(cacheKeys.detail.unique(vars.uuid))
 
-        // snapshot previous value to enable rollback onError()
-        const previous = queryClient.getQueryData<VideoDto[]>(cacheKeys.list.all())
-        const removed = previous?.filter((item) => item.uuid !== uuid)
-
-        // optimistically update to the new value
-        // (note: could refactor to use updater function which receives previous data as argument)
-        if (previous) {
-          queryClient.setQueryData<VideoDto[]>(cacheKeys.list.all(), removed)
-        }
-
-        return { previous }
-      },
-      onError: (_error, _vars, context) => {
-        // rollback on failure using the context returned by onMutate()
-        if (context && context?.previous) {
-          queryClient.setQueryData<VideoDto[]>(cacheKeys.list.all(), context.previous)
-        }
-      },
-      // onSettled: (_data, _error, vars, _context) => {
-      //   const invalidateItems = queryClient.invalidateQueries(cacheKeys.list.all())
-      //   // refetch data (react-query will await before proceeding if return value is a promise)
-      //   return invalidateItems
-      // },
+      if (typeof options?.onSuccess === 'function') {
+        options.onSuccess(data, vars, context)
+      }
     },
-  )
+    onMutate: async ({ uuid }) => {
+      // cancel any outstanding refetch queries to avoid overwriting optimistic update
+      await queryClient.cancelQueries(cacheKeys.all())
+
+      // snapshot previous value to enable rollback on error
+      const previous = queryClient.getQueryData<VideoDto[]>(cacheKeys.list.all())
+      const removed = previous?.filter((item) => item.uuid !== uuid)
+
+      // optimistically update to the new value
+      // (note: could refactor to use updater function which receives previous data as argument)
+      if (previous) {
+        queryClient.setQueryData<VideoDto[]>(cacheKeys.list.all(), removed)
+      }
+
+      return { previous }
+    },
+    onError: (_error, _vars, context) => {
+      // rollback on failure using the context returned by onMutate()
+      if (context && context?.previous) {
+        queryClient.setQueryData<VideoDto[]>(cacheKeys.list.all(), context.previous)
+      }
+    },
+  })
 
   return { mutate, mutateAsync, reset, error, isSuccess, isLoading, isError }
 }
