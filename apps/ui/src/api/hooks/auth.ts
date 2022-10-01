@@ -1,3 +1,4 @@
+import { useCallback } from 'react'
 import {
   UseMutateAsyncFunction,
   useMutation,
@@ -5,53 +6,26 @@ import {
   useQueryClient,
   type UseQueryResult,
 } from '@tanstack/react-query'
-import { useCallback } from 'react'
-import { useSessionContext } from '../context/SessionContextProvider'
-import type { AuthUser } from '../types/auth.types'
-import { apiFetch } from './lib/api-fetch'
-import { ApiMutation } from './types/mutation.types'
+
+import type { AuthUser } from '../../types/auth.types'
+import type { ApiMutation } from './../types/mutation.types'
+import type { AuthQueryEndpoint, AuthSignInCredentials } from '../types/auth.types'
+import { useSessionContext } from '../../context/SessionContextProvider'
+import { fetchSession, fetchSignIn, fetchSignOut } from '../fetchers/auth'
 
 // @todo create shared lib with interfaces of api responses
-
-/**
- * LocalStorage key for persisting the enabled/disabled state of the session context query.
- *
- * The value 'enabled' or 'disabled' is saved to LocalStorage. If the corresponding value does
- * not exist or if the value is 'disabled' the user is presumed to be unauthenticated and the
- * session query will be disabled.
- *
- * @see SessionContextProvider
- */
-export const LOCAL_STORAGE_SESSION_CTX_FLAG_KEY = 'FX_SESSION_CTX_FLAG'
-
-export interface AuthSignInCredentials {
-  email: string
-  password: string
-}
-
-export type AuthQueryEndpoint = 'session' | 'refresh' | 'signIn' | 'signOut'
 
 const AUTH_KEY_BASE = 'auth' as const
 
 /**
  * Query keys for auth API functions.
  */
-export const authQueryKeys: Record<AuthQueryEndpoint, Readonly<string[]>> = {
+export const authQueryKeys: Record<AuthQueryEndpoint | 'all', Readonly<string[]>> = {
+  all: [AUTH_KEY_BASE] as const,
   session: [AUTH_KEY_BASE, 'session'] as const,
   refresh: [AUTH_KEY_BASE, 'refresh'] as const,
   signIn: [AUTH_KEY_BASE, 'signIn'] as const,
   signOut: [AUTH_KEY_BASE, 'signOut'] as const,
-}
-
-export const authQueryEndpointRoutes: Record<AuthQueryEndpoint, Readonly<string>> = {
-  session: '/auth/session' as const,
-  refresh: '/auth/refresh' as const,
-  signIn: '/auth/sign-in' as const,
-  signOut: '/auth/sign-out' as const,
-}
-
-export async function fetchSession(): Promise<AuthUser> {
-  return apiFetch<AuthUser>(authQueryEndpointRoutes.session)
 }
 
 export function useAuthSessionQuery(
@@ -72,10 +46,12 @@ export function useAuthSessionQuery(
     retry: false,
     refetchInterval: 900000,
     // refetchOnMount: false, // potential consideration for non-auth + auth layout components that call useAuthSession() hook
+
+    // @see _app.tsx for global query client auth error handler + SessionContextProvider
     onError: (error: unknown): void => {
       console.warn(`useAuthSessionQuery onError handler`, error)
 
-      // queryClient.clear()
+      // // queryClient.clear()
     },
   })
 
@@ -84,16 +60,6 @@ export function useAuthSessionQuery(
     invalidate,
     remove,
   }
-}
-
-export async function signIn({ email, password }: AuthSignInCredentials): Promise<void> {
-  return apiFetch<void>(authQueryEndpointRoutes.signIn, {
-    method: 'POST',
-    body: JSON.stringify({
-      email,
-      password,
-    }),
-  })
 }
 
 /**
@@ -105,7 +71,7 @@ export function useAuthSignIn(): {
 } & ApiMutation {
   const session = useSessionContext()
 
-  const signInMutation = useMutation<void, Error, AuthSignInCredentials>(authQueryKeys.signIn, signIn, {
+  const signInMutation = useMutation<void, Error, AuthSignInCredentials>(authQueryKeys.signIn, fetchSignIn, {
     retry: false,
     onSuccess: () => {
       if (!session) {
@@ -126,12 +92,6 @@ export function useAuthSignIn(): {
   }
 }
 
-export async function signOut(): Promise<void> {
-  return apiFetch<void>(authQueryEndpointRoutes.signOut, {
-    method: 'POST',
-  })
-}
-
 /**
  * Hook that provides facilities to sign out from the back-end API.
  * The query client's response cache is cleared on successful sign-out.
@@ -140,11 +100,11 @@ export function useAuthSignOut(): { signOut: UseMutateAsyncFunction<void, unknow
   const queryClient = useQueryClient()
   const session = useSessionContext()
 
-  const signOutMutation = useMutation<void, Error, void, unknown>(authQueryKeys.signOut, signOut, {
+  const signOutMutation = useMutation<void, Error, void, unknown>(authQueryKeys.signOut, fetchSignOut, {
     retry: false,
     onSuccess: () => {
       if (!session) {
-        throw new Error('useAuthSignOut missing expected session (via SessionContextProvider)')
+        throw new Error('useAuthSignOut missing expected session via SessionContextProvider')
       }
 
       session.setEnabled(false)

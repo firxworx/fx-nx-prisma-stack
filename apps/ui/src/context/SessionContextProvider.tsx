@@ -1,9 +1,10 @@
 import React, { useMemo, useContext, useState, useEffect, useCallback } from 'react'
 
-import { LOCAL_STORAGE_SESSION_CTX_FLAG_KEY, useAuthSessionQuery } from '../api/auth'
-import { isAuthSessionResult } from '../types/type-guards/auth.type-guards'
+import { LOCAL_STORAGE_SESSION_CTX_FLAG_KEY } from '../api/constants/auth'
 import type { AuthSession } from '../types/session.types'
 import type { SessionStatus } from '../types/enums/session.enums'
+import { useAuthSessionQuery } from '../api/hooks/auth'
+import { isAuthSessionResult } from '../types/type-guards/auth.type-guards'
 
 const SessionContext = React.createContext<AuthSession<SessionStatus> | undefined>(undefined)
 
@@ -42,7 +43,7 @@ export const SessionContextProvider: React.FC<{
     [setIsQueryEnabled],
   )
 
-  // memoize to ensure a stable context value
+  // memoize to ensure stable context value
   const contextValue: AuthSession<SessionStatus> | undefined = useMemo(() => {
     const isLoading = status === 'loading'
 

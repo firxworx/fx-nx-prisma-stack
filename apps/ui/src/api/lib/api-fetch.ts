@@ -89,11 +89,11 @@ export async function apiFetch(path: string, options?: RequestInit, isRetryAttem
     if (response.status === 401) {
       switch (!!isRetryAttempt) {
         case true: {
-          console.warn('apiFetch refresh token retry attempt failed...')
+          console.warn('(401) - apiFetch refresh token retry attempt failed...')
           return Promise.reject(new AuthError(LABELS.ERROR_INVALID_OR_EXPIRED_CREDENTIALS))
         }
         case false: {
-          console.warn('apiFetch attempting refresh...')
+          console.warn(`(401) - apiFetch request failed (${path})... attempting refresh request...`)
 
           const RETRY_TIMEOUT = 5000
           const controller = new AbortController()
@@ -103,11 +103,13 @@ export async function apiFetch(path: string, options?: RequestInit, isRetryAttem
             const refreshResponse = await projectFetch(authQueryEndpointRoutes.refresh, { signal: controller.signal })
 
             if (refreshResponse.status === 401) {
+              console.warn(`(401) - apiFetch refresh request failed (${path}) `)
               console.warn(LABELS.ERROR_AUTH_REFRESH_TOKEN_FAILED)
               return Promise.reject(new AuthError(LABELS.ERROR_INVALID_OR_EXPIRED_CREDENTIALS))
             }
 
             if (!refreshResponse.ok) {
+              console.warn(`(${refreshResponse.status}) - apiFetch refresh failed - not ok (${path}) `)
               console.warn(LABELS.ERROR_API_SERVER)
               return Promise.reject(
                 new ApiError(`${LABELS.ERROR_API_SERVER} (${refreshResponse.status})`, response.status),

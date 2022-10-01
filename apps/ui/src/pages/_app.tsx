@@ -25,6 +25,8 @@ import { PlaceholderLayout } from '../components/layout/PlaceholderLayout'
 import { ModalContextProvider } from '../context/ModalContextProvider'
 import { ApiError } from '../api/errors/ApiError.class'
 
+import { LOCAL_STORAGE_SESSION_CTX_FLAG_KEY } from '../api/constants/auth'
+
 export const SIGN_IN_ROUTE = '/sign-in'
 export const DEFAULT_AUTHENTICATED_ROUTE = '/app'
 
@@ -64,10 +66,12 @@ function CustomApp({ Component, pageProps, router }: AppProps): JSX.Element {
         defaultOptions: {
           queries: {
             suspense: false,
-            retry: (_failCount, error): boolean => {
+            retry: (failCount, error): boolean => {
               if (error instanceof ApiError && error.status === 404) {
                 return false
               }
+
+              console.warn(`queryclient queries error count: ${failCount}`)
 
               return true
             },
@@ -98,7 +102,15 @@ function CustomApp({ Component, pageProps, router }: AppProps): JSX.Element {
                 )
               }
 
-              queryClient.clear()
+              // @see SessionContextProvider + useAuthSessionQuery()
+              if (typeof window !== 'undefined') {
+                console.warn('setting localstorage to disable session query...')
+                window.localStorage.setItem(LOCAL_STORAGE_SESSION_CTX_FLAG_KEY, 'disabled')
+              }
+
+              // queryClient.removeQueries() ...
+
+              queryClient.clear() // uncaught exception fail at line 108 fail of apiFetch if omitted
               return
             }
 
