@@ -5,7 +5,7 @@ import { FormProvider, useForm, type SubmitHandler } from 'react-hook-form'
 import { useIsMounted } from '@firx/react-hooks'
 
 import { DEFAULT_AUTHENTICATED_ROUTE } from '../../pages/_app'
-import { useAuthSignIn } from '../../api/auth'
+import { useAuthSignIn } from '../../api/hooks/auth'
 import { FormButton } from '../elements/forms/FormButton'
 import { FormInput } from '../elements/forms/FormInput'
 import { getValidatedPathUri } from '../../lib/uri/paths'

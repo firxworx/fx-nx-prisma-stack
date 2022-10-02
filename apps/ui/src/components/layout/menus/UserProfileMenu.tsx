@@ -2,7 +2,7 @@ import React, { Fragment, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { Menu, Transition } from '@headlessui/react'
 import clsx from 'clsx'
-import { useAuthSignOut } from '../../../api/auth'
+import { useAuthSignOut } from '../../../api/hooks/auth'
 import { useIsMounted } from '@firx/react-hooks'
 
 const DEFAULT_SIGN_OUT_REDIRECT_PATH = '/'

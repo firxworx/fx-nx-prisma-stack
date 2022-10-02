@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 
 import { useIsMounted } from '@firx/react-hooks'
 
-import { useAuthSignOut } from '../../api/auth'
+import { useAuthSignOut } from '../../api/hooks/auth'
 import { ActionButton } from '../elements/inputs/ActionButton'
 
 export interface SignOutButtonProps {

@@ -1,7 +1,8 @@
-import { authQueryEndpointRoutes } from '../auth'
 import { ApiError } from '../errors/ApiError.class'
 import { AuthError } from '../errors/AuthError.class'
 import { FormError } from '../errors/FormError.class'
+
+import { authQueryEndpointRoutes } from '../fetchers/auth' // for refresh endpoint
 
 /** Base URL of the project's back-end API. */
 export const API_BASE_URL = process.env.NEXT_PUBLIC_PROJECT_API_BASE_URL

@@ -9,7 +9,7 @@ import { ArrowLeftOnRectangleIcon } from '@heroicons/react/20/solid' // LogoutIc
 
 import type { NavigationLink } from '../../../types/navigation.types'
 import { useSessionContext } from '../../../context/SessionContextProvider'
-import { useAuthSignOut } from '../../../api/auth'
+import { useAuthSignOut } from '../../../api/hooks/auth'
 import { UserProfileMenu } from '../menus/UserProfileMenu'
 import { useIsMounted } from '@firx/react-hooks'
 
