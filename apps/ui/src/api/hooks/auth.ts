@@ -2,13 +2,13 @@ import { useCallback } from 'react'
 import {
   UseMutateAsyncFunction,
   useMutation,
+  UseMutationResult,
   useQuery,
   useQueryClient,
   type UseQueryResult,
 } from '@tanstack/react-query'
 
 import type { AuthUser } from '../../types/auth.types'
-import type { ApiMutation } from './../types/mutation.types'
 import type { AuthQueryEndpoint, AuthSignInCredentials } from '../types/auth.types'
 import { useSessionContext } from '../../context/SessionContextProvider'
 import { fetchSession, fetchSignIn, fetchSignOut } from '../fetchers/auth'
@@ -23,11 +23,19 @@ const AUTH_KEY_BASE = 'auth' as const
 export const authQueryKeys: Record<AuthQueryEndpoint | 'all', Readonly<string[]>> = {
   all: [AUTH_KEY_BASE] as const,
   session: [AUTH_KEY_BASE, 'session'] as const,
-  refresh: [AUTH_KEY_BASE, 'refresh'] as const,
   signIn: [AUTH_KEY_BASE, 'signIn'] as const,
   signOut: [AUTH_KEY_BASE, 'signOut'] as const,
 }
 
+/**
+ * React query hook to obtain user session profile/context data from the back-end API.
+ *
+ * This hook provides essential functionality for the project authentication strategy with http-only cookies.
+ * Refer to `_app.tsx` for global query client auth error handler.
+ *
+ * @param enabled if the query is enabled (and should periodically resend requests) or not
+ * @see SessionContextProvider
+ */
 export function useAuthSessionQuery(
   enabled: boolean,
 ): UseQueryResult<AuthUser, unknown> & { invalidate: () => Promise<void>; remove: () => void } {
@@ -45,7 +53,9 @@ export function useAuthSessionQuery(
     enabled,
     retry: false,
     refetchInterval: 900000,
-    // refetchOnMount: false, // potential consideration for non-auth + auth layout components that call useAuthSession() hook
+
+    // potential consideration for non-auth + auth layout components that call useAuthSession() hook...
+    // refetchOnMount: false,
 
     // @see _app.tsx for global query client auth error handler + SessionContextProvider
     onError: (error: unknown): void => {
@@ -63,12 +73,14 @@ export function useAuthSessionQuery(
 }
 
 /**
- * Hook that provides facilities to sign in to the back-end API via `AuthSignInCredentials`.
+ * React query hook that provides an async `signIn()` function to sign in to the back-end API with a set of
+ * `AuthSignInCredentials`.
+ *
  * The user's session context is fetched and cached on successful sign in.
  */
 export function useAuthSignIn(): {
   signIn: UseMutateAsyncFunction<void, Error, AuthSignInCredentials, unknown>
-} & ApiMutation {
+} & UseMutationResult<void, Error, AuthSignInCredentials> {
   const session = useSessionContext()
 
   const signInMutation = useMutation<void, Error, AuthSignInCredentials>(authQueryKeys.signIn, fetchSignIn, {
@@ -85,18 +97,23 @@ export function useAuthSignIn(): {
 
   return {
     signIn: signInMutation.mutateAsync,
-    error: signInMutation.error,
-    isLoading: signInMutation.isLoading,
-    isSuccess: signInMutation.isSuccess,
-    isError: signInMutation.isError,
+    ...signInMutation,
   }
 }
 
 /**
- * Hook that provides facilities to sign out from the back-end API.
- * The query client's response cache is cleared on successful sign-out.
+ * React hook that provides a `signOut()` function to sign out from the back-end API.
+ *
+ * The underlying react-query `QueryClient` cache is cleared on successful sign-out and the session profile/context
+ * query is disabled.
+ *
+ * @see useAuthSessionQuery
  */
-export function useAuthSignOut(): { signOut: UseMutateAsyncFunction<void, unknown, void, unknown> } & ApiMutation {
+export function useAuthSignOut(): { signOut: UseMutateAsyncFunction<void, unknown, void, unknown> } & UseMutationResult<
+  void,
+  Error,
+  void
+> {
   const queryClient = useQueryClient()
   const session = useSessionContext()
 
@@ -112,13 +129,8 @@ export function useAuthSignOut(): { signOut: UseMutateAsyncFunction<void, unknow
     },
   })
 
-  const { mutateAsync, error, isLoading, isSuccess, isError } = signOutMutation
-
   return {
-    signOut: mutateAsync,
-    error,
-    isLoading,
-    isSuccess,
-    isError,
+    signOut: signOutMutation.mutateAsync,
+    ...signOutMutation,
   }
 }
