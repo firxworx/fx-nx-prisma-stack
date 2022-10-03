@@ -18,9 +18,9 @@ import { fetchSession, fetchSignIn, fetchSignOut } from '../fetchers/auth'
 const AUTH_KEY_BASE = 'auth' as const
 
 /**
- * Query keys for auth API functions.
+ * Query keys for auth API functions used with react-query.
  */
-export const authQueryKeys: Record<AuthQueryEndpoint | 'all', Readonly<string[]>> = {
+export const authQueryKeys: Record<Exclude<AuthQueryEndpoint, 'refresh'> | 'all', Readonly<string[]>> = {
   all: [AUTH_KEY_BASE] as const,
   session: [AUTH_KEY_BASE, 'session'] as const,
   signIn: [AUTH_KEY_BASE, 'signIn'] as const,

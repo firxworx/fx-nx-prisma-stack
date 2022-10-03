@@ -7,7 +7,11 @@ export interface AuthSignInCredentials {
 }
 
 /**
- * Available endpoints of the back-end API related to authentication (for use with react-query).
- * Note the project fetch wrapper hits an additional endpoint for token refresh.
+ * Available endpoints of the back-end API related to authentication.
+ *
+ * The project fetch implementation makes use of the token refresh point and
+ * the remaining queries are used via react-query.
+ *
+ * @see apiFetch
  */
-export type AuthQueryEndpoint = 'session' | 'signIn' | 'signOut'
+export type AuthQueryEndpoint = 'session' | 'refresh' | 'signIn' | 'signOut'
