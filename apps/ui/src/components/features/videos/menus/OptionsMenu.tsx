@@ -95,7 +95,7 @@ export const OptionsMenu: React.FC<OptionsMenuProps> = ({ items, a11y }) => {
                 {({ active }): JSX.Element => (
                   <a
                     className={clsx(
-                      'flex items-center px-4 py-2',
+                      'flex items-center px-4 py-2 cursor-pointer',
                       active ? 'bg-slate-100 text-slate-900' : 'text-slate-700',
                     )}
                     onClick={item.onClick}

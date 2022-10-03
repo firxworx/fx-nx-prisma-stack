@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { debounce } from 'lodash'
 
 export type UseSearchFilterReturnValue<T = object> = [
@@ -46,9 +46,12 @@ export function useSearchFilter<T extends object>(key: keyof T, items: T[]): Use
     }
   }, [debouncedSearch])
 
-  const handleSearchInputChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    debouncedSearch(event.target.value, items, key)
-  }
+  const handleSearchInputChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>): void => {
+      debouncedSearch(event.target.value, items, key)
+    },
+    [debouncedSearch, items, key],
+  )
 
   return [handleSearchInputChange, results, searchInputRef]
 }
