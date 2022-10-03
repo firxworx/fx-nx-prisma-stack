@@ -31,14 +31,14 @@ export function useSearchFilter<T extends object>(key: keyof T, items: T[]): Use
     }, 250),
   ).current
 
-  // handle case where items and/or key change
+  // handle case where items reference or length, and/or key change
   useEffect(() => {
     setResults(items)
 
     if (searchInputRef.current) {
       debouncedSearch(searchInputRef.current.value, items, key)
     }
-  }, [items, key, debouncedSearch])
+  }, [items, items.length, key, debouncedSearch])
 
   useEffect(() => {
     return () => {
