@@ -1,20 +1,14 @@
 import React, { useId } from 'react'
 import clsx from 'clsx'
-import { RegisterOptions, useFormContext } from 'react-hook-form'
+import { useFormContext } from 'react-hook-form'
 
 import { ExclamationCircleIcon } from '@heroicons/react/24/outline'
+import { useMergedRef } from '@firx/react-hooks'
+import type { FormElementCommonProps } from '../../../types/components/form-element-common-props.interface'
 
-export interface FormTextAreaProps extends React.ComponentPropsWithoutRef<'textarea'> {
-  id?: string
-  name: string
-  label: string
-  placeholder?: string
-  helperText?: string
-  readOnly?: boolean
-  hideLabel?: boolean
-  hideErrorMessage?: boolean
-  validation?: RegisterOptions
-}
+export interface FormTextAreaProps
+  extends Omit<React.ComponentPropsWithRef<'textarea'>, 'name'>,
+    FormElementCommonProps {}
 
 /**
  * Form textarea (textbox) for use with react-hook-form.
@@ -24,18 +18,22 @@ export interface FormTextAreaProps extends React.ComponentPropsWithoutRef<'texta
  *
  * @see {@link https://react-hook-form.com/api/useformcontext}
  */
-export const TextArea: React.FC<FormTextAreaProps> = ({
-  id,
-  name,
-  label,
-  placeholder = '',
-  helperText,
-  readOnly = false,
-  hideLabel = false,
-  hideErrorMessage = false,
-  validation,
-  ...restProps
-}) => {
+export const TextArea = React.forwardRef<HTMLTextAreaElement, FormTextAreaProps>(function TextArea(
+  {
+    id,
+    name,
+    label,
+    placeholder = '',
+    helperText,
+    readOnly = false,
+    hideLabel = false,
+    hideErrorMessage = false,
+    appendClassName,
+    validationOptions,
+    ...restProps
+  },
+  forwardedRef,
+) {
   const {
     register,
     formState: { isSubmitting, errors },
@@ -44,19 +42,23 @@ export const TextArea: React.FC<FormTextAreaProps> = ({
   const safeId = useId()
   const componentId = id ?? safeId
 
+  const { ref: formRef, ...registerProps } = register(name, validationOptions)
+  const mergedRef = useMergedRef(forwardedRef, formRef)
+
   const showErrorMessage = errors[name] && !hideErrorMessage
 
   return (
-    <div>
+    <div className={appendClassName}>
       <label htmlFor={id} className={clsx(hideLabel ? 'sr-only' : 'fx-form-label mb-1')}>
         {label}
       </label>
       <div className="relative mt-1 text-left">
         <textarea
+          ref={mergedRef}
           id={componentId}
           disabled={restProps.disabled || isSubmitting}
-          {...register(name, validation)}
-          rows={3} // default -- overridden by `...restProps` if provided
+          {...registerProps}
+          rows={3} // default to be overridden by `...restProps` if a value is provided via props
           {...restProps}
           readOnly={readOnly}
           placeholder={placeholder}
@@ -85,4 +87,4 @@ export const TextArea: React.FC<FormTextAreaProps> = ({
       )}
     </div>
   )
-}
+})

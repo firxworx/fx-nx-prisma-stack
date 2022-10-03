@@ -22,6 +22,10 @@ export interface FormMultiListBoxProps extends UseControllerProps {
   // validation?: RegisterOptions
 }
 
+const LABELS = {
+  ADD_ITEM: 'Add Item',
+}
+
 /**
  * Multi-select dropdown component integrated with react-hook-form.
  *
@@ -50,7 +54,7 @@ export const FormMultiListBox: React.FC<FormMultiListBoxProps> = ({
   const { field } = useController({ name, ...restReactHookFormProps }) // { name, control, rule, defaultValue }
 
   return (
-    <div className={appendClassName}>
+    <div className={clsx('w-full', appendClassName)}>
       <Listbox
         name={field.name}
         value={field.value ?? []}
@@ -108,7 +112,7 @@ export const FormMultiListBox: React.FC<FormMultiListBoxProps> = ({
                       appendClassName="min-w-content ml-2"
                       onClick={onAddItemClick}
                     >
-                      <span className="sr-only">Add Item</span>
+                      <span className="sr-only">{LABELS.ADD_ITEM}</span>
                       <PlusIcon className="h-5 w-5" aria-hidden="true" />
                     </ActionButton>
                   </div>

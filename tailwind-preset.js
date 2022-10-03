@@ -155,9 +155,9 @@ module.exports = {
           width: 0,
           height: 0,
         },
-        [formInputTargets]: {
-          '@apply fx-form-input': {},
-        },
+        // [formInputTargets]: {
+        //   '@apply fx-form-input': {},
+        // },
         strong: {
           '@apply font-medium text-slate-800': {},
         },
@@ -236,6 +236,27 @@ module.exports = {
           '@apply block text-sm font-normal text-left': {},
           '@apply text-palette-form-label group-focus-within:font-medium group-focus-within:text-palette-form-label-focus':
             {},
+        },
+        // round the corners and add a border seperator to sets of adjacent items e.g. list items
+        // usage: apply this class along with definitions for border width + color
+        '.fx-rounded-set-md': {
+          '@apply border-x border-y': {},
+          '@apply first:rounded-t-md first:border-t first:border-b-0 last:rounded-b-md last:border-t-0 last:border-b':
+            {},
+        },
+        // if parent has `-space-y-px` (this variant is useful if borders of individual items in the set may be highlighted)
+        '.fx-rounded-set-md-parent': {
+          '@apply border': {},
+          '@apply first:rounded-t-md last:rounded-b-md': {},
+        },
+        // apply to parent containing set of vertical items (e.g. ul) for overall round borders + divider between each
+        '.fx-set-parent-rounded-md': {
+          '@apply -space-y-px': {},
+          '&>*': {
+            // tailwind 3.1 arbitrary variants e.g. className="[&>a]:text-black"
+            '@apply border': {},
+            '@apply first:rounded-t-md last:rounded-b-md': {},
+          },
         },
       })
     }),

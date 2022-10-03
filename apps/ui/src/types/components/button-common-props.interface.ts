@@ -1,7 +1,7 @@
 /**
  * Common base button props for different types of buttons in this project's UI.
  */
-export interface ButtonSharedProps {
+export interface ButtonCommonProps {
   /**
    * Button styles for different UX cases. Default variant is solid.
    */

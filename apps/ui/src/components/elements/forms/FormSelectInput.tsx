@@ -1,24 +1,16 @@
 import React, { useId } from 'react'
 import clsx from 'clsx'
-import { RegisterOptions, useFormContext } from 'react-hook-form'
+import { useFormContext } from 'react-hook-form'
 
 import { ExclamationCircleIcon } from '@heroicons/react/24/outline'
+import { useMergedRef } from '@firx/react-hooks'
+import type { FormElementCommonProps } from '../../../types/components/form-element-common-props.interface'
 
-export interface FormSelectInputProps extends React.ComponentPropsWithoutRef<'select'> {
-  id?: string
-  name: string
-  label: string
-  placeholder?: string
-  helperText?: string
-  type?: string
-  readOnly?: boolean
-  hideLabel?: boolean
-
-  /** disable display of error (does not disable error validation; useful if parent component will handle error display) */
-  hideError?: boolean
-
-  validation?: RegisterOptions
-  children?: React.ReactNode // made ? for FormSelectInput2
+export interface FormSelectInputProps
+  extends Omit<React.ComponentPropsWithRef<'select'>, 'name'>,
+    FormElementCommonProps {
+  // @todo resolve FormSelectInput `children?` as ? for FormSelectInput2 which is not currently in project use
+  children?: React.ReactNode
 }
 
 /**
@@ -29,19 +21,23 @@ export interface FormSelectInputProps extends React.ComponentPropsWithoutRef<'se
  *
  * @see {@link https://react-hook-form.com/api/useformcontext}
  */
-export const FormSelectInput: React.FC<FormSelectInputProps> = ({
-  id,
-  name,
-  label,
-  helperText,
-  placeholder,
-  readOnly = false,
-  hideError = false,
-  hideLabel = false,
-  children,
-  validation,
-  ...restProps
-}) => {
+export const FormSelectInput = React.forwardRef<HTMLSelectElement, FormSelectInputProps>(function FormSelectInput(
+  {
+    id,
+    name,
+    label,
+    helperText,
+    placeholder,
+    readOnly = false,
+    hideErrorMessage = false,
+    hideLabel = false,
+    appendClassName,
+    validationOptions,
+    children,
+    ...restProps
+  },
+  forwardedRef,
+) {
   const {
     register,
     formState: { isSubmitting, errors },
@@ -53,29 +49,35 @@ export const FormSelectInput: React.FC<FormSelectInputProps> = ({
 
   const value = watch(componentId)
 
-  const showError = errors[name] && !hideError
+  const { ref: formRef, ...registerProps } = register(name, validationOptions)
+  const mergedRef = useMergedRef(forwardedRef, formRef)
+
+  const showError = errors[name] && !hideErrorMessage
 
   // add `disabled` and `selected` attribute to option tag -- applies when SelectInput.readOnly is true
-  const readOnlyChildren = React.Children.map<React.ReactNode, React.ReactNode>(children, (child) => {
-    if (React.isValidElement<HTMLOptionElement>(child)) {
-      return React.cloneElement(child, {
-        disabled: child.props.value !== restProps?.defaultValue,
-        // selected: child.props.value === rest?.defaultValue,
+  const readOnlyChildren = readOnly
+    ? React.Children.map<React.ReactNode, React.ReactNode>(children, (child) => {
+        if (React.isValidElement<HTMLOptionElement>(child)) {
+          return React.cloneElement(child, {
+            disabled: child.props.value !== restProps?.defaultValue,
+            // selected: child.props.value === rest?.defaultValue,
+          })
+        }
       })
-    }
-  })
+    : null
 
   return (
-    <div>
+    <div className={appendClassName}>
       <label htmlFor={id} className={clsx(hideLabel ? 'sr-only' : 'fx-form-label mb-1')}>
         {label}
       </label>
       <div className="relative mt-1">
         <select
+          ref={mergedRef}
           id={componentId}
           disabled={restProps.disabled || isSubmitting}
-          {...register(name, validation)}
-          defaultValue="" // default blank -- overridden by `...restProps` if provided
+          {...registerProps}
+          defaultValue="" // default to be overridden by `...restProps` if a value is provided via props
           {...restProps}
           className={clsx(
             readOnly
@@ -111,4 +113,4 @@ export const FormSelectInput: React.FC<FormSelectInputProps> = ({
       )}
     </div>
   )
-}
+})

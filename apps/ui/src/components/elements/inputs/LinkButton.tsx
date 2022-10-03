@@ -3,9 +3,9 @@ import Link, { type LinkProps } from 'next/link'
 import clsx from 'clsx'
 
 import { Spinner } from '../feedback/Spinner'
-import type { ButtonSharedProps } from '../../../types/components/ButtonSharedProps.interface'
+import type { ButtonCommonProps } from '../../../types/components/button-common-props.interface'
 
-export interface LinkButtonProps extends ButtonSharedProps, LinkProps {}
+export interface LinkButtonProps extends ButtonCommonProps, LinkProps {}
 
 /**
  * NextJS Link component styled like a button.

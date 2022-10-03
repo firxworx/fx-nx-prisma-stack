@@ -2,10 +2,10 @@ import React, { type PropsWithChildren } from 'react'
 import clsx from 'clsx'
 
 import { Spinner } from '../feedback/Spinner'
-import type { ButtonSharedProps } from '../../../types/components/ButtonSharedProps.interface'
+import type { ButtonCommonProps } from '../../../types/components/button-common-props.interface'
 
 export interface ActionButtonProps
-  extends ButtonSharedProps,
+  extends ButtonCommonProps,
     Exclude<React.HTMLAttributes<HTMLButtonElement>, 'type' | 'className'> {
   /**
    * Button `type` is explicitly included and required to protect against corner-case differences across browsers.

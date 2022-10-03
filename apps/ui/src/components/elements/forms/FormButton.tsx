@@ -1,17 +1,18 @@
+import React, { useId } from 'react'
 import clsx from 'clsx'
 import { useFormContext } from 'react-hook-form'
 
 import { Spinner } from '../feedback/Spinner'
-import type { ButtonSharedProps } from '../../../types/components/ButtonSharedProps.interface'
+import type { ButtonCommonProps } from '../../../types/components/button-common-props.interface'
 
 export interface FormButtonProps
-  extends Exclude<ButtonSharedProps, 'isSubmitting'>,
-    React.ComponentPropsWithoutRef<'button'> {
+  extends Exclude<ButtonCommonProps, 'isSubmitting'>,
+    React.ComponentPropsWithRef<'button'> {
   /**
    * Explicitly set the underlying `button` element's `type` prop to protect against cross-browser corner-cases.
-   * FormButton default type is "submit".
+   * The default type of a `FormButton` is "submit".
    */
-  type: React.ComponentPropsWithoutRef<'button'>['type']
+  type: React.ComponentPropsWithRef<'button'>['type']
 }
 
 /**
@@ -26,23 +27,23 @@ export interface FormButtonProps
  * @see ActionButton for a standalone button that can be used outside the context of a form.
  * @see LinkButton for a nextjs-compatible anchor (link) styled as a button.
  */
-export const FormButton: React.FC<FormButtonProps> = ({
-  type,
-  variant,
-  border,
-  appendClassName,
-  disabled,
-  isLoading,
-  children,
-  ...restProps
-}) => {
+export const FormButton = React.forwardRef<HTMLButtonElement, FormButtonProps>(function FormButton(
+  { id, type, variant, border, appendClassName, disabled, isLoading, children, ...restProps },
+  forwardedRef,
+) {
   const {
     formState: { isSubmitting },
   } = useFormContext()
+
+  const safeId = useId()
+  const componentId = id ?? safeId
+
   const renderDisabled = !!disabled || isLoading || isSubmitting
 
   return (
     <button
+      ref={forwardedRef}
+      id={componentId}
       type={type ?? 'submit'}
       className={clsx(
         'fx-button-base',
@@ -77,7 +78,7 @@ export const FormButton: React.FC<FormButtonProps> = ({
       )}
     </button>
   )
-}
+})
 
 FormButton.defaultProps = {
   variant: 'solid',
