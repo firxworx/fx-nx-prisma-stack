@@ -184,23 +184,17 @@ export const VideoGalleryAddVideoButton: React.FC<{ onClick: React.MouseEventHan
  * @see VideoGallery
  */
 export const VideoItem: React.FC<VideoItemProps> = ({ video, onEditVideoClick, onDeleteVideoClick }) => {
-  const handleEditVideoClick: React.MouseEventHandler<HTMLDivElement> = useCallback(
-    (event) => {
-      if (typeof onEditVideoClick === 'function') {
-        onEditVideoClick(event)
-      }
-    },
-    [onEditVideoClick],
-  )
+  const handleEditVideoClick: React.MouseEventHandler<HTMLDivElement> = (event) => {
+    if (typeof onEditVideoClick === 'function') {
+      onEditVideoClick(event)
+    }
+  }
 
-  const handleDeleteVideoClick: React.MouseEventHandler<HTMLButtonElement> = useCallback(
-    (event) => {
-      if (typeof onDeleteVideoClick === 'function') {
-        onDeleteVideoClick(event)
-      }
-    },
-    [onDeleteVideoClick],
-  )
+  const handleDeleteVideoClick: React.MouseEventHandler<HTMLButtonElement> = (event) => {
+    if (typeof onDeleteVideoClick === 'function') {
+      onDeleteVideoClick(event)
+    }
+  }
 
   return (
     <div className="flex justify-center items-center w-full">

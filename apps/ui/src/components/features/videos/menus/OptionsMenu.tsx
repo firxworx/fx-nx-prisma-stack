@@ -12,6 +12,9 @@ export interface OptionsMenuItem {
 
 export interface OptionsMenuProps {
   items: OptionsMenuItem[]
+  a11y?: {
+    menuButtonCaption?: string
+  }
 }
 
 // mock data used in dev - keep around for future storybook/testing/etc per roadmap
@@ -35,9 +38,13 @@ export interface OptionsMenuProps {
 //   ],
 // }
 
+const LABELS = {
+  A11Y_DEFAULT_MENU_BUTTON: 'Open options menu',
+}
+
 const menuButtonClassName = clsx(
   'flex items-center p-2 rounded-md border',
-  'text-slate-400 hover:text-brand-primary-darkest', // hover:text-slate-600
+  'text-slate-400 hover:text-brand-primary-darker', // hover:text-slate-600
   'fx-focus-ring-form hover:bg-slate-50 hover:border-brand-primary-darker/30',
   'border-slate-300 text-sm bg-white',
   'transition-colors focus:bg-sky-50 focus:text-brand-primary-darker',
@@ -64,11 +71,11 @@ const menuButtonClassName = clsx(
 </Menu.Button>
 */
 
-export const OptionsMenu: React.FC<OptionsMenuProps> = ({ items }) => {
+export const OptionsMenu: React.FC<OptionsMenuProps> = ({ items, a11y }) => {
   return (
     <Menu as="div" className="relative inline-block text-left">
       <Menu.Button className={menuButtonClassName}>
-        <span className="sr-only">Open options menu</span>
+        <span className="sr-only">{a11y?.menuButtonCaption ?? LABELS.A11Y_DEFAULT_MENU_BUTTON}</span>
         <EllipsisVerticalIcon className="h-5 w-5" aria-hidden="true" />
       </Menu.Button>
 
@@ -82,13 +89,13 @@ export const OptionsMenu: React.FC<OptionsMenuProps> = ({ items }) => {
         leaveTo="transform opacity-0 scale-95"
       >
         <Menu.Items className="absolute right-0 z-20 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-          <div className="py-1">
+          <div className="py-1 text-sm font-normal">
             {items.map((item) => (
               <Menu.Item key={item.label}>
                 {({ active }): JSX.Element => (
                   <a
                     className={clsx(
-                      'flex items-center px-4 py-2 text-sm',
+                      'flex items-center px-4 py-2',
                       active ? 'bg-slate-100 text-slate-900' : 'text-slate-700',
                     )}
                     onClick={item.onClick}

@@ -9,6 +9,8 @@ import { ModalVariant } from '../../elements/modals/ModalBody'
 import { VideoForm } from './forms/VideoForm'
 import { VideoGallery } from './gallery/VideoGallery'
 import { ManagerControls } from './input-groups/ManagerControls'
+import { useSearchFilter } from '../../../hooks/useSearchFilter'
+import { VideoDto } from '../../../types/videos.types'
 
 export interface VideosManagerProps {
   parentContext: ApiParentContext<BoxProfileChildQueryContext>['parentContext']
@@ -20,9 +22,13 @@ export interface VideosManagerProps {
 export const VideosManager: React.FC<VideosManagerProps> = ({ parentContext }) => {
   const [currentVideo, setCurrentVideo] = useState<string | undefined>(undefined)
 
-  const videosQuery = useVideosQuery({ parentContext: parentContext })
+  const { data: videos, ...videosQuery } = useVideosQuery({ parentContext: parentContext })
   const videoQuery = useVideoQuery({ parentContext, uuid: currentVideo })
   const videoDeleteQuery = useVideoDeleteQuery()
+
+  const [handleSearchInputChange, searchResults] = useSearchFilter<VideoDto>('name', videos ?? [])
+
+  // console.log(`videomanager render (total videos: ${videos?.length ?? 0})`)
 
   const [showAddVideoModal] = useModalContext(
     {
@@ -80,31 +86,34 @@ export const VideosManager: React.FC<VideosManagerProps> = ({ parentContext }) =
       {videosQuery.isError && <p>Error fetching data</p>}
       {videoDeleteQuery.error && <p>Error deleting video</p>}
       {videosQuery.isLoading && <Spinner />}
-      {videosQuery.isSuccess && !!videosQuery.data?.length && (
+      {videosQuery.isSuccess && !!videos?.length && (
         <>
           <div className="mb-4 mt-2">
             <ManagerControls
               labels={{
                 search: {
-                  inputLabel: 'Search',
-                  inputPlaceholder: 'Search',
+                  inputLabel: 'Keyword Filter',
+                  inputPlaceholder: 'Keyword Filter',
                 },
                 actions: {
                   addButtonCaption: 'Add Video',
                 },
               }}
               onAddClick={showAddVideoModal}
+              onSortAscClick={(): void => alert('asc')}
+              onSortDescClick={(): void => alert('desc')}
+              onSearchInputChange={handleSearchInputChange}
             />
           </div>
           <VideoGallery
-            videos={videosQuery.data}
+            videos={searchResults}
             onAddVideoClick={showAddVideoModal}
             onEditVideoClick={handleEditVideoClick}
             onDeleteVideoClick={handleDeleteVideoClick}
           />
         </>
       )}
-      {videosQuery.isSuccess && !videosQuery.data?.length && (
+      {videosQuery.isSuccess && !videos?.length && (
         <div className="flex items-center border-2 border-dashed rounded-md p-4">
           <div className="text-slate-600">No videos found.</div>
         </div>
