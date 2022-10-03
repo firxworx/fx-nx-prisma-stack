@@ -9,6 +9,8 @@ import { VideoGroupForm } from './forms/VideoGroupForm'
 import { Spinner } from '../../elements/feedback/Spinner'
 import { VideoGroupItem } from './input-groups/VideoGroupsListItem'
 import { ManagerControls } from './input-groups/ManagerControls'
+import { useSearchFilter } from '../../../hooks/useSearchFilter'
+import { VideoGroupDto } from '../../../types/videos.types'
 
 export interface VideoGroupsManagerProps {
   parentContext: ApiParentContext<BoxProfileChildQueryContext>['parentContext']
@@ -21,9 +23,11 @@ export interface VideoGroupsManagerProps {
 export const VideoGroupsManager: React.FC<VideoGroupsManagerProps> = ({ parentContext }) => {
   const [currentVideoGroup, setCurrentVideoGroup] = useState<string | undefined>(undefined)
 
-  const videoGroupsQuery = useVideoGroupsQuery({ parentContext: parentContext })
+  const { data: videoGroups, ...videoGroupsQuery } = useVideoGroupsQuery({ parentContext: parentContext })
   const videoGroupQuery = useVideoGroupQuery({ parentContext, uuid: currentVideoGroup })
   const { mutate: deleteVideoGroup, ...videoGroupDeleteQuery } = useVideoGroupDeleteQuery()
+
+  const [handleSearchInputChange, searchResults] = useSearchFilter<VideoGroupDto>('name', videoGroups ?? [])
 
   const [showAddVideoGroupModal] = useModalContext(
     {
@@ -103,29 +107,32 @@ export const VideoGroupsManager: React.FC<VideoGroupsManagerProps> = ({ parentCo
       {videoGroupsQuery.isError && <p>Error fetching data</p>}
       {videoGroupDeleteQuery.error && <p>Error deleting video group</p>}
       {videoGroupsQuery.isLoading && <Spinner />}
-      {videoGroupsQuery.isSuccess && !!videoGroupsQuery.data?.length && !!parentContext?.boxProfileUuid && (
+      {videoGroupsQuery.isSuccess && !!videoGroups?.length && !!parentContext?.boxProfileUuid && (
         <div className="">
           <div className="mb-4 mt-2">
             <ManagerControls
               labels={{
                 search: {
-                  inputLabel: 'Search',
-                  inputPlaceholder: 'Search',
+                  inputLabel: 'Keyword Filter',
+                  inputPlaceholder: 'Keyword Filter',
                 },
                 actions: {
-                  addButtonCaption: 'Add Video Group',
+                  addButtonCaption: 'Add Group',
                 },
               }}
               onAddClick={showAddVideoGroupModal}
+              onSearchInputChange={handleSearchInputChange}
+              onSortAscClick={(): void => alert('asc')}
+              onSortDescClick={(): void => alert('desc')}
             />
           </div>
           <ul role="list" className="relative fx-set-parent-rounded-md">
-            {videoGroupsQuery.data?.map((vg, index) => (
+            {searchResults?.map((vg, index) => (
               <VideoGroupItem
                 key={vg.uuid}
                 parentContext={parentContext}
                 videoGroup={vg}
-                isActive={index === 2}
+                isActive={index === 1}
                 onEditClick={handleEditVideoGroup(vg.uuid)}
                 onDeleteClick={handleDeleteVideoGroup(vg.uuid)}
               />
@@ -133,7 +140,7 @@ export const VideoGroupsManager: React.FC<VideoGroupsManagerProps> = ({ parentCo
           </ul>
         </div>
       )}
-      {videoGroupsQuery.isSuccess && !videoGroupsQuery.data?.length && (
+      {videoGroupsQuery.isSuccess && !videoGroups?.length && (
         <div className="flex items-center border-2 border-dashed rounded-md p-4">
           <div className="text-slate-600">No video groups found.</div>
         </div>

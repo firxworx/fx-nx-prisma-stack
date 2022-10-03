@@ -9,6 +9,7 @@ import type { BoxProfileChildQueryContext } from '../../../../types/box-profiles
 import { VideoGroupDto } from '../../../../types/videos.types'
 import { Spinner } from '../../../elements/feedback/Spinner'
 import { OptionsMenu } from '../menus/OptionsMenu'
+import { Switch } from '@headlessui/react'
 
 export interface VideoGroupsListItemProps {
   parentContext: ApiParentContext<BoxProfileChildQueryContext>['parentContext']
@@ -19,11 +20,37 @@ export interface VideoGroupsListItemProps {
   onManageVideosClick?: React.MouseEventHandler<HTMLButtonElement>
 }
 
-const VideoDetails: React.FC<{ duration?: number; count: number }> = ({ duration, count }) => {
+/**
+ * Present basic inline stats about a Video Group.
+ */
+const VideosSummary: React.FC<{ duration?: number; count: number }> = ({ duration, count }) => {
   return (
     <span>
       {duration ? `${duration} - ` : ''} {count} {`${count === 1 ? 'video' : 'videos'}`}
     </span>
+  )
+}
+
+const Toggle: React.FC<{ label: string; enabled: boolean; onChange: (newValue: boolean) => void }> = ({
+  label,
+  enabled,
+  onChange,
+}) => {
+  return (
+    <Switch
+      checked={enabled}
+      onChange={onChange}
+      className={`${
+        enabled ? 'bg-brand-primary-darker/85' : 'bg-slate-200'
+      } relative inline-flex h-6 w-11 items-center rounded-full`}
+    >
+      <span className="sr-only">{label}</span>
+      <span
+        className={`${
+          enabled ? 'translate-x-6' : 'translate-x-1'
+        } inline-block h-4 w-4 transform rounded-full bg-white transition`}
+      />
+    </Switch>
   )
 }
 
@@ -46,6 +73,10 @@ const VideoDetails: React.FC<{ duration?: number; count: number }> = ({ duration
 //     ))}
 //   </ul>
 // )
+
+const LABELS = {
+  VIDEOS: 'Videos',
+}
 
 const cellPadding = 'p-4'
 
@@ -99,15 +130,22 @@ export const VideoGroupItem: React.FC<VideoGroupsListItemProps> = ({
   return (
     <li
       className={clsx('relative flex flex-wrap', {
-        ['bg-sky-50 border-blue-200']: isActive,
+        ['bg-sky-50 border-sky-200']: isActive, // border-sky-200
       })}
     >
+      <div className={clsx('flex items-center justify-center flex-shrink-0 py-4 pl-4')}>
+        <Toggle
+          label="Toggle if this Video Group is active or not"
+          enabled={isActive}
+          onChange={(newValue): void => alert(`yoyo next value is ${newValue}`)}
+        />
+      </div>
       <div className={clsx('block w-full flex-1', cellPadding)}>
         <div className="block mb-1 font-normal text-base text-brand-primary-darkest leading-snug">
           <div className="mr-2">{videoGroup.name}</div>
         </div>
         <div className="block text-sm leading-4 text-brand-primary-darkest/80">
-          <VideoDetails count={videoGroup.videos.length} />
+          <VideosSummary count={videoGroup.videos.length} />
         </div>
       </div>
       <div className={clsx('flex items-center space-x-2', cellPadding)}>
@@ -118,37 +156,11 @@ export const VideoGroupItem: React.FC<VideoGroupsListItemProps> = ({
             'font-medium tracking-tight text-brand-primary-darkest shadow-sm', // text-slate-700
             'fx-focus-ring-form hover:bg-slate-50 hover:border-brand-primary-darker/30',
             'border-slate-300 text-sm',
-            // 'border-brand-primary',
             'transition-colors focus:bg-sky-50 focus:text-brand-primary-darker',
           )}
         >
-          Videos
+          {LABELS.VIDEOS}
         </button>
-        {isActive ? (
-          <div
-            className={clsx(
-              'inline-flex justify-center items-center px-4 py-2 border rounded-md border-slate-300 w-24',
-              'font-medium tracking-tight text-slate-400',
-              'fx-focus-ring-form cursor-default bg-slate-100 text-sm',
-              'transition-colors focus:bg-sky-50 focus:text-brand-primary-darker',
-            )}
-          >
-            Active
-          </div>
-        ) : (
-          <button
-            type="button"
-            className={clsx(
-              'inline-flex items-center px-4 py-2 rounded-md border bg-white w-24',
-              'font-medium tracking-tight text-brand-primary-darkest shadow-sm',
-              'fx-focus-ring-form hover:bg-slate-50 hover:border-brand-primary-darker/30',
-              'border-slate-300 text-sm',
-              'transition-colors focus:bg-sky-50 focus:text-brand-primary-darker',
-            )}
-          >
-            Set Active
-          </button>
-        )}
         <OptionsMenu
           items={[
             {
