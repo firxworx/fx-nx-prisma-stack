@@ -9,11 +9,6 @@ export class CreateVideoGroupDto {
 
   @ApiProperty({ required: false })
   @IsOptional()
-  @IsString()
-  description?: string
-
-  @ApiProperty({ required: false })
-  @IsOptional()
   @IsArray()
   @IsUUID(4, { each: true })
   videos?: string[]

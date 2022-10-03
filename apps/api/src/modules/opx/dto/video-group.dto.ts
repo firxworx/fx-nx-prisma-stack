@@ -1,11 +1,12 @@
 import { InternalServerErrorException } from '@nestjs/common'
 import type { Video, VideoGroup } from '@prisma/client'
 import { Expose, Type } from 'class-transformer'
-import { VIDEO_GROUP_MODEL_PUBLIC_FIELDS } from '../constants/video-group-model-public-fields.const'
+import {
+  VIDEO_GROUP_MODEL_NULLABLE_FIELDS,
+  VIDEO_GROUP_MODEL_PUBLIC_FIELDS,
+} from '../constants/video-group-model-public-fields.const'
 import type { VideoGroupResponse } from '../types/response.types'
 import { VideoDto } from './video.dto'
-
-export const VIDEO_GROUP_MODEL_NULLABLE_FIELDS: (keyof VideoGroup)[] = ['description']
 
 /**
  * Response DTO for VideoGroup model, compatible with NestJS' `ClassSerializerInterceptor`.
@@ -26,9 +27,6 @@ export class VideoGroupDto implements VideoGroupResponse {
 
   @Expose()
   name!: string
-
-  @Expose()
-  description!: string | null
 
   @Expose()
   @Type(() => VideoDto)

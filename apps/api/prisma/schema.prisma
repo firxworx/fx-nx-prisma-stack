@@ -121,9 +121,8 @@ model VideoGroup {
   boxProfile   BoxProfile @relation(fields: [boxProfileId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   boxProfileId Int
 
-  name        String
-  description String?
-  videos      VideoGroupsOnVideos[]
+  name   String
+  videos VideoGroupsOnVideos[]
 
   @@unique([boxProfileId, name])
 }
