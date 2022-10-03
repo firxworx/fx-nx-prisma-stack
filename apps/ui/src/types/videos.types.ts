@@ -22,11 +22,10 @@ export interface VideoGroupDto extends ApiBaseDto {
   createdAt: Date
   updatedAt: Date // @todo handle dates response
   name: string
-  description: string
   videos: VideoDto[]
 }
 
-export interface CreateVideoGroupDto extends Pick<VideoGroupDto, 'name' | 'description'> {
+export interface CreateVideoGroupDto extends Pick<VideoGroupDto, 'name'> {
   videos?: VideoGroupDto['videos'][number]['uuid'][]
 }
 

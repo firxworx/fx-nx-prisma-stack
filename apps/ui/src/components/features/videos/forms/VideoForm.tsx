@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { FormProvider, SubmitHandler, useForm } from 'react-hook-form'
 
 import { useIsMounted } from '@firx/react-hooks'
@@ -13,6 +13,7 @@ import { useVideoGroupsQuery } from '../../../../api/hooks/video-groups'
 import { ApiParentContext } from '../../../../api/types/common.types'
 import { BoxProfileChildQueryContext } from '../../../../types/box-profiles.types'
 import { FormListBox } from '../../../elements/forms/FormListBox'
+import { VideoPlatform } from '../../../../types/enums/videos.enums'
 
 export interface CreateVideoFormValues extends CreateVideoDto {}
 export interface MutateVideoFormValues extends UpdateVideoDto {}
@@ -24,7 +25,17 @@ export interface VideoFormProps extends ApiParentContext<BoxProfileChildQueryCon
   }
   mutate?: {
     onSuccess?: (data: VideoDto, variables: MutateVideoFormValues, context: unknown) => void
-    data: VideoDto
+    data: VideoDto | undefined
+  }
+}
+
+// react-hook-form docs recommend initializing empty forms from `undefined`
+const getEmptyFormValues = (): CreateVideoFormValues => {
+  return {
+    name: '',
+    externalId: '',
+    platform: VideoPlatform.YOUTUBE,
+    groups: [],
   }
 }
 
@@ -36,7 +47,7 @@ const mapVideoDtoToFormValues = (video?: VideoDto): MutateVideoFormValues | unde
         platform: video.platform,
         groups: video.groups?.map((vg) => vg.uuid) ?? [],
       }
-    : undefined
+    : getEmptyFormValues()
 
 type VideoGroupSelectOption = { value: string; label: string }
 
@@ -93,17 +104,22 @@ const InnerForm: React.FC<{
  * Form component for Videos create + mutate API operations, powered by react-hook-form.
  *
  * Specify one of the `create` or `mutate` objects via props, including an optional `onSuccess()` callback.
+ *
+ * @todo VideoForm per docs is recommended to initialize defaultValues to non-undefined values e.g. empty string or null
  */
 export const VideoForm: React.FC<VideoFormProps> = ({ parentContext, create, mutate }) => {
   const isMounted = useIsMounted()
 
-  const videoCreateForm = useForm<CreateVideoFormValues>()
-  const { handleSubmit: handleCreateSubmit } = videoCreateForm
-
-  const videoMutateForm = useForm<MutateVideoFormValues>({
-    defaultValues: mutate?.data ? mapVideoDtoToFormValues(mutate.data) : undefined,
+  const videoCreateForm = useForm<CreateVideoFormValues>({
+    defaultValues: getEmptyFormValues(),
   })
-  const { handleSubmit: handleMutateSubmit } = videoMutateForm
+  const { handleSubmit: handleCreateSubmit, reset: resetCreateForm } = videoCreateForm
+
+  const initialValues = mutate?.data
+  const videoMutateForm = useForm<MutateVideoFormValues>({
+    defaultValues: initialValues ? mapVideoDtoToFormValues(initialValues) : undefined,
+  })
+  const { handleSubmit: handleMutateSubmit, reset: resetMutateForm } = videoMutateForm
 
   const { data: videoGroups } = useVideoGroupsQuery({ parentContext: parentContext })
 
@@ -127,29 +143,45 @@ export const VideoForm: React.FC<VideoFormProps> = ({ parentContext, create, mut
     return videoGroups?.map((videoGroup) => ({ value: videoGroup.uuid, label: videoGroup.name })) ?? []
   }, [videoGroups])
 
-  const handleCreateVideoSubmit: SubmitHandler<CreateVideoFormValues> = async (formData) => {
+  useEffect(() => {
+    if (mutate) {
+      resetMutateForm(mapVideoDtoToFormValues(initialValues))
+    }
+  }, [resetMutateForm, mutate, initialValues])
+
+  const handleCreateVideo: SubmitHandler<CreateVideoFormValues> = async (formValues) => {
     if (!isMounted) {
       return
     }
 
     try {
-      await createVideoAsync({ parentContext: parentContext, ...formData })
+      await createVideoAsync(
+        { parentContext: parentContext, ...formValues },
+        {
+          onSuccess: () => resetCreateForm(),
+        },
+      )
     } catch (error: unknown) {
       console.error(error instanceof Error ? error.message : String(error))
     }
   }
 
-  const handleMutateVideoSubmit: SubmitHandler<MutateVideoFormValues> = async (formData) => {
+  const handleMutateVideo: SubmitHandler<MutateVideoFormValues> = async (formValues) => {
     if (!isMounted || !mutate?.data?.uuid) {
       return
     }
 
     try {
-      await mutateVideoAsync({
-        parentContext: parentContext,
-        uuid: mutate.data.uuid,
-        ...formData,
-      })
+      await mutateVideoAsync(
+        {
+          parentContext: parentContext,
+          uuid: mutate.data.uuid,
+          ...formValues,
+        },
+        {
+          onSuccess: () => resetMutateForm(),
+        },
+      )
     } catch (error: unknown) {
       console.error(error instanceof Error ? error.message : String(error))
     }
@@ -164,12 +196,20 @@ export const VideoForm: React.FC<VideoFormProps> = ({ parentContext, create, mut
   }
 
   if (mutate) {
+    if (!mutate.data) {
+      return (
+        <div className="flex justify-center items-center p-4">
+          <Spinner />
+        </div>
+      )
+    }
+
     return (
       <FormProvider {...videoMutateForm}>
         <InnerForm
           videoGroupSelectOptions={videoSelectOptions}
           isLoading={isMutateLoading}
-          onSubmit={handleMutateSubmit(handleMutateVideoSubmit)}
+          onSubmit={handleMutateSubmit(handleMutateVideo)}
         />
       </FormProvider>
     )
@@ -180,7 +220,7 @@ export const VideoForm: React.FC<VideoFormProps> = ({ parentContext, create, mut
       <InnerForm
         videoGroupSelectOptions={videoSelectOptions}
         isLoading={isCreateLoading}
-        onSubmit={handleCreateSubmit(handleCreateVideoSubmit)}
+        onSubmit={handleCreateSubmit(handleCreateVideo)}
       />
     </FormProvider>
   )
