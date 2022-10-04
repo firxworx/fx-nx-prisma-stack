@@ -15,6 +15,22 @@ module.exports = {
       ...defaultTheme.screens,
     },
     extend: {
+      animation: {
+        // loading bounce (refer to inline plugin `Utilities` below for animation delays)
+        'bouncy-opacity': 'bouncy-opacity 0.75s infinite alternate',
+      },
+      keyframes: {
+        'bouncy-opacity': {
+          from: {
+            opacity: 0.8,
+            transform: 'translate3d(0, 0.5rem, 0)',
+          },
+          to: {
+            opacity: 0.1,
+            transform: 'translate3d(0, -0.5rem, 0)',
+          },
+        },
+      },
       spacing: {
         1.25: '0.3125rem',
       },
@@ -116,7 +132,7 @@ module.exports = {
     require('@headlessui/tailwindcss'),
 
     // add custom styles via inline custom plugin
-    plugin(function ({ addBase, addComponents }) {
+    plugin(function ({ addBase, addComponents, addUtilities }) {
       const webkitSearchInputXIconTarget =
         'input[type="search"]::-webkit-search-decoration, input[type="search"]::-webkit-search-cancel-button, input[type="search"]::-webkit-search-results-button, input[type="search"]::-webkit-search-results-decoration'
 
@@ -258,6 +274,13 @@ module.exports = {
             '@apply first:rounded-t-md last:rounded-b-md': {},
           },
         },
+      })
+      addUtilities({
+        // add .animation-delay-100 to .animation-delay-900
+        ...Array.from({ length: 9 }, (_, i) => i).reduce(
+          (acc, i) => ({ ...acc, [`.animation-delay-${i * 100}`]: { animationDelay: `0.${i}s` } }),
+          {},
+        ),
       })
     }),
   ],
