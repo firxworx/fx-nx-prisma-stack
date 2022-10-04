@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { Spinner } from '../feedback/Spinner'
+import { BouncyLoader } from '../feedback/BouncyLoader'
 
 export interface PageHeadingProps {
   subHeading?: string
@@ -21,12 +21,12 @@ export const PageHeading: React.FC<React.PropsWithChildren<PageHeadingProps>> = 
 }) => {
   return (
     <div
-      className={clsx('flex justify-start items-center', {
+      className={clsx('flex justify-between items-center', {
         'mb-4 sm:mb-6 md:mb-8': bottomMargin === 'standard',
         'mb-6 sm:mb-8 md:mb-10': bottomMargin === 'extra',
       })}
     >
-      <div>
+      <div className="flex-1">
         <h1
           className={clsx(
             'text-2xl sm:text-3xl font-semibold tracking-tight',
@@ -42,11 +42,19 @@ export const PageHeading: React.FC<React.PropsWithChildren<PageHeadingProps>> = 
           </div>
         )}
       </div>
-      <div>
+      {!!showLoadingSpinner && (
+        <div className="pl-4">
+          <BouncyLoader />
+        </div>
+      )}
+      {/* <div>
         {!!showLoadingSpinner && (
-          <Spinner size="sm" color="brand" appendClassName={clsx({ 'ml-4': !subHeading, 'ml-6': !!subHeading })} />
+          // alternate --
+          // <Spinner size="sm" color="brand" appendClassName={clsx({ 'ml-4': !subHeading, 'ml-6': !!subHeading })} />
+
+          <BouncyLoader appendClassName={clsx({ 'ml-4': !subHeading, 'ml-6': !!subHeading })} />
         )}
-      </div>
+      </div> */}
     </div>
   )
 }
