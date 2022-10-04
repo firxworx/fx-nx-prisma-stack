@@ -4,7 +4,7 @@ import { VideoPlatform } from '../constants/video-platform.enum'
 import { VideoGroupDto } from './video-group.dto'
 import { InternalServerErrorException } from '@nestjs/common'
 import type { VideoResponse } from '../types/response.types'
-import { VIDEO_MODEL_PUBLIC_FIELDS } from '../constants/video-model-public-fields.const'
+import { VIDEO_MODEL_NULLABLE_FIELDS, VIDEO_MODEL_PUBLIC_FIELDS } from '../constants/video-model-public-fields.const'
 
 /**
  * Response DTO for Video model, compatible with NestJS' `ClassSerializerInterceptor`.
@@ -39,9 +39,14 @@ export class VideoDto implements VideoResponse {
   constructor(partial: Partial<Video & { groups: { videoGroup: Partial<VideoGroup> }[] }>) {
     // console.log('creating partial video.dto.ts', JSON.stringify(partial, null, 2))
     const videoFields = VIDEO_MODEL_PUBLIC_FIELDS.reduce((acc, fieldName) => {
-      if (partial[fieldName] === undefined || partial[fieldName] === null) {
+      if (
+        !VIDEO_MODEL_NULLABLE_FIELDS.includes(fieldName) &&
+        (partial[fieldName] === undefined || partial[fieldName] === null)
+      ) {
         throw new InternalServerErrorException(
-          `Invalid query result: missing expected data for required field '${fieldName}'`,
+          `Invalid query result: missing expected data for required field '${fieldName}' (value: ${String(
+            partial[fieldName],
+          )})`,
         )
       }
 

@@ -118,6 +118,8 @@ model VideoGroup {
   createdAt DateTime @default(now()) @db.Timestamptz()
   updatedAt DateTime @updatedAt @db.Timestamptz()
 
+  enabledAt DateTime? @db.Timestamptz()
+
   boxProfile   BoxProfile @relation(fields: [boxProfileId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   boxProfileId Int
 

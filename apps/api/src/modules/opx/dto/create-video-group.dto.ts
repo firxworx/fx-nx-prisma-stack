@@ -1,11 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsArray, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator'
+import { IsArray, IsBoolean, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator'
 
 export class CreateVideoGroupDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
   name!: string
+
+  @ApiProperty()
+  @IsBoolean()
+  @IsOptional()
+  enabled?: boolean
 
   @ApiProperty({ required: false })
   @IsOptional()

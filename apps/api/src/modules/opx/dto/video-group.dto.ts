@@ -26,6 +26,9 @@ export class VideoGroupDto implements VideoGroupResponse {
   updatedAt!: Date
 
   @Expose()
+  enabledAt!: Date | null
+
+  @Expose()
   name!: string
 
   @Expose()
@@ -34,12 +37,15 @@ export class VideoGroupDto implements VideoGroupResponse {
 
   constructor(partial: Partial<VideoGroup & { videos: { video: Partial<Video> }[] }>) {
     const videoGroupFields = VIDEO_GROUP_MODEL_PUBLIC_FIELDS.reduce((acc, fieldName) => {
+      // if nullable fields does not include the fieldname and the value is undefined or null
       if (
-        (!VIDEO_GROUP_MODEL_NULLABLE_FIELDS.includes(fieldName) && partial[fieldName] === undefined) ||
-        partial[fieldName] === null
+        !VIDEO_GROUP_MODEL_NULLABLE_FIELDS.includes(fieldName) &&
+        (partial[fieldName] === undefined || partial[fieldName] === null)
       ) {
         throw new InternalServerErrorException(
-          `Invalid query result: missing expected data for required field '${fieldName}'`,
+          `Invalid query result: missing expected data for required field '${fieldName}' (value: ${String(
+            partial[fieldName],
+          )})`,
         )
       }
 

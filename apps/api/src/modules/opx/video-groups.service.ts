@@ -98,6 +98,8 @@ export class VideoGroupsService {
       orderBy: videoGroupDtoPrismaOrderByClause,
     })
 
+    console.log(JSON.stringify(items, null, 2))
+
     return items.map((item) => new VideoGroupDto(item))
   }
 
@@ -125,7 +127,7 @@ export class VideoGroupsService {
   }
 
   async createByUser(user: AuthUser, boxProfileUuid: string, dto: CreateVideoGroupDto): Promise<VideoGroupDto> {
-    const { videos: videoUuids, ...restDto } = dto
+    const { videos: videoUuids, enabled, ...restDto } = dto
 
     // verify the user owns the videos that the new video group should be associated with
     // @todo confirm if this can be more elegantly handled with prisma e.g. implicitly in one query w/ exception handling for response type
@@ -133,11 +135,16 @@ export class VideoGroupsService {
       await this.videosService.verifyUserAndBoxProfileOwnershipOrThrow(user, boxProfileUuid, videoUuids)
     }
 
+    const videoGroupData = {
+      ...(enabled ? { enabledAt: new Date().toISOString() } : {}),
+      ...restDto,
+    }
+
     // @todo catch unique constraint violation for video groups create
     const videoGroup = await this.prisma.videoGroup.create({
       select: videoGroupDtoPrismaSelectClause,
       data: {
-        ...restDto,
+        ...videoGroupData,
         boxProfile: {
           connect: {
             uuid: boxProfileUuid,
@@ -165,18 +172,29 @@ export class VideoGroupsService {
     dto: UpdateVideoGroupDto,
   ): Promise<VideoGroupDto> {
     const videoWhereCondition = this.getIdentifierWhereCondition(identifier)
-    const { videos: videoUuids, ...restDto } = dto
+    const { videos: videoUuids, enabled, ...restDto } = dto
 
     // verify the user owns the videos that the new video group should be associated with
     if (videoUuids) {
       await this.videosService.verifyUserAndBoxProfileOwnershipOrThrow(user, boxProfileUuid, videoUuids)
     }
 
+    const videoGroupData = {
+      // if DTO `enabled` is undefined then db `enabledAt` should not be mutated
+      // @todo test for the nullable behavior w/ prisma update + undefined
+      ...(enabled === true
+        ? { enabledAt: new Date().toISOString() }
+        : enabled === false
+        ? { enabledAt: null }
+        : { enabledAt: undefined }),
+      ...restDto,
+    }
+
     const videoGroup = await this.prisma.videoGroup.update({
       select: videoGroupDtoPrismaSelectClause,
       where: videoWhereCondition,
       data: {
-        ...restDto,
+        ...videoGroupData,
         boxProfile: {
           connect: {
             uuid: boxProfileUuid,
