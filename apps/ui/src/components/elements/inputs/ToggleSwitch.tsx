@@ -52,10 +52,10 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
     <Switch
       checked={toggleState}
       disabled={isLoading || isDisabled}
-      className={clsx('relative inline-flex h-6 w-11 items-center rounded-full', {
-        ['bg-brand-primary-darker/85']: toggleState === true && !isDisabled,
+      className={clsx('relative inline-flex h-6 w-11 items-center rounded-full transition-colors', {
+        ['bg-brand-primary-darker/85 hover:bg-brand-primary-darker/95']: toggleState === true && !isDisabled,
         ['bg-slate-300']: toggleState === true && isDisabled,
-        ['bg-slate-200']: toggleState === false,
+        ['bg-slate-200 hover:bg-slate-300/75']: toggleState === false,
         ['cursor-not-allowed']: isDisabled,
         ['cursor-pointer']: !isLoading && !isDisabled,
 

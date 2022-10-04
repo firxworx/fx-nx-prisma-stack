@@ -71,9 +71,14 @@ export const SearchSortInput = React.forwardRef<HTMLInputElement, SearchSortInpu
         {label}
       </label>
       <div className="flex rounded-md shadow-sm">
-        <div className="relative flex-grow focus-within:z-10">
-          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-            <MagnifyingGlassIcon className="h-5 w-5 text-slate-400" aria-hidden="true" />
+        <div className="group relative flex-grow focus-within:z-10">
+          <div
+            className={clsx(
+              'pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3',
+              'text-slate-400 group-focus-within:text-brand-primary-darkest/70 transition-colors',
+            )}
+          >
+            <MagnifyingGlassIcon className="h-5 w-5" aria-hidden="true" />
           </div>
           <input
             ref={forwardRef}
