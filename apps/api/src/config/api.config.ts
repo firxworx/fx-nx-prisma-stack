@@ -1,9 +1,13 @@
 import { registerAs } from '@nestjs/config'
 
-import { mapEnvVarsToConfigOptionFlags } from './lib/env-mapper'
+import { mapEnvVarsToConfigOptionFlags, mapEnvVarsToConfigStringDict } from './lib/env-mapper'
 import type { ApiConfig } from './types/api-config.interface'
 
-const requiredEnvsKeyMap: Record<string, keyof ApiConfig['options']> = {
+const requiredCookieEnvsKeyMap: Record<string, keyof ApiConfig['cookies']> = {
+  COOKIE_SECRET: 'secret',
+}
+
+const requiredOptionEnvsKeyMap: Record<string, keyof ApiConfig['options']> = {
   API_OPT_COMPRESSION: 'compression',
   API_OPT_CSRF_PROTECTION: 'csrfProtection',
 }
@@ -22,6 +26,7 @@ export default registerAs('api', (): ApiConfig => {
     meta: {
       projectTag: process.env.API_TAG_ID ?? 'fx',
     },
-    options: mapEnvVarsToConfigOptionFlags(requiredEnvsKeyMap),
+    cookies: mapEnvVarsToConfigStringDict(requiredCookieEnvsKeyMap),
+    options: mapEnvVarsToConfigOptionFlags(requiredOptionEnvsKeyMap),
   }
 })

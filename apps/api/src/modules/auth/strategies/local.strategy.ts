@@ -12,6 +12,9 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly authService: AuthService) {
     super({
       usernameField: 'email',
+
+      // option to pass request object as first argument to the validate() callback
+      passReqToCallback: false,
     })
   }
 
@@ -20,7 +23,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
    * or else throw an `UnauthorizedException`.
    *
    * The user returned by this method is added to the request object of any controller method decorated
-   * with the appropriate guard - `LocalAuthGuard`.
+   * with the appropriate guard e.g. `LocalAuthGuard`.
    */
   async validate(email: string, password: string): Promise<SanitizedUser> {
     this.logger.log(`User sign-in request: ${email}`)

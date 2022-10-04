@@ -85,7 +85,7 @@ export async function configureNestExpressApp(
     }),
   )
 
-  // enable cors for REST endpoints only (graphql/apollo requires separate configuration if used)
+  // enable cors for REST endpoints only (note: graphql/apollo requires separate configuration if used)
   app.enableCors({
     origin,
     credentials: true, // required for auth cookies
@@ -94,9 +94,16 @@ export async function configureNestExpressApp(
   })
 
   // cookie-parser (express middleware) populates `req.cookies`
-  app.use(cookieParser()) // @todo add cookie secret set via config -> env when setting up cookie-parser
+  // this middleware must be registered BEFORE csrf-protection middleware that uses a cookie strategy
+  app.use(cookieParser(apiConfig.cookies.secret))
 
+  // ** DEPRECATION ALERT **
+  // @todo need new csrf protection implementation: csurf was just deprecated due to several issues + vulnerabilities
+  // @see https://portswigger.net/daily-swig/csrf-flaw-in-csurf-npm-package-aimed-at-protecting-against-the-same-flaws
+  // @see https://github.com/Psifi-Solutions/csrf-csrf
+  //
   // conditionally enable csurf (express middleware) for csrf/xsrf protection (initializion must follow cookie-parser)
+  // https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#double-submit-cookie
   if (apiConfig.options.csrfProtection) {
     // the _csrf cookie stores the token secret client-side so httpOnly is required to block access by js
     const csurfMiddleware = csurf({
@@ -106,8 +113,8 @@ export async function configureNestExpressApp(
     // csurf is added via middleware function to provide a lever for conditionally disabling csrf protection by route
     app.use((req: Request, res: Response, next: NextFunction) => {
       // example of disabling csrf protection for a given path
-      // if (req.path === `${globalPrefix}/example-route/example`) return next()
-      // note: auth routes for ui's should have csrf protection enabled to mitigate login csrf attacks
+      // if (req.path === `${globalPrefix}/example-route/example`) { return next() }
+      // note: auth routes used by ui's should always have csrf protection enabled to mitigate login csrf attacks
 
       csurfMiddleware(req, res, next)
     })
@@ -133,6 +140,7 @@ export async function configureNestExpressApp(
   // use helmet to add common http headers that enhance security
   app.use(
     helmet({
+      // example of specifying CSP is required and implementation is not handled at infra tier:
       // contentSecurityPolicy: { directives: {...} }
     }),
   )

@@ -5,6 +5,9 @@ export interface ApiConfig {
   meta: {
     projectTag: string
   }
+  cookies: {
+    secret: string
+  }
   options: {
     csrfProtection: boolean
     compression: boolean
