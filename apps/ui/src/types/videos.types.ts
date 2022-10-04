@@ -9,7 +9,6 @@ export interface VideoDto extends ApiBaseDto {
   externalId: string
   createdAt: Date
   updatedAt: Date
-  enabledAt: Date | null
   groups: VideoGroupDto[]
 }
 

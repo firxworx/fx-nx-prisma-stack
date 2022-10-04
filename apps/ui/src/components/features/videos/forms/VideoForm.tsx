@@ -13,7 +13,7 @@ import { useVideoGroupsQuery } from '../../../../api/hooks/video-groups'
 import { ApiParentContext } from '../../../../api/types/common.types'
 import { BoxProfileChildQueryContext } from '../../../../types/box-profiles.types'
 import { FormListBox } from '../../../elements/forms/FormListBox'
-import { VideoPlatform } from '../../../../types/enums/videos.enums'
+import { VideoPlatform, VideoPlatformDisplayName } from '../../../../types/enums/videos.enums'
 
 export interface CreateVideoFormValues extends CreateVideoDto {}
 export interface MutateVideoFormValues extends UpdateVideoDto {}
@@ -70,10 +70,10 @@ const InnerForm: React.FC<{
           name="platform"
           label="Platform"
           placeholder="Platform"
-          options={[
-            { value: 'YOUTUBE', label: 'YouTube' },
-            { value: 'VIMEO', label: 'Vimeo' },
-          ]}
+          options={Object.entries(VideoPlatformDisplayName).map(([enumKey, platformName]) => ({
+            value: enumKey,
+            label: platformName,
+          }))}
         />
         <FormInput
           name="externalId"
@@ -87,7 +87,8 @@ const InnerForm: React.FC<{
           options={videoGroupSelectOptions}
           appendClassName="sm:col-span-2"
           onAddItemClick={(): void => {
-            alert('implement me') // @todo implement add item to form multi list box
+            alert('implement me')
+            // @todo implement add item to form multi list box
             // resetVideoGroupForm()
             // showModal()
           }}
