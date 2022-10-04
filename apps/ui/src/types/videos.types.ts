@@ -9,6 +9,7 @@ export interface VideoDto extends ApiBaseDto {
   externalId: string
   createdAt: Date
   updatedAt: Date
+  enabledAt: Date | null
   groups: VideoGroupDto[]
 }
 
@@ -21,11 +22,13 @@ export interface UpdateVideoDto extends Partial<CreateVideoDto> {}
 export interface VideoGroupDto extends ApiBaseDto {
   createdAt: Date
   updatedAt: Date // @todo handle dates response
+  enabledAt: Date | null
   name: string
   videos: VideoDto[]
 }
 
 export interface CreateVideoGroupDto extends Pick<VideoGroupDto, 'name'> {
+  enabled?: boolean
   videos?: VideoGroupDto['videos'][number]['uuid'][]
 }
 

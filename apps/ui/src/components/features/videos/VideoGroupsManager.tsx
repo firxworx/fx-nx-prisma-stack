@@ -2,7 +2,13 @@ import { useCallback, useState } from 'react'
 
 import type { ApiParentContext } from '../../../api/types/common.types'
 import type { BoxProfileChildQueryContext } from '../../../types/box-profiles.types'
-import { useVideoGroupDeleteQuery, useVideoGroupQuery, useVideoGroupsQuery } from '../../../api/hooks/video-groups'
+import type { VideoGroupDto } from '../../../types/videos.types'
+import {
+  useVideoGroupDeleteQuery,
+  useVideoGroupMutateQuery,
+  useVideoGroupQuery,
+  useVideoGroupsQuery,
+} from '../../../api/hooks/video-groups'
 import { useModalContext } from '../../../context/ModalContextProvider'
 import { ModalVariant } from '../../elements/modals/ModalBody'
 import { VideoGroupForm } from './forms/VideoGroupForm'
@@ -10,7 +16,6 @@ import { Spinner } from '../../elements/feedback/Spinner'
 import { VideoGroupItem } from './input-groups/VideoGroupsListItem'
 import { ManagerControls } from './input-groups/ManagerControls'
 import { useSearchFilter } from '../../../hooks/useSearchFilter'
-import { VideoGroupDto } from '../../../types/videos.types'
 
 export interface VideoGroupsManagerProps {
   parentContext: ApiParentContext<BoxProfileChildQueryContext>['parentContext']
@@ -25,6 +30,8 @@ export const VideoGroupsManager: React.FC<VideoGroupsManagerProps> = ({ parentCo
 
   const { data: videoGroups, ...videoGroupsQuery } = useVideoGroupsQuery({ parentContext: parentContext })
   const videoGroupQuery = useVideoGroupQuery({ parentContext, uuid: currentVideoGroup })
+
+  const { mutateAsync: mutateVideoGroupAsync, ...videoGroupMutateQuery } = useVideoGroupMutateQuery()
   const { mutate: deleteVideoGroup, ...videoGroupDeleteQuery } = useVideoGroupDeleteQuery()
 
   const [handleSearchInputChange, searchResults] = useSearchFilter<VideoGroupDto>('name', videoGroups ?? [])
@@ -32,8 +39,6 @@ export const VideoGroupsManager: React.FC<VideoGroupsManagerProps> = ({ parentCo
   const [showAddVideoGroupModal] = useModalContext(
     {
       title: 'Add Video Group',
-      // actionLabel: 'Save',
-      // action: () => alert('saved'),
       variant: ModalVariant.FORM,
     },
     (hideModal) => (
@@ -67,13 +72,13 @@ export const VideoGroupsManager: React.FC<VideoGroupsManagerProps> = ({ parentCo
     [parentContext, videoGroupQuery.data],
   )
 
-  // const handleEditVideoGroupClick = useCallback(
-  //   (uuid: string, _event: React.MouseEvent<HTMLAnchorElement, MouseEvent>): void => {
-  //     setCurrentVideoGroup(uuid)
-  //     showEditVideoGroupModal()
-  //   },
-  //   [showEditVideoGroupModal],
-  // )
+  const handleChangeActiveVideoGroup = useCallback(
+    (uuid: string): ((enabled: boolean) => void) =>
+      (enabled) => {
+        mutateVideoGroupAsync({ parentContext: parentContext, uuid, enabled })
+      },
+    [parentContext, mutateVideoGroupAsync],
+  )
 
   const handleEditVideoGroup = useCallback(
     (uuid: string): React.MouseEventHandler<HTMLAnchorElement> =>
@@ -95,13 +100,6 @@ export const VideoGroupsManager: React.FC<VideoGroupsManagerProps> = ({ parentCo
     [parentContext, deleteVideoGroup],
   )
 
-  // const handleDeleteVideoGroupClick = useCallback(
-  //   (uuid: string, _event: React.MouseEvent): void => {
-  //     videoGroupDeleteQuery.mutate({ parentContext: parentContext, uuid })
-  //   },
-  //   [parentContext, videoGroupDeleteQuery],
-  // )
-
   return (
     <>
       {videoGroupsQuery.isError && <p>Error fetching data</p>}
@@ -122,19 +120,25 @@ export const VideoGroupsManager: React.FC<VideoGroupsManagerProps> = ({ parentCo
               }}
               onAddClick={showAddVideoGroupModal}
               onSearchInputChange={handleSearchInputChange}
-              onSortAscClick={(): void => alert('asc')}
-              onSortDescClick={(): void => alert('desc')}
+              onSortAscClick={(): void => alert('asc - implemenation TBD')} // @todo sort asc implementation TBD (VG)
+              onSortDescClick={(): void => alert('desc - implementation TBD')} // @todo sort desc implementation TBD (VG)
             />
           </div>
           <ul role="list" className="relative fx-set-parent-rounded-md">
-            {searchResults?.map((vg, index) => (
+            {searchResults?.map((videoGroup) => (
               <VideoGroupItem
-                key={vg.uuid}
+                key={videoGroup.uuid}
                 parentContext={parentContext}
-                videoGroup={vg}
-                isActive={index === 1}
-                onEditClick={handleEditVideoGroup(vg.uuid)}
-                onDeleteClick={handleDeleteVideoGroup(vg.uuid)}
+                videoGroup={videoGroup}
+                isActive={!!videoGroup.enabledAt}
+                isActiveToggleLoading={videoGroupMutateQuery.isLoading} // disable all toggles
+                isActiveToggleLoadingAnimated={
+                  // animate only the one changed by user
+                  videoGroupMutateQuery.isLoading && videoGroupMutateQuery.variables?.uuid === videoGroup.uuid
+                }
+                onEditClick={handleEditVideoGroup(videoGroup.uuid)}
+                onDeleteClick={handleDeleteVideoGroup(videoGroup.uuid)}
+                onActiveToggleChange={handleChangeActiveVideoGroup(videoGroup.uuid)}
               />
             ))}
           </ul>

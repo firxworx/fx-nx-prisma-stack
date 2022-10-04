@@ -9,48 +9,33 @@ import type { BoxProfileChildQueryContext } from '../../../../types/box-profiles
 import { VideoGroupDto } from '../../../../types/videos.types'
 import { Spinner } from '../../../elements/feedback/Spinner'
 import { OptionsMenu } from '../menus/OptionsMenu'
-import { Switch } from '@headlessui/react'
+import { ToggleSwitch, ToggleSwitchProps } from '../../../elements/inputs/ToggleSwitch'
 
 export interface VideoGroupsListItemProps {
   parentContext: ApiParentContext<BoxProfileChildQueryContext>['parentContext']
   videoGroup: VideoGroupDto
   isActive: boolean
+  isActiveToggleLoading?: boolean
+  isActiveToggleLoadingAnimated?: boolean
   onEditClick?: React.MouseEventHandler<HTMLAnchorElement>
   onDeleteClick?: React.MouseEventHandler<HTMLAnchorElement>
   onManageVideosClick?: React.MouseEventHandler<HTMLButtonElement>
+  onActiveToggleChange: ToggleSwitchProps['onToggleChange']
+}
+
+interface VideoGroupSummaryProps {
+  duration?: number
+  count: number
 }
 
 /**
- * Present basic inline stats about a Video Group.
+ * Display basic Video Group stats inline. Part of `VideoGroupsListItem`.
  */
-const VideosSummary: React.FC<{ duration?: number; count: number }> = ({ duration, count }) => {
+const VideoGroupSummary: React.FC<VideoGroupSummaryProps> = ({ duration, count }) => {
   return (
     <span>
       {duration ? `${duration} - ` : ''} {count} {`${count === 1 ? 'video' : 'videos'}`}
     </span>
-  )
-}
-
-const Toggle: React.FC<{ label: string; enabled: boolean; onChange: (newValue: boolean) => void }> = ({
-  label,
-  enabled,
-  onChange,
-}) => {
-  return (
-    <Switch
-      checked={enabled}
-      onChange={onChange}
-      className={`${
-        enabled ? 'bg-brand-primary-darker/85' : 'bg-slate-200'
-      } relative inline-flex h-6 w-11 items-center rounded-full`}
-    >
-      <span className="sr-only">{label}</span>
-      <span
-        className={`${
-          enabled ? 'translate-x-6' : 'translate-x-1'
-        } inline-block h-4 w-4 transform rounded-full bg-white transition`}
-      />
-    </Switch>
   )
 }
 
@@ -60,22 +45,10 @@ const Toggle: React.FC<{ label: string; enabled: boolean; onChange: (newValue: b
 //   </button>
 // )
 
-// const ManageButton: React.FC = () => (
-//   <button type="button" className={clsx('flex justify-center items-center p-4', 'text-sm')}>
-//     Manage Videos
-//   </button>
-// )
-
-// const VideoList: React.FC = () => (
-//   <ul className="mt-4 ml-4 list-disc list-inside text-brand-primary-darkest">
-//     {videoGroup.videos.map((video) => (
-//       <li key={video.uuid}>{video.name}</li>
-//     ))}
-//   </ul>
-// )
-
 const LABELS = {
   VIDEOS: 'Videos',
+  EDIT_DETAILS: 'Edit Details',
+  DELETE_VIDEO_GROUP: 'Delete Video Group',
 }
 
 const cellPadding = 'p-4'
@@ -84,8 +57,11 @@ export const VideoGroupItem: React.FC<VideoGroupsListItemProps> = ({
   parentContext,
   videoGroup,
   isActive,
+  isActiveToggleLoading,
+  isActiveToggleLoadingAnimated,
   onEditClick,
   onDeleteClick,
+  onActiveToggleChange,
   // onManageVideosClick,
 }) => {
   const handleEditClick: React.MouseEventHandler<HTMLAnchorElement> = useCallback(
@@ -126,18 +102,20 @@ export const VideoGroupItem: React.FC<VideoGroupsListItemProps> = ({
     return <Spinner />
   }
 
-  // refer to parent with tailwind-preset custom class fx-set-parent-rounded-md for css border definitions
   return (
     <li
-      className={clsx('relative flex flex-wrap', {
-        ['bg-sky-50 border-sky-200']: isActive, // border-sky-200
+      // for css border definitions refer to parent ul.fx-set-parent-rounded-md (custom class in tailwind-preset)
+      className={clsx('relative flex flex-wrap transition-colors', {
+        ['bg-sky-50 border-sky-200']: isActive,
       })}
     >
       <div className={clsx('flex items-center justify-center flex-shrink-0 py-4 pl-4')}>
-        <Toggle
+        <ToggleSwitch
           label="Toggle if this Video Group is active or not"
-          enabled={isActive}
-          onChange={(newValue): void => alert(`yoyo next value is ${newValue}`)}
+          toggleState={isActive}
+          isLoading={isActiveToggleLoading}
+          isLoadingAnimated={isActiveToggleLoadingAnimated}
+          onToggleChange={onActiveToggleChange}
         />
       </div>
       <div className={clsx('block w-full flex-1', cellPadding)}>
@@ -145,7 +123,7 @@ export const VideoGroupItem: React.FC<VideoGroupsListItemProps> = ({
           <div className="mr-2">{videoGroup.name}</div>
         </div>
         <div className="block text-sm leading-4 text-brand-primary-darkest/80">
-          <VideosSummary count={videoGroup.videos.length} />
+          <VideoGroupSummary count={videoGroup.videos.length} />
         </div>
       </div>
       <div className={clsx('flex items-center space-x-2', cellPadding)}>
@@ -153,7 +131,7 @@ export const VideoGroupItem: React.FC<VideoGroupsListItemProps> = ({
           type="button"
           className={clsx(
             'inline-flex items-center px-4 py-2 rounded-md border bg-white',
-            'font-medium tracking-tight text-brand-primary-darkest shadow-sm', // text-slate-700
+            'font-medium tracking-tight text-brand-primary-darkest shadow-sm',
             'fx-focus-ring-form hover:bg-slate-50 hover:border-brand-primary-darker/30',
             'border-slate-300 text-sm',
             'transition-colors focus:bg-sky-50 focus:text-brand-primary-darker',
@@ -164,12 +142,12 @@ export const VideoGroupItem: React.FC<VideoGroupsListItemProps> = ({
         <OptionsMenu
           items={[
             {
-              label: 'Edit Details',
+              label: LABELS.EDIT_DETAILS,
               SvgIcon: PencilSquareIcon,
               onClick: handleEditClick,
             },
             {
-              label: 'Delete Video Group',
+              label: LABELS.DELETE_VIDEO_GROUP,
               SvgIcon: XCircleIcon,
               onClick: handleDeleteClick,
             },
