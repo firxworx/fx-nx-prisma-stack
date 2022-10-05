@@ -12,7 +12,7 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common'
-import type { Response } from 'express'
+import type { CookieOptions, Response } from 'express'
 import { ConfigService } from '@nestjs/config'
 
 import type { AuthConfig } from '../../config/types/auth-config.interface'
@@ -51,24 +51,66 @@ export class AuthController {
   }
 
   /**
-   * Helper to set sign out cookies on the given ExpressJS `Response` object.
+   * Helper that returns an Express `CookieOptions` object with configuration for
+   * authentication + refresh cookies.
+   *
+   * The function accepts an argument for the cookie lifetime in seconds relative to now.
+   * It performs an internal conversion to the _milliseconds from `Date.now()`_ unit required
+   * by Express.
+   *
+   * @future consider making SameSite configurable via env (values: 'lax' | 'strict' | 'none')
+   */
+  private getCookieOptions(expiresInSeconds: number): CookieOptions {
+    return {
+      secure: process.env.NODE_ENV === 'production',
+      httpOnly: true,
+      sameSite: true,
+      signed: true,
+      maxAge: expiresInSeconds * 1000,
+    }
+  }
+
+  /**
+   * Helper to set sign out cookies on the given Express `Response` object.
    */
   private setSignOutCookies(response: Response): void {
-    response.clearCookie('Authentication', {
-      secure: process.env.NODE_ENV === 'production',
-      httpOnly: true,
-      sameSite: true,
-      signed: true,
-      maxAge: 0,
-    })
+    response.clearCookie('Authentication', this.getCookieOptions(0))
+    response.clearCookie('Refresh', this.getCookieOptions(0))
+  }
 
-    response.clearCookie('Refresh', {
-      secure: process.env.NODE_ENV === 'production',
-      httpOnly: true,
-      sameSite: true,
-      signed: true,
-      maxAge: 0,
-    })
+  /**
+   * Helper to set signed Authentication + Refresh token cookies on the given Express
+   * `Response` object.
+   *
+   * If `expiresInSeconds` is not provided for a given cookie the config value obtained from
+   * the environment for that cookie will be used.
+   */
+  private setCredentialsCookies(
+    response: Response,
+    config: {
+      authentication: {
+        signedTokenPayload: string
+        expiresInSeconds?: number
+      }
+      refresh: {
+        signedTokenPayload: string
+        expiresInSeconds?: number
+      }
+    },
+  ): void {
+    const { authentication, refresh } = config
+
+    response.cookie(
+      'Authentication',
+      authentication.signedTokenPayload,
+      this.getCookieOptions(authentication.expiresInSeconds ?? this.authConfig.jwt.accessToken.expirationTime),
+    )
+
+    response.cookie(
+      'Refresh',
+      refresh.signedTokenPayload,
+      this.getCookieOptions(refresh.expiresInSeconds ?? this.authConfig.jwt.refreshToken.expirationTime),
+    )
   }
 
   @Post('register')
@@ -108,26 +150,21 @@ export class AuthController {
 
     this.logger.log(`User sign-in: ${user.email} <${user.id}> <${user.uuid}> <${user.name}>`)
 
-    const payload = this.authService.buildJwtTokenPayload(user)
-    const signedAuthenticationPayload = await this.authService.signAuthenticationPayload(payload)
+    const payload = this.authService.createJwtTokenPayload(user)
+    const signedAuthenticationToken = await this.authService.signAuthenticationPayload(payload)
     const signedRefreshToken = await this.authService.signRefreshPayload(payload)
 
     await this.authService.setUserRefreshTokenHash(user.email, signedRefreshToken)
 
-    response.cookie('Authentication', signedAuthenticationPayload, {
-      secure: process.env.NODE_ENV === 'production',
-      httpOnly: true,
-      sameSite: true, // @future make SameSite an env file setting // also 'lax' | 'strict' | 'none'
-      signed: true,
-      maxAge: this.authConfig.jwt.accessToken.expirationTime,
-    })
-
-    response.cookie('Refresh', signedRefreshToken, {
-      secure: process.env.NODE_ENV === 'production',
-      httpOnly: true,
-      sameSite: true, // @future make SameSite an env file setting // also 'lax' | 'strict' | 'none'
-      signed: true,
-      maxAge: this.authConfig.jwt.refreshToken.expirationTime,
+    this.setCredentialsCookies(response, {
+      authentication: {
+        signedTokenPayload: signedAuthenticationToken,
+        expiresInSeconds: this.authConfig.jwt.accessToken.expirationTime,
+      },
+      refresh: {
+        signedTokenPayload: signedRefreshToken,
+        expiresInSeconds: this.authConfig.jwt.refreshToken.expirationTime,
+      },
     })
 
     return { name, email }
@@ -172,8 +209,7 @@ export class AuthController {
     //
     // - `exp` claim of a signed jsonwebtoken is NumericDate format i.e. seconds since unix epoch
     //    - https://www.npmjs.com/package/jsonwebtoken#token-expiration-exp-claim
-    // - `maxAge` of express CookieOptions is specified in milliseconds relative to current time
-    //    - e.g. Math.floor(Date.now() / 1000) * 60 * 60 === expires 1 hour from now
+    // - `maxAge` of express CookieOptions is specified in milliseconds relative to now
 
     // @future consider SameSite as env file setting (options: 'lax' | 'strict' | 'none'; `true` === 'strict')
     // http://expressjs.com/en/resources/middleware/cookie-session.html
@@ -184,40 +220,33 @@ export class AuthController {
     this.logger.log(`Auth refresh token request by user: ${email}`)
 
     try {
-      const payload = this.authService.buildJwtTokenPayload(user)
-      const expendedRefreshTokenPayload = await this.authService.verifyRefreshToken(request.signedCookies?.Refresh)
+      const payload = this.authService.createJwtTokenPayload(user)
+      const redeemedRefreshTokenDecodedPayload = await this.authService.verifyRefreshToken(
+        request.signedCookies?.Refresh,
+      )
 
-      const currentTime_s = Math.floor(Date.now() / 1000)
-      const refreshTokenExpiresIn_s = expendedRefreshTokenPayload.exp - currentTime_s
+      const redeemedRefreshTokenExpiredInSeconds =
+        redeemedRefreshTokenDecodedPayload.exp - Math.floor(Date.now() / 1000)
 
-      const signedAuthenticationPayload = await this.authService.signAuthenticationPayload(payload)
-      const signedRefreshTokenPayload = await this.authService.signRefreshPayload(payload, refreshTokenExpiresIn_s)
+      const signedAuthenticationToken = await this.authService.signAuthenticationPayload(payload)
+      const signedRefreshToken = await this.authService.signRefreshPayload(
+        payload,
+        redeemedRefreshTokenExpiredInSeconds,
+      )
 
-      await this.authService.setUserRefreshTokenHash(user.email, signedRefreshTokenPayload)
+      await this.authService.setUserRefreshTokenHash(user.email, signedRefreshToken)
 
-      const newAuthenticationCookieMaxAge = this.authConfig.jwt.accessToken.expirationTime * 1000
-      const newRefreshCookieMaxAge =
-        (refreshTokenExpiresIn_s < this.authConfig.jwt.refreshToken.expirationTime
-          ? refreshTokenExpiresIn_s
-          : this.authConfig.jwt.refreshToken.expirationTime) * 1000
+      this.logger.debug(`expended refresh token exp claim value: ${redeemedRefreshTokenDecodedPayload.exp}s`)
+      this.logger.debug(`new-issue refresh token cookie maxAge is: ${redeemedRefreshTokenExpiredInSeconds}s`)
 
-      this.logger.debug(`expended refresh token exp claim value: ${expendedRefreshTokenPayload.exp}s`)
-      this.logger.debug(`new refresh token cookie maxAge is: ${newRefreshCookieMaxAge}`)
-
-      response.cookie('Authentication', signedAuthenticationPayload, {
-        secure: process.env.NODE_ENV === 'production',
-        httpOnly: true,
-        sameSite: true,
-        signed: true,
-        maxAge: newAuthenticationCookieMaxAge,
-      })
-
-      response.cookie('Refresh', signedRefreshTokenPayload, {
-        secure: process.env.NODE_ENV === 'production',
-        httpOnly: true,
-        sameSite: true,
-        signed: true,
-        maxAge: newRefreshCookieMaxAge,
+      this.setCredentialsCookies(response, {
+        authentication: {
+          signedTokenPayload: signedAuthenticationToken,
+        },
+        refresh: {
+          signedTokenPayload: signedRefreshToken,
+          expiresInSeconds: redeemedRefreshTokenExpiredInSeconds,
+        },
       })
 
       return {

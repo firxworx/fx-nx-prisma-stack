@@ -22,7 +22,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request): string | null => {
           // cookies are added to request object by cookie-parser (refer to main.ts for configuration)
-          // note: if using unsigned cookies use request?.cookies?.Refresh
+          // note: if using unsigned cookies use request?.cookies?.Authentication
           return request?.signedCookies?.Authentication ?? null
         },
       ]),

@@ -264,7 +264,7 @@ export class AuthService {
   /**
    * Return JWT token payload for the given `SanitizedUser`.
    */
-  public buildJwtTokenPayload(user: SanitizedUser): TokenPayload {
+  public createJwtTokenPayload(user: SanitizedUser): TokenPayload {
     return {
       email: user.email,
       name: user.name,
