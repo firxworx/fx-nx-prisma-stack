@@ -67,7 +67,7 @@ export const ModalBody: React.FC<React.PropsWithChildren<ModalBodyProps & ModalB
 }) => {
   const modalRef = useRef<HTMLDivElement>(null)
 
-  // for transition performance: only add the box-shadow to modal after it has transitioned
+  // for performance track hasEntered to only add a box-shadow to the modal body after it has transitioned in
   const [hasEntered, setHasEntered] = useState(false)
 
   // bug workaround: delay activation of focus trap to avoid interfering with Transition
@@ -77,7 +77,7 @@ export const ModalBody: React.FC<React.PropsWithChildren<ModalBodyProps & ModalB
   }, [])
 
   // isomorphic-friendly id for aria/a11y purposes
-  const modalHeadingId = useId()
+  const headingId = useId()
 
   // bug warning (2021-04):
   // Transition component's `beforeEnter` may double-fire on first use on a fresh page load when used with show=true, appear=true
@@ -93,8 +93,11 @@ export const ModalBody: React.FC<React.PropsWithChildren<ModalBodyProps & ModalB
 
   return (
     <div className="fixed inset-0 z-50 pointer-events-none">
-      <div className="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center pointer-events-auto sm:block sm:p-0">
-        {/* zero-width-space (&#8203;) required as layout trick -- do not allow prettier to break the next line */}
+      <div
+        // consider min-h-full (tw) vs min-h-screen (past)
+        className="flex items-center justify-center min-h-full p-4 sm:p-0 text-center pointer-events-auto"
+      >
+        {/* zero-width-space (&#8203;) required as layout trick -- do not allow code formatters to break the line with &#8203 */}
         {/* prettier-ignore */}
         <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
         <Transition
@@ -110,7 +113,7 @@ export const ModalBody: React.FC<React.PropsWithChildren<ModalBodyProps & ModalB
           leave="ease-in duration-200"
           leaveFrom="opacity-100 translate-y-0 sm:scale-100"
           leaveTo="opacity-0 translate-y-4 sm:translate-y-12 sm:scale-95"
-          className="inline-block text-left align-bottom transition-all transform sm:my-8 sm:align-middle sm:max-w-sm sm:w-full"
+          className="relative transform transition-all inline-block align-bottom sm:align-middle sm:my-8 xxs:min-w-[18rem] sm:w-full sm:max-w-lg text-left"
         >
           <FocusTrap
             active={focusActive}
@@ -130,14 +133,17 @@ export const ModalBody: React.FC<React.PropsWithChildren<ModalBodyProps & ModalB
               ref={modalRef}
               tabIndex={-1}
               className={clsx(
-                'px-4 pt-5 pb-4 text-left overflow-hidden bg-white rounded-lg sm:p-6 focus:outline-none',
+                // note: adding overflow-hidden risks hiding open drop-down menus
+                'p-4 sm:p-6 rounded-lg text-left bg-white focus:outline-none fx-modal-body-after-shadow',
                 {
-                  ['shadow-modal']: hasEntered,
+                  // add shadow to ::after w/ opacity transition (refer to '.fx-modal-body-after-shadow' in preset)
+                  ['after:opacity-0']: !hasEntered,
+                  ['after:opacity-100']: hasEntered,
                 },
               )}
               role="dialog"
               aria-modal
-              aria-labelledby={variant !== ModalVariant.BLANK ? modalHeadingId : undefined}
+              aria-labelledby={variant !== ModalVariant.BLANK ? headingId : undefined}
             >
               {variant !== ModalVariant.ALERT && (
                 <div className="absolute top-0 right-0 hidden pt-4 pr-4 sm:block">
@@ -152,10 +158,13 @@ export const ModalBody: React.FC<React.PropsWithChildren<ModalBodyProps & ModalB
                     <div>
                       <ModalBodyVariantIcon variant={variant} />
                       <div>
-                        <h3 className="text-lg font-medium leading-6 text-center text-slate-900" id={modalHeadingId}>
+                        <h3
+                          className="mb-4 text-lg font-medium leading-6 text-center text-heading-primary"
+                          id={headingId}
+                        >
                           {title}
                         </h3>
-                        <div className="mt-2 text-base text-slate-500">{children}</div>
+                        <div className="text-base text-slate-500">{children}</div>
                       </div>
                     </div>
                     {(variant !== ModalVariant.FORM || action) && (

@@ -11,6 +11,7 @@ const defaultTheme = require('tailwindcss/defaultTheme')
 module.exports = {
   theme: {
     screens: {
+      xxs: '315px', // 320px is about as small as a smartphone gets
       xs: '475px',
       ...defaultTheme.screens,
     },
@@ -64,6 +65,11 @@ module.exports = {
         // palette: {},
         button: {
           primary: colors.sky[700],
+        },
+        heading: {
+          primary: {
+            DEFAULT: colors.sky[900],
+          },
         },
         action: {
           primary: {
@@ -185,10 +191,21 @@ module.exports = {
           '@apply max-w-6xl': {},
         },
         '.fx-layout-padding-x': {
-          '@apply px-0 xs:px-4 sm:px-6 xl:px-8': {},
+          '@apply px-4 sm:px-6 xl:px-8': {},
         },
         '.fx-layout-padding-y': {
           '@apply pt-0 xs:pt-4 sm:pt-6 pb-10 xs:pb-12 sm:pb-16': {},
+        },
+        '.fx-modal-body-shadow': {
+          '@apply shadow-[0_0_24px_8px_rgba(51,65,85,0.5)]': {}, // slate-700 50% opacity
+        },
+        // add modal body shadow to ::after pseudo element, to transition in after modal body renders for performance
+        // usage: add conditional styles `after:opacity-0` when !hasEntered + `after:opacity-100` when hasEntered
+        '.fx-modal-body-after-shadow': {
+          '@apply relative after:pointer-events-none': {},
+          "@apply after:absolute after:top-0 after:left-0 after:w-full after:h-full after:content-['']": {},
+          '@apply after:rounded-md after:shadow-[0_0_24px_8px_rgba(51,65,85,0.5)]': {}, // slate-700 50% opacity
+          '@apply after:transition-opacity after:duration-100': {},
         },
         '.fx-box': {
           'p-2 xs:p-4 sm:p-6 lg:p-8': {},
