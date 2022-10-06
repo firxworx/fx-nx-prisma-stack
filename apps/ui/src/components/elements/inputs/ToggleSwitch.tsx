@@ -60,7 +60,7 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
         ['cursor-pointer']: !isLoading && !isDisabled,
 
         // delay pulse animation for additional feedback only when api connectivity is spotty
-        ['animate-[pulse_2s_infinite_1.5s] cursor-progress']: isLoading && !isDisabled,
+        ['animate-[pulse_2s_infinite_1.5s] cursor-default']: isLoading && !isDisabled,
       })}
       onChange={onToggleChange}
     >

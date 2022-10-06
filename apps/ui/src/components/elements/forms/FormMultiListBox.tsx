@@ -11,13 +11,15 @@ import { ActionButton } from '../inputs/ActionButton'
 export interface FormMultiListBoxProps extends UseControllerProps {
   name: string
   label: string
+  selectedCountLabelSingular?: string // e.g. `${count} ${selectedCountLabel}s` falls back to `label` if not provided
+  selectedCountLabelPlural?: string // e.g. `${count} ${selectedCountLabel}s` falls back to `label` if not provided
+  placeholder?: string
   helperText?: string
   options: FormListBoxOption[]
   hideLabel?: boolean
   disabled?: boolean
   appendClassName?: string
   onAddItemClick?: (event: React.MouseEvent) => void
-  // placeholder?: string
   // readOnly?: boolean
   // validation?: RegisterOptions
 }
@@ -40,8 +42,10 @@ const LABELS = {
 export const FormMultiListBox: React.FC<FormMultiListBoxProps> = ({
   name,
   label,
+  selectedCountLabelSingular,
+  selectedCountLabelPlural,
   helperText,
-  // placeholder,
+  placeholder,
   options,
   // readOnly = false,
   hideLabel = false,
@@ -87,10 +91,14 @@ export const FormMultiListBox: React.FC<FormMultiListBoxProps> = ({
                         !field.value || (Array.isArray(field.value) && field.value.length === 0),
                     })}
                   >
-                    {Array.isArray(field.value) && !!field.value.length
-                      ? field.value
-                          .map((selectedOption) => options.find((i) => i.value === selectedOption)?.label)
-                          .join(', ')
+                    {Array.isArray(field.value) && !!field.value.length // field.value.map((selectedOption) => options.find((i) => i.value === selectedOption)?.label).join(', ')
+                      ? `${field.value.length} ${
+                          field.value.length === 1
+                            ? selectedCountLabelSingular ?? label
+                            : selectedCountLabelPlural ?? label
+                        }`
+                      : typeof placeholder === 'string'
+                      ? placeholder
                       : `Select ${label}`}
                   </span>
                   <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">

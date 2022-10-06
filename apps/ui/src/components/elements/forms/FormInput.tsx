@@ -75,18 +75,20 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(func
           type={type}
           readOnly={readOnly}
           className={clsx(
-            'block w-full rounded-md fx-form-input',
+            'block w-full rounded-md', // fx-form-input fx-focus-ring-form @todo specificity vs. tailwind + better system for common class or use theme
+            'border rounded-md border-palette-form-border text-palette-form-input placeholder:text-palette-form-placeholder',
+            'focus:outline-none focus:border-slate-300 focus:ring-2 focus:ring-sky-100', // fx-focus-ring-form
             // @todo FormInput classNames revision of styling logic for fx-form-input to work alongside conditional styles
             // probably need to split into multiple general styles and group them where it works
             readOnly
-              ? 'bg-slate-100 border-slate-300 cursor-not-allowed focus:ring-0 focus:border-slate-300'
+              ? 'bg-slate-100 cursor-not-allowed' // focus:ring-0 focus:border-slate-300
               : 'bg-white',
             {
               ['animate-pulse cursor-progress']: isSubmitting,
               // editable field + no error
-              ['border-slate-300 focus:ring-blue-100 focus:border-slate-300']: !readOnly && !errors[name],
+              ['border-slate-300']: !readOnly && !errors[name],
               // editable field + error
-              ['border-error-400 focus:ring-error-200 focus:border-error-400']: !readOnly && errors[name],
+              ['border-error-400']: !readOnly && errors[name],
             },
           )}
           aria-label={hideLabel ? label : undefined}

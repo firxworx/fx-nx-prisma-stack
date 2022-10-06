@@ -5,10 +5,23 @@ import { BarsArrowDownIcon, BarsArrowUpIcon, ChevronDownIcon, MagnifyingGlassIco
 import { DropDownMenu } from '../menus/DropDownMenu'
 
 export interface SearchSortInputProps {
+  /** Optional `id` of underlying input element. If not provided, an SSR-friendly id is generated. */
   id?: string
+
+  /** Optional name for search input (default: "search"). */
   name?: string
+
+  /** Label for the search input. This value is made available to screen-readers. */
   label: string
+
+  /** Search input placeholder. */
   placeholder: string
+
+  /** Optionally override the `type` of the underlying input element (default: "search"). */
+  type?: React.ComponentPropsWithRef<'input'>['type']
+
+  /** Append additional classes to parent div. Intended + safe for adding margins + spacing vs. customization. */
+  appendClassName?: string
   onSearchInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void
   onSortAscClick: (event: React.MouseEvent<HTMLAnchorElement>) => void
   onSortDescClick: (event: React.MouseEvent<HTMLAnchorElement>) => void
@@ -34,7 +47,7 @@ const SortMenuButton = React.forwardRef<HTMLButtonElement>(function SortMenuButt
       ref={forwardRef}
       type="button"
       className={clsx(
-        'group relative -ml-px flex items-center px-4 py-2 border rounded-r-md',
+        'group relative -ml-px flex items-center px-2.5 xs:px-4 py-2 border rounded-r-md',
         'min-h-full', // important for full height within parent SearchSortInput
         'border-slate-300 bg-slate-50 hover:bg-slate-100 focus:bg-sky-50',
         'text-sm font-medium text-slate-700 hover:text-brand-primary-darker focus:text-brand-primary-darker',
@@ -47,8 +60,11 @@ const SortMenuButton = React.forwardRef<HTMLButtonElement>(function SortMenuButt
       {...props}
     >
       <BarsArrowUpIcon className="h-5 w-5 text-slate-400 ui-open:text-slate-400/60" aria-hidden="true" />
-      <span className="ml-2 text-slate-600 ui-open:text-slate-500/80">{LABELS.SORT}</span>
-      <ChevronDownIcon className="ml-2.5 -mr-1.5 h-5 w-5 text-slate-400 ui-open:text-slate-400/60" aria-hidden="true" />
+      <span className="hidden xs:inline-block ml-2 text-slate-600 ui-open:text-slate-500/80">{LABELS.SORT}</span>
+      <ChevronDownIcon
+        className="ml-1 xs:ml-2.5 -mr-1.5 h-5 w-5 text-slate-400 ui-open:text-slate-400/60"
+        aria-hidden="true"
+      />
     </button>
   )
 })
@@ -59,15 +75,15 @@ const SortMenuButton = React.forwardRef<HTMLButtonElement>(function SortMenuButt
  * Ref is forwarded to the underlying search input element.
  */
 export const SearchSortInput = React.forwardRef<HTMLInputElement, SearchSortInputProps>(function SearchSortInput(
-  { id, name, label, placeholder, onSearchInputChange, onSortAscClick, onSortDescClick },
+  { id, name, label, type, placeholder, appendClassName, onSearchInputChange, onSortAscClick, onSortDescClick },
   forwardRef,
 ) {
   const safeId = useId()
   const searchInputId = id ?? safeId
 
   return (
-    <div className="max-w-lg">
-      <label htmlFor="list-search-sort" className="sr-only">
+    <div className={clsx('max-w-lg', appendClassName)}>
+      <label htmlFor={searchInputId} className="sr-only">
         {label}
       </label>
       <div className="flex rounded-md shadow-sm">
@@ -82,12 +98,12 @@ export const SearchSortInput = React.forwardRef<HTMLInputElement, SearchSortInpu
           </div>
           <input
             ref={forwardRef}
-            type="search"
             id={searchInputId}
-            name={name ?? 'list-search-sort'}
+            type={type ?? 'search'}
+            name={name ?? 'search'}
             className={clsx(
               // note: .fx-focus-ring is overridden due to specificity so explicit classes added below for now
-              'block w-full pl-10 rounded-none rounded-l-md border-slate-300',
+              'block w-full pl-10 min-w-[12rem] rounded-none rounded-l-md border-slate-300',
               'placeholder:tracking-tight',
               'focus:outline-none focus:ring-2 focus:border-slate-300 focus:ring-sky-100',
               'text-slate-800',

@@ -53,7 +53,7 @@ const LABELS = {
  * is used to toggle the menu.
  */
 export const DropDownMenu: React.FC<DropDownMenuProps> = ({ a11y, items, MenuButton }) => {
-  // noting an example in a GitHub issue by maintainer used the following vs <Menu.Button as={MenuButton} />
+  // noting an example from by headlessui maintainer from GitHub issue w/ following vs. <Menu.Button as={MenuButton} />:
   // <Menu.Button as={React.Fragment}>
   //   <MenuButton />
   // </Menu.Button>
@@ -61,7 +61,7 @@ export const DropDownMenu: React.FC<DropDownMenuProps> = ({ a11y, items, MenuBut
   return (
     <Menu
       as="div"
-      className="relative inline-block" // block vs flexbox for more reliable positioning of absolute menu
+      className="relative inline-block" // block vs flex used for more reliable positioning of absolute menu when open
     >
       {MenuButton ? (
         <Menu.Button as={MenuButton} />

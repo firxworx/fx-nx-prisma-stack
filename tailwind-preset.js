@@ -262,7 +262,7 @@ module.exports = {
         '.fx-form-input': {
           '@apply border rounded-md': {},
           '@apply border-palette-form-border text-palette-form-input placeholder:text-palette-form-placeholder': {},
-          '@apply fx-focus-ring-form': {},
+          // '@apply fx-focus-ring-form': {},
         },
         '.fx-form-label': {
           // requires that a parent wrapping div have the tailwind 'group' class applied
