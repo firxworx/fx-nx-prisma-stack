@@ -61,9 +61,10 @@ export const SessionContextProvider: React.FC<{
     }
   }, [profile, status, error, setEnabled, refetch, invalidate, remove])
 
-  // console.debug(`SessionContextProvider: [enabled, ${enabled}], [status, ${status}], [profile, ${!!profile}]`)
+  // console.log(`SessionContextProvider: [enabled, ${isQueryEnabled}], [status, ${status}], [profile, ${!!profile}]`)
+  // console.log('profile value', JSON.stringify(profile, null, 2))
 
-  const isSessionReady = isQueryEnabled && status !== 'loading' && !!profile
+  const isSessionReady = status !== 'loading' && !!profile
   return <SessionContext.Provider value={contextValue}>{children(isSessionReady)}</SessionContext.Provider>
 }
 

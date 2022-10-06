@@ -15,17 +15,18 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import '../styles/tailwind.css'
 
 import { AuthError } from '../api/errors/AuthError.class'
-import { SessionLoadingScreen } from '../components/layout/SessionLoadingScreen'
+import { ApiError } from '../api/errors/ApiError.class'
+import { ModalContextProvider } from '../context/ModalContextProvider'
+import { SessionContextProvider } from '../context/SessionContextProvider'
 import { AppLayout } from '../components/layout/AppLayout'
 import { AuthenticatedLayout } from '../components/layout/AuthenticatedLayout'
-import { PublicLayout } from '../components/layout/PublicLayout'
-import { SessionContextProvider } from '../context/SessionContextProvider'
-import { ActionButton } from '../components/elements/inputs/ActionButton'
 import { PlaceholderLayout } from '../components/layout/PlaceholderLayout'
-import { ModalContextProvider } from '../context/ModalContextProvider'
-import { ApiError } from '../api/errors/ApiError.class'
+import { PublicLayout } from '../components/layout/PublicLayout'
+import { SessionLoadingScreen } from '../components/layout/SessionLoadingScreen'
+import { ActionButton } from '../components/elements/inputs/ActionButton'
 
 import { LOCAL_STORAGE_SESSION_CTX_FLAG_KEY } from '../api/constants/auth'
+import { authQueryKeys } from '../api/hooks/auth'
 
 export const SIGN_IN_ROUTE = '/sign-in'
 export const DEFAULT_AUTHENTICATED_ROUTE = '/app'
@@ -72,7 +73,6 @@ function CustomApp({ Component, pageProps, router }: AppProps): JSX.Element {
               }
 
               console.warn(`queryclient queries error count: ${failCount}`)
-
               return true
             },
             // retry: true,
@@ -96,32 +96,34 @@ function CustomApp({ Component, pageProps, router }: AppProps): JSX.Element {
             if (error instanceof AuthError) {
               console.error(`Global query client error handler (AuthError Case) [${error.message}]`, error)
 
+              // refer to SessionContextProvider + useAuthSessionQuery() for complete auth behavior
+              if (typeof window !== 'undefined') {
+                console.warn('setting localstorage to disable session query...')
+                window.localStorage.setItem(LOCAL_STORAGE_SESSION_CTX_FLAG_KEY, 'disabled')
+              }
+
               if (router.pathname !== SIGN_IN_ROUTE) {
                 routerPush(
                   router.asPath ? `${SIGN_IN_ROUTE}?redirect=${encodeURIComponent(router.asPath)}` : SIGN_IN_ROUTE,
                 )
               }
 
-              // @see SessionContextProvider + useAuthSessionQuery()
-              if (typeof window !== 'undefined') {
-                console.warn('setting localstorage to disable session query...')
-                window.localStorage.setItem(LOCAL_STORAGE_SESSION_CTX_FLAG_KEY, 'disabled')
-              }
-
-              // queryClient.removeQueries() ...
-
-              queryClient.clear() // uncaught exception fail at line 108 fail of apiFetch if omitted
+              queryClient.removeQueries(authQueryKeys.all) // added - clear cache results (new requests will hard-load)
+              queryClient.clear() // dev note: omit may cause uncaught exception fail at line 108 fail of apiFetch
               return
             }
 
-            // // only show toast if there's already data in the cache -- indicates failed background update
+            // // only show toast if there's already data in the cache as this indicates a failed background update
             // if (query.state.data !== undefined) {
             //   // toast.error(`Something went wrong: ${error.message}`)
             // }
+
+            // dev-only debug @todo grep pass for console log/warn/error and remove for production
             console.error('global query error handler:', error instanceof Error ? error.message : String(error))
           },
         }),
         mutationCache: new MutationCache({
+          // dev-only debug
           onError: (error: unknown) => console.error('global mutation error handler:', error),
         }),
       }),
