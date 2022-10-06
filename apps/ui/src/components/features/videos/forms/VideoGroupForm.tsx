@@ -24,6 +24,7 @@ export interface VideoGroupFormProps extends ApiParentContext<BoxProfileChildQue
   }
   mutate?: {
     data: VideoGroupDto | undefined
+    showVideosInput?: boolean
     onSuccess?: (data: VideoGroupDto, variables: MutateVideoGroupFormValues, context: unknown) => void
   }
 }
@@ -40,14 +41,27 @@ type VideoSelectOption = { value: string; label: string }
 
 const InnerForm: React.FC<{
   isLoading?: boolean
-  videoSelectOptions: VideoSelectOption[]
+  videoSelectOptions?: VideoSelectOption[]
   onSubmit: React.FormEventHandler<HTMLFormElement>
 }> = ({ isLoading, videoSelectOptions, onSubmit }) => {
   return (
     <form onSubmit={onSubmit} className={clsx('w-full', { ['animate-pulse']: isLoading })}>
-      <div className="grid grid-cols-1 gap-4">
-        <FormInput name="name" label="Group Name" placeholder="Group Name" validationOptions={{ required: true }} />
-        <FormMultiListBox name="videos" label="Videos" options={videoSelectOptions} />
+      <div className="grid grid-cols-1 gap-2 xs:gap-4">
+        <FormInput
+          name="name"
+          label="Playlist Name"
+          placeholder="Playlist Name"
+          validationOptions={{ required: true }}
+        />
+        {!!videoSelectOptions?.length && (
+          <FormMultiListBox
+            name="videos"
+            label="Videos"
+            selectedCountLabelSingular="Video"
+            selectedCountLabelPlural="Videos"
+            options={videoSelectOptions}
+          />
+        )}
       </div>
       <FormButton type="submit" isLoading={isLoading} appendClassName="mt-6">
         Save
@@ -69,9 +83,9 @@ export const VideoGroupForm: React.FC<VideoGroupFormProps> = ({ parentContext, c
   const videoGroupCreateForm = useForm<CreateVideoGroupFormValues>()
   const { handleSubmit: handleCreateSubmit } = videoGroupCreateForm
 
-  const initialValues = mutate?.data
+  const initialMutateFormValues = useMemo(() => mapVideoGroupDtoToFormValues(mutate?.data), [mutate?.data])
   const videoGroupMutateForm = useForm<MutateVideoGroupFormValues>({
-    defaultValues: mutate?.data ? mapVideoGroupDtoToFormValues(mutate.data) : undefined,
+    defaultValues: initialMutateFormValues,
   })
   const { handleSubmit: handleMutateSubmit, reset: resetMutateForm } = videoGroupMutateForm
 
@@ -99,9 +113,9 @@ export const VideoGroupForm: React.FC<VideoGroupFormProps> = ({ parentContext, c
 
   useEffect(() => {
     if (mutate) {
-      resetMutateForm(mapVideoGroupDtoToFormValues(initialValues))
+      resetMutateForm(initialMutateFormValues)
     }
-  }, [resetMutateForm, mutate, initialValues])
+  }, [mutate, resetMutateForm, initialMutateFormValues])
 
   const handleCreateVideoGroupSubmit: SubmitHandler<CreateVideoGroupFormValues> = async (formValues) => {
     if (!isMounted) {
@@ -143,7 +157,7 @@ export const VideoGroupForm: React.FC<VideoGroupFormProps> = ({ parentContext, c
     return (
       <FormProvider {...videoGroupMutateForm}>
         <InnerForm
-          videoSelectOptions={videoSelectOptions}
+          videoSelectOptions={mutate.showVideosInput ? videoSelectOptions : undefined}
           isLoading={isMutateLoading}
           onSubmit={handleMutateSubmit(handleMutateVideoGroupSubmit)}
         />

@@ -16,6 +16,9 @@ import { Spinner } from '../../elements/feedback/Spinner'
 import { VideoGroupItem } from './input-groups/VideoGroupsListItem'
 import { ManagerControls } from './input-groups/ManagerControls'
 import { useSearchFilter } from '../../../hooks/useSearchFilter'
+import { VideoSelector } from './input-groups/VideoSelector'
+import { useVideosQuery } from '../../../api/hooks/videos'
+import { ActionButton } from '../../elements/inputs/ActionButton'
 
 export interface VideoGroupsManagerProps {
   parentContext: ApiParentContext<BoxProfileChildQueryContext>['parentContext']
@@ -28,6 +31,8 @@ export interface VideoGroupsManagerProps {
 export const VideoGroupsManager: React.FC<VideoGroupsManagerProps> = ({ parentContext }) => {
   const [currentVideoGroup, setCurrentVideoGroup] = useState<string | undefined>(undefined)
 
+  const { data: videos } = useVideosQuery({ parentContext: parentContext })
+
   const { data: videoGroups, ...videoGroupsQuery } = useVideoGroupsQuery({ parentContext: parentContext })
   const videoGroupQuery = useVideoGroupQuery({ parentContext, uuid: currentVideoGroup })
 
@@ -38,7 +43,7 @@ export const VideoGroupsManager: React.FC<VideoGroupsManagerProps> = ({ parentCo
 
   const [showAddVideoGroupModal] = useModalContext(
     {
-      title: 'Add Video Group',
+      title: 'New Playlist',
       variant: ModalVariant.FORM,
     },
     (hideModal) => (
@@ -55,7 +60,7 @@ export const VideoGroupsManager: React.FC<VideoGroupsManagerProps> = ({ parentCo
 
   const [showEditVideoGroupModal] = useModalContext(
     {
-      title: 'Edit Video Group',
+      title: 'Edit Playlist',
       variant: ModalVariant.FORM,
     },
     (hideModal) => (
@@ -70,6 +75,22 @@ export const VideoGroupsManager: React.FC<VideoGroupsManagerProps> = ({ parentCo
       />
     ),
     [parentContext, videoGroupQuery.data],
+  )
+
+  const [showVideoSelectorModal] = useModalContext(
+    {
+      title: 'Video Playlist',
+      variant: ModalVariant.FORM,
+    },
+    (hideModal) => (
+      <div>
+        <VideoSelector videos={videos ?? []} />
+        <ActionButton appendClassName="mt-4 sm:mt-6" onClick={hideModal}>
+          Save
+        </ActionButton>
+      </div>
+    ),
+    [parentContext, videos],
   )
 
   const handleChangeActiveVideoGroup = useCallback(
@@ -115,7 +136,7 @@ export const VideoGroupsManager: React.FC<VideoGroupsManagerProps> = ({ parentCo
                   inputPlaceholder: 'Keyword Filter',
                 },
                 actions: {
-                  addButtonCaption: 'Add Group',
+                  addButtonCaption: 'Playlist',
                 },
               }}
               onAddClick={showAddVideoGroupModal}
@@ -133,18 +154,19 @@ export const VideoGroupsManager: React.FC<VideoGroupsManagerProps> = ({ parentCo
                 isActive={!!videoGroup.enabledAt}
                 isActiveToggleLoading={videoGroupMutateQuery.isLoading} // disable all toggles
                 isActiveToggleLoadingAnimated={
-                  // animate only the one changed by user
+                  // animate only the toggle that was changed by the user to not overdo the effect
                   videoGroupMutateQuery.isLoading && videoGroupMutateQuery.variables?.uuid === videoGroup.uuid
                 }
                 onEditClick={handleEditVideoGroup(videoGroup.uuid)}
                 onDeleteClick={handleDeleteVideoGroup(videoGroup.uuid)}
                 onActiveToggleChange={handleChangeActiveVideoGroup(videoGroup.uuid)}
+                onManageVideosClick={showVideoSelectorModal}
               />
             ))}
           </ul>
         </div>
       )}
-      {videoGroupsQuery.isSuccess && !videoGroups?.length && (
+      {videoGroupsQuery.isSuccess && (!videoGroups?.length || !searchResults.length) && (
         <div className="flex items-center border-2 border-dashed rounded-md p-4">
           <div className="text-slate-600">No video groups found.</div>
         </div>

@@ -96,7 +96,7 @@ export const VideosManager: React.FC<VideosManagerProps> = ({ parentContext }) =
                   inputPlaceholder: 'Keyword Filter',
                 },
                 actions: {
-                  addButtonCaption: 'Add Video',
+                  addButtonCaption: 'Video',
                 },
               }}
               onAddClick={showAddVideoModal}

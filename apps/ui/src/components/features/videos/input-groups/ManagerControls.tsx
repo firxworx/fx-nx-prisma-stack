@@ -32,8 +32,8 @@ export const ManagerControls: React.FC<ManagerControlsProps> = ({
   onSortDescClick,
 }) => {
   return (
-    <div className="md:flex md:items-center md:justify-between">
-      <div className="min-w-0 flex-1 md:mt-0">
+    <div className="block sm:flex sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+      <div className="flex-1">
         <SearchSortInput
           label={labels.search.inputLabel}
           placeholder={labels.search.inputPlaceholder}
@@ -42,7 +42,7 @@ export const ManagerControls: React.FC<ManagerControlsProps> = ({
           onSortDescClick={onSortDescClick}
         />
       </div>
-      <div className="flex md:mt-0 md:ml-4">
+      <div className="flex justify-end xs:justify-start sm:pl-4">
         <button
           type="button"
           className={clsx(

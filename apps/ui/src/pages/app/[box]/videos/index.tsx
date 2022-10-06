@@ -13,6 +13,7 @@ import { PageHeading } from '../../../../components/elements/headings/PageHeadin
 import { getRouterParamValue } from '../../../../lib/router'
 import { VideosManager } from '../../../../components/features/videos/VideosManager'
 import { VideoGroupsManager } from '../../../../components/features/videos/VideoGroupsManager'
+// import { FormMultiComboBox } from '../../../../components/elements/forms/FormMultiComboBox'
 
 type ParentContext = ApiParentContext<BoxProfileChildQueryContext>['parentContext']
 
@@ -152,13 +153,13 @@ export const TabLayout: React.FC<TabLayoutProps> = ({ tabs }) => {
           ))}
         </Tab.List>
       </div>
-      <Tab.Panels as="div" tabIndex={100} className="poop">
+      <Tab.Panels as="div">
         {tabs.map((tab) => {
           return (
             <Tab.Panel
               key={tab.label}
-              tabIndex={1000} // @see above comment + issue note that this is currently not supported (headless bug)
-              className="pee py-4 sm:py-6 focus:rounded-sm fx-focus-ring-form focus:ring-offset-8"
+              tabIndex={-1} // @see above comment + issue note that this is currently not supported (headless bug)
+              className="py-4 sm:py-6 focus:rounded-sm fx-focus-ring-form focus:ring-offset-8"
             >
               {!!parentContext.boxProfileUuid && <tab.Component parentContext={parentContext}></tab.Component>}
             </Tab.Panel>
@@ -183,20 +184,16 @@ export const ManageVideosIndexPage: NextPage = () => {
     boxProfileUuid,
   }
 
-  const { data: videos } = useVideosQuery({ parentContext: parentContext })
-  const {
-    data: videoGroups,
-    // isSuccess,
-    isLoading,
-    isFetching,
-    isError,
-  } = useVideoGroupsQuery({ parentContext: { boxProfileUuid } })
+  const { data: videos, ...videosQuery } = useVideosQuery({ parentContext: parentContext })
+  const { data: videoGroups, ...videoGroupsQuery } = useVideoGroupsQuery({ parentContext: { boxProfileUuid } })
+
+  const isDataReady = videosQuery.isSuccess && videoGroupsQuery.isSuccess
 
   const tabs = React.useMemo(
     () => [
       {
-        label: 'Groups',
-        paramKey: 'groups',
+        label: 'Playlists',
+        paramKey: 'playlists',
         count: videoGroups?.length,
         Component: VideoGroupsTab,
       },
@@ -210,28 +207,22 @@ export const ManageVideosIndexPage: NextPage = () => {
     [videoGroups?.length, videos?.length],
   )
 
-  // const { push: routerPush, query: routerQuery } = useRouter()
-
   return (
     <>
-      <PageHeading showLoadingSpinner={isFetching}>Manage Videos</PageHeading>
+      <PageHeading showLoadingSpinner={videosQuery.isFetching || videoGroupsQuery.isFetching}>
+        Manage Videos
+      </PageHeading>
       <div className="mb-4 sm:mb-6">
-        <p className="mb-2 sm:mb-0">Add YouTube videos and organize them into Video Groups.</p>
+        <p className="mb-2 sm:mb-0">Add YouTube videos and organize them into Playlists.</p>
         <p>
-          Switch a Video Group to <strong>Active</strong> to load it into your Box&apos;s{' '}
-          <strong>Video Player Mode</strong>.
+          Switch a Playlist to <strong>Active</strong> to load it to your Box&apos;s <strong>Video Player Mode</strong>.
         </p>
       </div>
       <div>
-        {isError && <p>Error fetching data</p>}
-        {isLoading && <Spinner />}
-        {/*isSuccess && !videoGroups?.length && (
-          <div className="flex items-center border-2 border-dashed rounded-md p-4">
-            <div className="text-slate-600">No video groups found.</div>
-          </div>
-        )*/}
+        {(videosQuery.isError || videoGroupsQuery.isError) && <p>Error fetching data</p>}
+        {(videosQuery.isLoading || videoGroupsQuery.isLoading) && <Spinner />}
+        {isDataReady && <TabLayout tabs={tabs} />}
       </div>
-      <TabLayout tabs={tabs} />
     </>
   )
 }
