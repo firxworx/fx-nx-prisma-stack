@@ -1,6 +1,6 @@
 {
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/shared/react/forms/src",
+  "sourceRoot": "libs/shared/react/forms-rhf/src",
   "projectType": "library",
   "tags": ["publish:public"],
   "targets": {
@@ -8,16 +8,16 @@
       "executor": "@nrwl/web:rollup",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/libs/shared/react/forms",
-        "tsConfig": "libs/shared/react/forms/tsconfig.lib.json",
-        "project": "libs/shared/react/forms/package.json",
-        "entryFile": "libs/shared/react/forms/src/index.ts",
+        "outputPath": "dist/libs/shared/react/forms-rhf",
+        "tsConfig": "libs/shared/react/forms-rhf/tsconfig.lib.json",
+        "project": "libs/shared/react/forms-rhf/package.json",
+        "entryFile": "libs/shared/react/forms-rhf/src/index.ts",
         "external": ["react/jsx-runtime"],
         "rollupConfig": "@nrwl/react/plugins/bundle-rollup",
         "compiler": "babel",
         "assets": [
           {
-            "glob": "libs/shared/react/forms/README.md",
+            "glob": "libs/shared/react/forms-rhf/README.md",
             "input": ".",
             "output": "."
           }
@@ -28,14 +28,14 @@
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["libs/shared/react/forms/**/*.{ts,tsx,js,jsx}"]
+        "lintFilePatterns": ["libs/shared/react/forms-rhf/**/*.{ts,tsx,js,jsx}"]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/shared/react/forms"],
+      "outputs": ["coverage/libs/shared/react/forms-rhf"],
       "options": {
-        "jestConfig": "libs/shared/react/forms/jest.config.ts",
+        "jestConfig": "libs/shared/react/forms-rhf/jest.config.ts",
         "passWithNoTests": true
       }
     }
