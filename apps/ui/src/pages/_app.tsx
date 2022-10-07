@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
-import { useRouter } from 'next/router'
 import { ErrorBoundary } from 'react-error-boundary'
 import {
   MutationCache,
@@ -27,21 +26,17 @@ import { ActionButton } from '../components/elements/inputs/ActionButton'
 
 import { LOCAL_STORAGE_SESSION_CTX_FLAG_KEY } from '../api/constants/auth'
 import { authQueryKeys } from '../api/hooks/auth'
+import { AppConfig, ApplicationContextProvider, useApplicationContext } from '../context/ApplicationContextProvider'
 
 export const SIGN_IN_ROUTE = '/sign-in'
 export const DEFAULT_AUTHENTICATED_ROUTE = '/app'
 
 export const PUBLIC_ROUTES_WHITELIST = ['/', SIGN_IN_ROUTE, '/about']
 
-export const PUBLIC_NAV_LINKS = [
-  { title: 'About', href: '/about' },
-  { title: 'Sign-In', href: SIGN_IN_ROUTE },
-]
+export const PUBLIC_NAV_LINKS = [{ title: 'About', href: '/about' }]
 
 export const AUTHENTICATED_NAV_LINKS = [
   { title: 'App', href: DEFAULT_AUTHENTICATED_ROUTE },
-  { title: 'Videos', href: '/app/videos' },
-  { title: 'Video Groups', href: '/app/video-groups' },
   { title: 'About', href: '/about' },
 ]
 
@@ -57,9 +52,8 @@ const isPublicRoute = (routerPath: string): boolean =>
         route === '/' ? false : routerPath.startsWith(route),
       )
 
-function CustomApp({ Component, pageProps, router }: AppProps): JSX.Element {
-  const { push: routerPush } = useRouter()
-  const { reset } = useQueryErrorResetBoundary()
+const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router }) => {
+  const app = useApplicationContext()
 
   const [queryClient] = useState(
     () =>
@@ -102,9 +96,11 @@ function CustomApp({ Component, pageProps, router }: AppProps): JSX.Element {
                 window.localStorage.setItem(LOCAL_STORAGE_SESSION_CTX_FLAG_KEY, 'disabled')
               }
 
-              if (router.pathname !== SIGN_IN_ROUTE) {
-                routerPush(
-                  router.asPath ? `${SIGN_IN_ROUTE}?redirect=${encodeURIComponent(router.asPath)}` : SIGN_IN_ROUTE,
+              if (!isPublicRoute(router.asPath) && router.pathname !== SIGN_IN_ROUTE) {
+                router.push(
+                  router.asPath
+                    ? `${app.keyRoutes.signIn}?redirect=${encodeURIComponent(router.asPath)}`
+                    : app.keyRoutes.signIn,
                 )
               }
 
@@ -130,11 +126,55 @@ function CustomApp({ Component, pageProps, router }: AppProps): JSX.Element {
   )
 
   return (
-    <>
+    <QueryClientProvider client={queryClient}>
+      <ModalContextProvider>
+        <SessionContextProvider>
+          {(isSessionReady): JSX.Element => (
+            <>
+              {isPublicRoute(router.asPath) ? (
+                <AppLayout navigationLinks={isSessionReady ? AUTHENTICATED_NAV_LINKS : PUBLIC_NAV_LINKS}>
+                  <PublicLayout>
+                    <Component {...pageProps} />
+                  </PublicLayout>
+                </AppLayout>
+              ) : isSessionReady ? (
+                <AppLayout navigationLinks={isSessionReady ? AUTHENTICATED_NAV_LINKS : PUBLIC_NAV_LINKS}>
+                  <AuthenticatedLayout>
+                    {/* autherrorlistener, sessiontimer, etc */}
+                    <Component {...pageProps} />
+                  </AuthenticatedLayout>
+                </AppLayout>
+              ) : (
+                <PlaceholderLayout>
+                  <SessionLoadingScreen />
+                </PlaceholderLayout>
+              )}
+            </>
+          )}
+        </SessionContextProvider>
+
+        {/* ReactQueryDevtools is only included in bundles when NODE_ENV === 'development' */}
+        <ReactQueryDevtools initialIsOpen={false} />
+      </ModalContextProvider>
+    </QueryClientProvider>
+  )
+}
+
+function CustomApp({ Component, pageProps, router }: AppProps): JSX.Element {
+  const [appConfig] = useState<AppConfig>({
+    keyRoutes: {
+      signIn: SIGN_IN_ROUTE,
+    },
+  })
+
+  const { reset } = useQueryErrorResetBoundary()
+
+  return (
+    <ApplicationContextProvider config={appConfig}>
       <Head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="initial-scale=1.0, width=device-width" />
-        <meta name="description" content={process.env.NEXT_PUBLIC_SITE_META_DESCRIPTION} key="description" />
+        <meta key="description" name="description" content={process.env.NEXT_PUBLIC_SITE_META_DESCRIPTION} />
         <title>{process.env.NEXT_PUBLIC_SITE_TITLE}</title>
       </Head>
       <ErrorBoundary
@@ -148,39 +188,9 @@ function CustomApp({ Component, pageProps, router }: AppProps): JSX.Element {
           </div>
         )}
       >
-        <QueryClientProvider client={queryClient}>
-          <ModalContextProvider>
-            <SessionContextProvider>
-              {(isSessionReady): JSX.Element => (
-                <>
-                  {isPublicRoute(router.asPath) ? (
-                    <AppLayout navigationLinks={isSessionReady ? AUTHENTICATED_NAV_LINKS : PUBLIC_NAV_LINKS}>
-                      <PublicLayout>
-                        <Component {...pageProps} />
-                      </PublicLayout>
-                    </AppLayout>
-                  ) : isSessionReady ? (
-                    <AppLayout navigationLinks={isSessionReady ? AUTHENTICATED_NAV_LINKS : PUBLIC_NAV_LINKS}>
-                      <AuthenticatedLayout>
-                        {/* autherrorlistener, sessiontimer, etc */}
-                        <Component {...pageProps} />
-                      </AuthenticatedLayout>
-                    </AppLayout>
-                  ) : (
-                    <PlaceholderLayout>
-                      <SessionLoadingScreen />
-                    </PlaceholderLayout>
-                  )}
-                </>
-              )}
-            </SessionContextProvider>
-
-            {/* ReactQueryDevtools is only included in bundles when NODE_ENV === 'development' */}
-            <ReactQueryDevtools initialIsOpen={false} />
-          </ModalContextProvider>
-        </QueryClientProvider>
+        <ReactApp Component={Component} pageProps={pageProps} router={router} />
       </ErrorBoundary>
-    </>
+    </ApplicationContextProvider>
   )
 }
 
