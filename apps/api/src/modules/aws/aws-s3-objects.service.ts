@@ -19,18 +19,18 @@ import {
   DeleteObjectsCommand,
   S3Client,
 } from '@aws-sdk/client-s3'
+// import { NodeHttpHandler } from '@aws-sdk/node-http-handler'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { Injectable, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { Readable } from 'stream'
 import { AwsAbstractService } from './aws.abstract.service'
-// import { NodeHttpHandler } from '@aws-sdk/node-http-handler'
 
 /**
  * NestJS service for working with S3 bucket objects in the project AWS environment.
  */
 @Injectable()
-export class AwsS3Service extends AwsAbstractService<S3Client> {
+export class AwsS3ObjectsService extends AwsAbstractService<S3Client> {
   protected readonly logger = new Logger(this.constructor.name)
 
   constructor(configService: ConfigService) {
@@ -65,10 +65,10 @@ export class AwsS3Service extends AwsAbstractService<S3Client> {
 
   async listBuckets(): Promise<ListBucketsCommandOutput> {
     try {
-      const data = await this.client.send(new ListBucketsCommand({}))
+      const output = await this.client.send(new ListBucketsCommand({}))
 
       this.logger.debug('Success listing AWS S3 buckets')
-      return data // return supports unit tests
+      return output // await then return syntax better supports unit test use-cases
     } catch (error: unknown) {
       this.logger.error('Error listing AWS S3 buckets', error)
       throw error
