@@ -20,6 +20,7 @@ import { StripeModule } from './modules/stripe/stripe.module'
 import { assertNonNullable } from './types/type-assertions/assert-non-nullable'
 import { AwsModule } from './modules/aws/aws.module'
 import { OpxModule } from './modules/opx/opx.module'
+import { YouTubeModule } from './modules/youtube/youtube.module'
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { OpxModule } from './modules/opx/opx.module'
     AuthModule,
     AwsModule,
     StripeModule,
+    YouTubeModule,
     OpxModule,
   ],
   controllers: [],
