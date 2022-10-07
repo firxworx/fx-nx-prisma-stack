@@ -55,10 +55,10 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({ name }) => {
     <Menu as="div" className="relative">
       <Menu.Button
         className={clsx(
-          'flex items-center justify-center w-10 h-10 border-2 rounded-full',
-          'text-sm font-normal text-action-primary transition-colors',
-          'bg-slate-100 border-action-primary-darkest hover:bg-white',
-          'fx-focus-ring focus:bg-white',
+          'flex items-center justify-center w-10 h-10 border-[3px] rounded-full',
+          'text-sm font-normal text-action-primary focus:text-action-primary-hover transition-colors',
+          'bg-white/25 border-action-primary hover:bg-white',
+          'fx-focus-ring-form focus:border-action-primary-hover focus:bg-white/40',
         )}
       >
         <span className="inline-block leading-none font-semibold">{name.charAt(0).toUpperCase()}</span>

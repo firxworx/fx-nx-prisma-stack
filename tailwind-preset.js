@@ -3,10 +3,10 @@ const plugin = require('tailwindcss/plugin')
 
 const defaultTheme = require('tailwindcss/defaultTheme')
 
-// const Color = require('color')
-// const alpha = (c, val) => Color(c).alpha(val).rgb().string()
-// const lighen = (c, val) => Color(c).lighten(val).rgb().string()
-// const darken = (c, val) => Color(c).darken(val).rgb().string()
+const colord = require('colord').colord
+// const alpha = (c, value) => colord(c).alpha(value).toRgbString()
+const lighten = (c, value) => colord(c).lighten(value).toRgbString()
+const darken = (c, value) => colord(c).darken(value).toRgbString()
 
 module.exports = {
   theme: {
@@ -62,7 +62,27 @@ module.exports = {
         {},
       ),
       colors: {
+        fx1: {
+          50: '#f1f5f9',
+          100: '#e9eff5',
+          200: '#cedde9',
+          300: '#a3c0d6',
+          400: '#729fbe',
+          500: '#5083a7',
+          600: '#3d698c',
+          700: '#325572',
+          800: '#2d495f',
+          900: '#293e51',
+        },
         // palette: {},
+        a11y: {
+          ring: {
+            highlight: colors.amber[300],
+            DEFAULT: colors.sky[100],
+            dark: colors.sky[200], // use if component's background color is similar to DEFAULT
+            line: colors.slate[300], // only if required for contrast e.g. ToggleSwitch
+          },
+        },
         button: {
           primary: colors.sky[700],
         },
@@ -72,10 +92,15 @@ module.exports = {
           },
         },
         action: {
+          // dark high-contrast (vs light background) color
           primary: {
+            idle: colors.slate[400],
+            half: lighten(colors.sky[900], 0.5),
             lightest: colors.sky[500],
             lighter: colors.sky[600],
-            DEFAULT: colors.sky[700],
+            DEFAULT: colors.sky[900],
+            alpha: colord(colors.sky[900]).alpha(0.5).toRgbString(),
+            hover: lighten(colors.sky[900], 0.1),
             darker: colors.sky[800],
             darkest: colors.sky[900],
           },
@@ -250,13 +275,13 @@ module.exports = {
           '@apply focus:outline-none focus:border-slate-300 focus:ring-2 focus:ring-sky-100': {},
         },
         '.fx-link': {
-          '@apply font-medium text-action-primary-darker fx-focus-ring focus:rounded-sm transition-colors duration-150':
+          '@apply font-medium text-action-primary fx-focus-ring-form ring-offset-1 focus:rounded-sm transition-colors duration-150':
             {},
           '&:hover': {
-            '@apply text-action-primary underline': {},
+            '@apply text-action-primary-hover underline': {},
           },
           '&:active': {
-            '@apply text-action-primary': {},
+            '@apply text-action-primary-hover': {},
           },
         },
         '.fx-form-input': {

@@ -52,16 +52,20 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
     <Switch
       checked={toggleState}
       disabled={isLoading || isDisabled}
-      className={clsx('relative inline-flex h-6 w-11 items-center rounded-full transition-colors', {
-        ['bg-brand-primary-darker/85 hover:bg-brand-primary-darker/95']: toggleState === true && !isDisabled,
-        ['bg-slate-300']: toggleState === true && isDisabled,
-        ['bg-slate-200 hover:bg-slate-300/75']: toggleState === false,
-        ['cursor-not-allowed']: isDisabled,
-        ['cursor-pointer']: !isLoading && !isDisabled,
+      className={clsx(
+        'group relative inline-flex h-6 w-11 items-center border border-transparent rounded-full',
+        'fx-focus-ring-form focus:shadow-md focus:border-slate-300 transition-colors',
+        {
+          ['bg-brand-primary-darker/85 hover:bg-brand-primary-darker/95']: toggleState === true && !isDisabled,
+          ['bg-slate-300']: toggleState === true && isDisabled,
+          ['bg-slate-200 hover:bg-slate-300/75']: toggleState === false,
+          ['cursor-not-allowed']: isDisabled,
+          ['cursor-pointer']: !isLoading && !isDisabled,
 
-        // delay pulse animation for additional feedback only when api connectivity is spotty
-        ['animate-[pulse_2s_infinite_1.5s] cursor-default']: isLoading && !isDisabled,
-      })}
+          // delay pulse animation for additional feedback only when api connectivity is spotty
+          ['animate-[pulse_2s_infinite_1.5s] cursor-default']: isLoading && !isDisabled,
+        },
+      )}
       onChange={onToggleChange}
     >
       <span className="sr-only">{label}</span>

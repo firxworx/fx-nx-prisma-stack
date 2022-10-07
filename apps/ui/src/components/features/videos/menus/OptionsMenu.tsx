@@ -45,8 +45,8 @@ const LABELS = {
 const menuButtonClassName = clsx(
   'flex items-center p-2 rounded-md border',
   'text-slate-400 hover:text-brand-primary-darker', // hover:text-slate-600
-  'fx-focus-ring-form hover:bg-slate-50 hover:border-brand-primary-darker/30',
-  'border-slate-300 text-sm bg-white',
+  'fx-focus-ring-form hover:bg-slate-50 hover:border-action-primary-alpha',
+  'border-slate-300 text-sm bg-white focus:shadow-sm hover:shadow-sm',
   'transition-colors focus:bg-sky-50 focus:text-brand-primary-darker',
 
   // custom tailwindcss variants courtesy of the plugin `@headlessui/tailwindcss`

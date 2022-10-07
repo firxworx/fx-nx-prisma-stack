@@ -32,8 +32,8 @@ export interface DropDownMenuProps {
 
 const menuButtonClassName = clsx(
   'flex items-center p-2 rounded-md border',
-  'text-slate-400 hover:text-brand-primary-darkest',
-  'fx-focus-ring-form hover:bg-slate-50 hover:border-brand-primary-darker/30',
+  'text-slate-400 hover:text-action-primary',
+  'fx-focus-ring-form hover:bg-slate-50 hover:border-action-primary', // hover:border-brand-primary-darker/30
   'border-slate-300 text-sm bg-white',
   'transition-colors focus:bg-sky-50 focus:text-brand-primary-darker',
 

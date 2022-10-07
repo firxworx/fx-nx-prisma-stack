@@ -88,6 +88,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2",
     "clsx": "^1.2.1",
+    "colord": "^2.9.3",
     "compression": "^1.7.4",
     "constructs": "^10.1.92",
     "cookie-parser": "^1.4.6",

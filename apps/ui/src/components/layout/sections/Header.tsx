@@ -4,23 +4,64 @@ import { useRouter } from 'next/router'
 import clsx from 'clsx'
 import { Popover, Transition } from '@headlessui/react'
 
-import { Bars3Icon, XMarkIcon, CloudIcon } from '@heroicons/react/24/outline'
-import { ArrowLeftOnRectangleIcon } from '@heroicons/react/20/solid' // LogoutIcon
+import { CloudIcon } from '@heroicons/react/24/outline'
+import { ArrowLeftOnRectangleIcon, ArrowRightOnRectangleIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/20/solid' // sign-out icon
 
 import type { NavigationLink } from '../../../types/navigation.types'
+import { useApplicationContext } from '../../../context/ApplicationContextProvider'
 import { useSessionContext } from '../../../context/SessionContextProvider'
 import { useAuthSignOut } from '../../../api/hooks/auth'
-import { UserProfileMenu } from '../menus/UserProfileMenu'
 import { useIsMounted } from '@firx/react-hooks'
+import { UserProfileMenu } from '../menus/UserProfileMenu'
+import { LinkButton } from '../../elements/inputs/LinkButton'
+import { IconButton } from '../../elements/inputs/IconButton'
 
 export interface HeaderProps {
   navigationLinks: NavigationLink[]
 }
 
+export interface MenuLinksProps {
+  navigationLinks: HeaderProps['navigationLinks']
+  // considering...
+  // (NavigationLink & { SvgIcon?: React.FC<React.ComponentPropsWithoutRef<'svg'>> })[]
+
+  classNames: {
+    /** Link (anchor) classNames common to all menu links regardless of router state. */
+    base?: string
+    /** Conditional classNames for menu links that do not correspond to the router's current page. */
+    standard?: string
+    /** Conditional classNames for menu links that correspond to the router's current page. */
+    current?: string
+  }
+  onLinkClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void
+}
+
 const LABELS = {
   HOME: 'Home',
+  SIGN_IN: 'Sign In',
   SIGN_OUT: 'Sign Out',
+  A11Y_CLOSE_MENU: 'Close Menu',
+  A11Y_OPEN_NAVIGATION_MENU: 'Open Navigation Menu',
 }
+
+const MobileNavCloseButton = React.forwardRef<HTMLButtonElement, React.ComponentPropsWithoutRef<'button'>>(
+  function MobileNavMenuButton(props, forwardedRef) {
+    return <IconButton ref={forwardedRef} SvgIcon={XMarkIcon} a11y={{ label: LABELS.A11Y_CLOSE_MENU }} {...props} />
+  },
+)
+
+const MobileNavMenuButton = React.forwardRef<HTMLButtonElement, React.ComponentPropsWithoutRef<'button'>>(
+  function MobileNavMenuButton(props, forwardedRef) {
+    return (
+      <IconButton
+        ref={forwardedRef}
+        SvgIcon={Bars3Icon}
+        a11y={{ label: LABELS.A11Y_OPEN_NAVIGATION_MENU }}
+        {...props}
+      />
+    )
+  },
+)
 
 /**
  * Header logo that links to the route provided via its `href` prop (defaults to '/').
@@ -30,16 +71,19 @@ const LogoLink: React.FC<{ href?: string; appendClassName?: string }> = ({ href,
     <Link href={href ?? '/'}>
       <a
         className={clsx(
-          'group inline-block w-fit relative border-2 border-transparent rounded-md',
-          'fx-focus-ring focus:bg-white transition-colors',
-          'hover:bg-white hover:border-slate-200 hover:border-dashed',
+          'group inline-block w-fit relative rounded-md',
+          'fx-focus-ring-form focus:bg-white/25 transition-colors',
           appendClassName,
         )}
       >
         <span className="sr-only">
           {process.env.NEXT_PUBLIC_SITE_TITLE} &emdash; {LABELS.HOME}
         </span>
-        <CloudIcon className="h-8 sm:h-10 w-auto transition-colors text-action-primary-darkest group-hover:text-action-primary-darker" />
+        <CloudIcon
+          className={clsx(
+            'h-8 sm:h-10 w-auto transition-colors text-action-primary group-hover:text-action-primary-hover',
+          )}
+        />
       </a>
     </Link>
   )
@@ -55,14 +99,10 @@ LogoLink.defaultProps = {
  * Individual links (anchor tags) have the given `linkClassName` applied as className and the
  * optional `onLinkClick` set as `onClick` handler.
  */
-const MenuLinks: React.FC<
-  Pick<HeaderProps, 'navigationLinks'> & {
-    linkClassName: string
-    linkCurrentClassName?: string
-    onLinkClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void
-  }
-> = ({ navigationLinks, linkClassName, linkCurrentClassName, onLinkClick }) => {
+const MenuLinks: React.FC<MenuLinksProps> = ({ navigationLinks, classNames, onLinkClick }) => {
   const router = useRouter()
+
+  const { base, standard, current } = classNames
 
   const isCurrentMenuLink = (routerPathName: string, itemHref: string): boolean => {
     return routerPathName !== '/' && itemHref === routerPathName
@@ -76,7 +116,11 @@ const MenuLinks: React.FC<
         return (
           <Link key={item.title} href={`${item.href}`}>
             <a
-              className={clsx(linkClassName, isCurrent ? linkCurrentClassName ?? '' : undefined)}
+              // the fx-nav-link-* prefix classNames are to prevent key collisions
+              className={clsx(base, {
+                [clsx('fx-nav-link-standard', standard)]: !isCurrent,
+                [clsx('fx-nav-link-current', current)]: isCurrent,
+              })}
               aria-current={isCurrent ? 'page' : false}
               onClick={onLinkClick}
             >
@@ -93,7 +137,19 @@ const MenuLinks: React.FC<
  * Desktop navigation menu containing horizontal links, hidden via CSS for viewports < tailwindcss 'lg' breakpoint.
  */
 const DesktopNavMenu: React.FC<Pick<HeaderProps, 'navigationLinks'>> = ({ navigationLinks }) => {
+  const app = useApplicationContext()
   const session = useSessionContext()
+
+  const baseLinkClassName = clsx(
+    'inline-block px-4 py-2 rounded-md',
+    'transition-colors',
+    'text-base font-medium text-center leading-tight',
+    'focus:text-action-primary-hover hover:text-action-primary-hover',
+    'focus:outline-none focus:ring-2 focus:ring-fx1-200',
+  )
+
+  const standardLinkClassName = clsx('text-action-primary hover:bg-white/25 focus:bg-white/20')
+  const currentLinkClassName = 'text-action-primary bg-white/50 hover:bg-white/40 focus:bg-white/40'
 
   return (
     <div className="hidden lg:flex lg:justify-start lg:items-center lg:flex-1 text-slate-900">
@@ -101,18 +157,20 @@ const DesktopNavMenu: React.FC<Pick<HeaderProps, 'navigationLinks'>> = ({ naviga
         <div className="flex-1 px-6 space-x-4">
           <MenuLinks
             navigationLinks={navigationLinks}
-            linkClassName={clsx(
-              'inline-block px-4 py-2 border-2 rounded-lg',
-              'transition-colors duration-200',
-              'text-base font-medium text-center leading-tight',
-              'text-action-primary-darkest border-transparent',
-              'hover:bg-white hover:border-slate-200 hover:border-dashed',
-              'fx-focus-ring focus:bg-white',
-            )}
-            linkCurrentClassName={'bg-white'}
+            classNames={{
+              base: baseLinkClassName,
+              standard: standardLinkClassName,
+              current: currentLinkClassName,
+            }}
           />
         </div>
-        {session?.profile && <UserProfileMenu name={session.profile.name} />}
+        {session?.profile ? (
+          <UserProfileMenu name={session.profile.name} />
+        ) : (
+          <div>
+            <LinkButton href={app.keyRoutes.signIn}>{LABELS.SIGN_IN}</LinkButton>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -125,11 +183,17 @@ const DesktopNavMenu: React.FC<Pick<HeaderProps, 'navigationLinks'>> = ({ naviga
  * e.g. https://tailwindui.com/components/application-ui/navigation/navbars "With Search in Column Layout"
  */
 const MobileNavMenu: React.FC<
-  Pick<HeaderProps, 'navigationLinks'> & { isMenuOpen: boolean; onMenuItemClick: () => void }
-> = ({ navigationLinks, isMenuOpen, onMenuItemClick }) => {
+  Pick<HeaderProps, 'navigationLinks'> & {
+    isMenuOpen: boolean
+    onCloseMenuClick: () => void
+    onMenuItemClick: () => void
+  }
+> = ({ navigationLinks, isMenuOpen, onCloseMenuClick, onMenuItemClick }) => {
   const { push: routerPush } = useRouter()
 
+  const app = useApplicationContext()
   const session = useSessionContext()
+
   const isMounted = useIsMounted()
   const { signOut, isSuccess: isSignOutSuccess } = useAuthSignOut()
 
@@ -146,74 +210,66 @@ const MobileNavMenu: React.FC<
     }
   }
 
-  const linkClassName =
-    'w-full px-5 py-2 text-lg font-medium fx-focus-ring ring-inset focus:bg-slate-100 focus:rounded-md'
+  const baseLinkClassName = clsx(
+    'w-full px-5 py-2 text-lg text-action-primary font-medium fx-focus-ring-form ring-inset rounded-md',
+    'focus:outline-none focus:ring-2 focus:ring-fx1-200',
+  )
+
+  const standardLinkClassName = 'focus:bg-white/30'
+  const currentLinkClassName = 'bg-white/30 focus:bg-white/40'
 
   return (
-    <div className="rounded-b-lg shadow-lg bg-slate-200 ring-1 ring-black ring-opacity-5 overflow-hidden">
-      <div className="px-5 pt-4 flex items-center justify-between">
-        <LogoLink />
-        <div className="-mr-2">
-          <MobileNavCloseButton />
+    <div className="rounded-b-md shadow-lg bg-fx1-100 ring-1 ring-black ring-opacity-5 overflow-hidden">
+      <div className="pt-4 flex items-center justify-between">
+        <div className="pl-4">
+          <LogoLink />
+        </div>
+        <div className="pr-4">
+          <MobileNavCloseButton onClick={onCloseMenuClick} />
         </div>
       </div>
-      <div className="py-6 text-slate-600">
-        <div className="space-y-1">
+      <div className="pt-2">
+        <div className="p-2 space-y-1">
           <MenuLinks
             navigationLinks={navigationLinks}
-            linkClassName={clsx('block', linkClassName)}
-            linkCurrentClassName={'bg-slate-100 text-slate-500'}
+            classNames={{
+              base: clsx('block', baseLinkClassName),
+              standard: standardLinkClassName,
+              current: currentLinkClassName,
+            }}
             onLinkClick={handleMenuLinkClick}
           />
         </div>
-        {session?.profile && (
-          <div className="mt-3">
+        <div className="py-2 px-2 border-t border-fx1-200 -mt-px">
+          {session?.profile ? (
             <button
               type="button"
-              className={clsx('flex items-center justify-start text-sky-700', linkClassName)}
+              className={clsx('flex items-center justify-start text-action-primary', baseLinkClassName)}
               role="menuitem"
               onClick={(): void => {
-                signOut() // async fire+forget
+                signOut() // fire + forget the async function
               }}
             >
               <ArrowLeftOnRectangleIcon className="inline-block h-5 w-5 mr-2" aria-hidden />
-              <span>Sign Out</span>
+              <span>{LABELS.SIGN_OUT}</span>
             </button>
-          </div>
-        )}
+          ) : (
+            <div className="flex w-full">
+              <Link href={app.keyRoutes.signIn}>
+                <a className={clsx('block', baseLinkClassName, standardLinkClassName)} role="menuitem">
+                  <ArrowRightOnRectangleIcon className="inline-block h-5 w-5 mr-2" aria-hidden="true" />
+                  <span>{LABELS.SIGN_IN}</span>
+                </a>
+              </Link>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
 }
 
-const mobileNavPopOverButtonClassName = clsx(
-  'group inline-flex items-center justify-center p-2 border-2 rounded-md',
-  'bg-white border-slate-300 hover:border-action-primary focus:border-action-primary hover:bg-sky-50',
-  'fx-focus-ring transition-colors',
-)
-
-const mobileNavButtonIconClassName =
-  'h-5 w-5 transition-colors text-slate-700 group-hover:text-action-primary group-focus:text-action-primary'
-
-const MobileNavMenuButton: React.FC = () => {
-  return (
-    <Popover.Button className={mobileNavPopOverButtonClassName}>
-      <span className="sr-only">Open Navigation Menu</span>
-      <Bars3Icon className={mobileNavButtonIconClassName} />
-    </Popover.Button>
-  )
-}
-
-const MobileNavCloseButton: React.FC = () => {
-  return (
-    <Popover.Button className={mobileNavPopOverButtonClassName}>
-      <span className="sr-only">Close Menu</span>
-      <XMarkIcon className={mobileNavButtonIconClassName} aria-hidden="true" />
-    </Popover.Button>
-  )
-}
-
-const headerClassName = 'relative border-b-2 bg-slate-100 border-slate-200'
+const headerClassName = 'relative border-b bg-fx1-100 border-fx1-200'
 
 const navClassName = clsx(
   'relative mx-auto flex items-center justify-between py-3',
@@ -221,8 +277,7 @@ const navClassName = clsx(
 )
 
 /**
- * Non-dynamic placeholder header that corresponds to `Header` component.
- *
+ * Static header placeholder with similar dimensions to the `Header` component.
  * @see Header
  */
 export const PlaceholderHeader: React.FC = () => {
@@ -242,7 +297,7 @@ export const PlaceholderHeader: React.FC = () => {
 }
 
 /**
- * Header with branding that implements a responsive navigation menu.
+ * Header with logo that includes a responsive navigation menu.
  */
 export const Header: React.FC<HeaderProps> = ({ navigationLinks }) => {
   return (
@@ -256,7 +311,7 @@ export const Header: React.FC<HeaderProps> = ({ navigationLinks }) => {
                   <LogoLink />
                 </div>
                 <div className="flex items-center lg:hidden">
-                  <MobileNavMenuButton />
+                  <Popover.Button as={MobileNavMenuButton} />
                 </div>
               </div>
               <DesktopNavMenu navigationLinks={navigationLinks} />
@@ -278,7 +333,12 @@ export const Header: React.FC<HeaderProps> = ({ navigationLinks }) => {
               static
               className={clsx('absolute z-30 top-0 inset-x-0 transition origin-top-right lg:hidden')}
             >
-              <MobileNavMenu navigationLinks={navigationLinks} isMenuOpen={open} onMenuItemClick={close} />
+              <MobileNavMenu
+                navigationLinks={navigationLinks}
+                isMenuOpen={open}
+                onCloseMenuClick={close}
+                onMenuItemClick={close}
+              />
             </Popover.Panel>
           </Transition>
         </>

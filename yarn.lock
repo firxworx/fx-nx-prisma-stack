@@ -7406,6 +7406,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"colord@npm:^2.9.3":
+  version: 2.9.3
+  resolution: "colord@npm:2.9.3"
+  checksum: 95d909bfbcfd8d5605cbb5af56f2d1ce2b323990258fd7c0d2eb0e6d3bb177254d7fb8213758db56bb4ede708964f78c6b992b326615f81a18a6aaf11d64c650
+  languageName: node
+  linkType: hard
+
 "colorette@npm:^1.1.0":
   version: 1.4.0
   resolution: "colorette@npm:1.4.0"
@@ -10172,6 +10179,7 @@ __metadata:
     class-transformer: ^0.5.1
     class-validator: ^0.13.2
     clsx: ^1.2.1
+    colord: ^2.9.3
     compression: ^1.7.4
     constructs: ^10.1.92
     cookie-parser: ^1.4.6

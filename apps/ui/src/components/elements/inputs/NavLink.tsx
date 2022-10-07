@@ -17,12 +17,12 @@ export interface NavLinkProps extends LinkProps {
 const NavLinkComponent: React.FC<PropsWithChildren<NavLinkProps>> = ({
   appendClassName,
   children,
-  anchorProps,
   openInNewTab,
-  ...restProps
+  anchorProps,
+  ...restLinkProps
 }) => {
   return (
-    <Link {...restProps}>
+    <Link {...restLinkProps}>
       <a
         target={openInNewTab ? '_blank' : undefined}
         rel={openInNewTab ? 'noopener noreferrer' : undefined}
