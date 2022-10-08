@@ -25,10 +25,20 @@
       "files": ["*.ts", "*.tsx"],
       "extends": ["plugin:@nrwl/nx/typescript"],
       "rules": {
+        // warn on unused vars + disable warnings for variables named with an underscore prefix e.g. `_unused`
         "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
+
+        // project convention: explicitly declare types (devs must declare intent)
         "@typescript-eslint/no-inferrable-types": "off",
+
+        // project convention: all functions must have explicit return types (devs must declare intent)
+        "@typescript-eslint/explicit-function-return-type": "warn",
+
+        // project convention: all react components + aws-cdk classes should always have a corresponding *Props interface
         "@typescript-eslint/no-empty-interface": "off",
-        "@typescript-eslint/explicit-function-return-type": "warn"
+
+        // disable rule to allow a common pattern seen with certain packages e.g. clsx { ['class names']: condition }
+        "no-useless-computed-key": "off"
       }
     },
     {

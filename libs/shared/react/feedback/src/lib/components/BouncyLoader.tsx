@@ -3,9 +3,10 @@ import React from 'react'
 
 export interface BouncyLoaderProps {
   variant?: 'lighter' | 'darker'
-  // isDelayed?: boolean // idea for delayed loader
   appendClassName?: string
 }
+
+// @future idea for delayed loader/spinner e.g. 500ms -- isDelayed?: boolean
 
 /**
  * Animated loader (spinner) component that renders three bouncing circles of varying opacity.
@@ -18,8 +19,8 @@ export const BouncyLoader: React.FC<BouncyLoaderProps> = React.memo(function Bou
   appendClassName,
 }) {
   const ballClassName = clsx('w-2 h-2 rounded-full animate-bouncy-opacity', {
-    ['bg-slate-300']: variant === 'lighter',
-    ['bg-slate-500']: variant === 'darker',
+    'bg-slate-300': variant === 'lighter',
+    'bg-slate-500': variant === 'darker',
   })
 
   return (

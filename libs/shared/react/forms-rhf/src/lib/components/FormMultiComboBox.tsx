@@ -4,20 +4,15 @@ import { useController, UseControllerProps } from 'react-hook-form'
 import clsx from 'clsx'
 
 import { CheckIcon, PlusIcon, XCircleIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
+import type { FormOption } from '../types/form-option.interface'
 
 const LABELS = {
   NO_FILTER_QUERY_MATCHES_FOUND: 'No matches found',
 }
 
-export interface FormMultiComboBoxOption {
-  value: string | number
-  label: string
-  disabled?: boolean
-}
-
 export interface FormMultiComboBoxProps extends UseControllerProps {
   label: string
-  options: FormMultiComboBoxOption[]
+  options: FormOption[]
   hideLabel?: boolean
   disabled?: boolean // currently not part of react-hook-form useController/Controller
   appendClassName?: string
@@ -25,7 +20,7 @@ export interface FormMultiComboBoxProps extends UseControllerProps {
 
 export interface ComboBoxItemsButtonProps {
   label: string
-  selectedItems: FormMultiComboBoxOption[] | undefined
+  selectedItems: FormOption[] | undefined
   disabled?: boolean
   onItemDeselect: (value: string | number) => React.MouseEventHandler
 }
@@ -36,7 +31,7 @@ export interface ComboBoxFilterQueryInputButtonProps {
 }
 
 // for dev/debug purposes (see commented out usage below)
-// const SelectedItemsCommaList: React.FC<{ selectedItems: FormMultiComboBoxOption[] }> = ({ selectedItems }) => {
+// const SelectedItemsCommaList: React.FC<{ selectedItems: FormOption[] }> = ({ selectedItems }) => {
 //   return (
 //     <div className="text-sm">
 //       {selectedItems.length > 0 && <span>Selected items: {selectedItems.map((item) => item.name).join(', ')}</span>}
@@ -45,7 +40,7 @@ export interface ComboBoxFilterQueryInputButtonProps {
 // }
 
 interface ComboBoxSelectedItemPillProps {
-  item: FormMultiComboBoxOption
+  item: FormOption
   disabled?: boolean
   onItemDeselect: (value: string | number) => React.MouseEventHandler
 }
@@ -57,7 +52,7 @@ const ComboBoxSelectedItemPill: React.FC<ComboBoxSelectedItemPillProps> = ({ ite
       className={clsx(
         'group inline-flex items-center text-slate-800 bg-slate-200 transition-colors py-1.5 pl-2 leading-none rounded-md text-sm fx-focus-ring',
         {
-          ['hover:text-slate-700 hover:bg-error-200']: !disabled,
+          'hover:text-slate-700 hover:bg-error-200': !disabled,
         },
       )}
       onClick={onItemDeselect(item.value)}
@@ -66,7 +61,7 @@ const ComboBoxSelectedItemPill: React.FC<ComboBoxSelectedItemPillProps> = ({ ite
       <span className="inline-block flex-1">{item.label}</span>
       <span className="inline-block pl-1.5 pr-2">
         <XCircleIcon
-          className={clsx('h-4 w-4 text-slate-400 pt-0.5', { ['group-hover:text-error']: !disabled })}
+          className={clsx('h-4 w-4 text-slate-400 pt-0.5', { 'group-hover:text-error': !disabled })}
           aria-hidden="true"
         />
       </span>
@@ -94,7 +89,7 @@ const ComboBoxItemsButton: React.FC<ComboBoxItemsButtonProps> = ({
     >
       <span className="block">
         {selectedItems && !!selectedItems.length ? (
-          <ul className={clsx('inline-flex space-x-2 list-none py-1.5', { ['opacity-70']: disabled })}>
+          <ul className={clsx('inline-flex space-x-2 list-none py-1.5', { 'opacity-70': disabled })}>
             {selectedItems.map((item) => (
               <li key={`${item.value}-${item.label}`}>
                 <ComboBoxSelectedItemPill item={item} onItemDeselect={onItemDeselect} />
@@ -108,7 +103,7 @@ const ComboBoxItemsButton: React.FC<ComboBoxItemsButtonProps> = ({
       <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
         <ChevronUpDownIcon
           className={clsx('h-5 w-5 text-slate-400', {
-            ['group-hover:text-slate-600 group-active:text-slate-800']: !!(selectedItems && selectedItems.length),
+            'group-hover:text-slate-600 group-active:text-slate-800': !!(selectedItems && selectedItems.length),
           })}
           aria-hidden="true"
         />
@@ -128,7 +123,7 @@ const ComboBoxFilterQueryInputButton: React.FC<ComboBoxFilterQueryInputButtonPro
         onChange={onFilterQueryChange}
         placeholder="Select Option&hellip;"
         disabled={disabled}
-        // displayValue={(items: FormMultiComboBoxOption[]) => items.map((item) => item.name).join(', ')}
+        // displayValue={(items: FormOption[]) => items.map((item) => item.name).join(', ')}
       />
       <ComboBox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
         <ChevronUpDownIcon className="h-5 w-5 text-slate-400" aria-hidden="true" />
@@ -139,7 +134,7 @@ const ComboBoxFilterQueryInputButton: React.FC<ComboBoxFilterQueryInputButtonPro
 
 export interface ComboBoxFilterQuerySelectionButtonProps {
   label: string
-  selectedItems: FormMultiComboBoxOption[]
+  selectedItems: FormOption[]
   disabled?: boolean
   onFilterQueryChange: (event: React.ChangeEvent<HTMLInputElement>) => void
   onItemDeselect: (value: string | number) => React.MouseEventHandler
@@ -161,7 +156,7 @@ const ComboBoxFilterQuerySelectionButton: React.FC<ComboBoxFilterQuerySelectionB
     <div className="relative flex fx-input-border" tabIndex={0}>
       <div className="flex flex-wrap flex-1 space-x-2 py-2 px-3">
         {!!selectedItems.length && (
-          <ul className={clsx('inline-flex space-x-2 list-none py-1.5', { ['opacity-70']: disabled })}>
+          <ul className={clsx('inline-flex space-x-2 list-none py-1.5', { 'opacity-70': disabled })}>
             {selectedItems.map((item) => (
               <li key={`${item.value}-${item.label}`}>
                 <ComboBoxSelectedItemPill item={item} onItemDeselect={onItemDeselect} />
@@ -207,7 +202,7 @@ export const FormMultiComboBox: React.FC<FormMultiComboBoxProps> = ({
   ...restReactHookFormProps
 }) => {
   const [filterQuery, setFilterQuery] = useState<string>('')
-  const [stableOptions, setStableOptions] = useState<FormMultiComboBoxOption[]>(options)
+  const [stableOptions, setStableOptions] = useState<FormOption[]>(options)
 
   const {
     field,
@@ -223,24 +218,22 @@ export const FormMultiComboBox: React.FC<FormMultiComboBoxProps> = ({
     // and this will result in a duplicate key violation (among other problems) if the user selects a selected item vs. expected deselect behavior
     //
     // one alternative is to always use primitive values such as id/uuid with headlessui but this can make things less flexible
-    const matched: FormMultiComboBoxOption[] = options.map((option) => {
-      const fieldMatchedOption = ((field.value ?? []) as FormMultiComboBoxOption[]).find(
-        (item) => item.value === option.value,
-      )
+    const matched: FormOption[] = options.map((option) => {
+      const fieldMatchedOption = ((field.value ?? []) as FormOption[]).find((item) => item.value === option.value)
       return fieldMatchedOption ?? option
     })
 
     setStableOptions(matched)
   }, [options, field.value])
 
-  // const filteredItems: FormMultiComboBoxOption[] =
+  // const filteredItems: FormOption[] =
   //   filterQuery === ''
   //     ? options
   //     : options.filter((item) => {
   //         return item.name.toLowerCase().includes(filterQuery.toLowerCase())
   //       })
 
-  const filteredItems: FormMultiComboBoxOption[] =
+  const filteredItems: FormOption[] =
     filterQuery === ''
       ? stableOptions
       : stableOptions.filter((item) => {
@@ -255,7 +248,7 @@ export const FormMultiComboBox: React.FC<FormMultiComboBoxProps> = ({
     (value: string | number): React.MouseEventHandler =>
       (event: React.MouseEvent) => {
         event.stopPropagation()
-        field.onChange(field.value.filter((item: FormMultiComboBoxOption) => item.value !== value))
+        field.onChange(field.value.filter((item: FormOption) => item.value !== value))
       },
     [field],
   )

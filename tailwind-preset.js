@@ -176,9 +176,10 @@ module.exports = {
       // const buttonTargets = `button, [type='button'], [type='reset'], [type='submit']`
 
       addBase({
-        // always show scrollbar to avoid horizontal jank on Windows PC's during loading + modals + transitions
+        // always show scrollbar to help avoid horizontal jank especially on Win/PC's during loading/modals/transitions
         body: {
           overflowY: 'scroll',
+          scrollBehavior: 'smooth',
         },
         main: {
           '@apply text-slate-900': {},

@@ -4,19 +4,14 @@ import { Listbox, Transition } from '@headlessui/react'
 import { useController, type UseControllerProps } from 'react-hook-form'
 
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
-
-export interface FormListBoxOption {
-  value: string | number
-  label: string
-  disabled?: boolean
-}
+import type { FormOption } from '../types/form-option.interface'
 
 // React.ComponentPropsWithoutRef<'select'> {
 export interface FormListBoxProps extends UseControllerProps {
   name: string
   label: string
   helperText?: string
-  options: FormListBoxOption[]
+  options: FormOption[]
   hideLabel?: boolean
   appendClassName?: string
   placeholder?: string
@@ -71,8 +66,8 @@ export const FormListBox: React.FC<FormListBoxProps> = ({
               >
                 <span
                   className={clsx('block truncate', {
-                    ['text-palette-form-input']: !!field.value,
-                    ['text-palette-form-placeholder']: !field.value,
+                    'text-palette-form-input': !!field.value,
+                    'text-palette-form-placeholder': !field.value,
                   })}
                 >
                   {field.value
@@ -82,9 +77,7 @@ export const FormListBox: React.FC<FormListBoxProps> = ({
                 <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                   <ChevronUpDownIcon
                     className={clsx('h-5 w-5 text-slate-400', {
-                      ['group-hover:text-slate-600 group-active:text-palette-form-input']: !!(
-                        options && options.length
-                      ),
+                      'group-hover:text-slate-600 group-active:text-palette-form-input': !!(options && options.length),
                     })}
                     aria-hidden="true"
                   />

@@ -1,4 +1,5 @@
 {
   "name": "@firx/react-forms-rhf",
+  "description": "React form components integrated with react-hook-form",
   "version": "0.0.1"
 }

@@ -4,7 +4,7 @@ import { useFormContext } from 'react-hook-form'
 
 import { useMergedRef } from '@firx/react-hooks'
 import { ExclamationCircleIcon } from '@heroicons/react/24/outline'
-import type { FormElementCommonProps } from '../../../types/components/form-element-common-props.interface'
+import type { FormElementCommonProps } from '../types/form-element-common-props.interface'
 
 export interface FormInputProps extends Omit<React.ComponentPropsWithRef<'input'>, 'name'>, FormElementCommonProps {
   /**
@@ -57,7 +57,7 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(func
       className={clsx(
         'group',
         {
-          ['opacity-80']: restProps.disabled,
+          'opacity-80': restProps.disabled,
         },
         appendClassName,
       )}
@@ -84,11 +84,11 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(func
               ? 'bg-slate-100 cursor-not-allowed' // focus:ring-0 focus:border-slate-300
               : 'bg-white',
             {
-              ['animate-pulse cursor-progress']: isSubmitting,
+              'animate-pulse cursor-progress': isSubmitting,
               // editable field + no error
-              ['border-slate-300']: !readOnly && !errors[name],
+              'border-slate-300': !readOnly && !errors[name],
               // editable field + error
-              ['border-error-400']: !readOnly && errors[name],
+              'border-error-400': !readOnly && errors[name],
             },
           )}
           aria-label={hideLabel ? label : undefined}

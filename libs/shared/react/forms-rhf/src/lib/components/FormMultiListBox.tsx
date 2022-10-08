@@ -2,11 +2,8 @@ import React from 'react'
 import clsx from 'clsx'
 import { useController, type UseControllerProps } from 'react-hook-form'
 import { Listbox, Transition } from '@headlessui/react'
-
 import { CheckIcon, ChevronUpDownIcon, PlusIcon } from '@heroicons/react/20/solid'
-
-import type { FormListBoxOption } from './FormListBox'
-import { ActionButton } from '../inputs/ActionButton'
+import type { FormOption } from '../types/form-option.interface'
 
 export interface FormMultiListBoxProps extends UseControllerProps {
   name: string
@@ -15,7 +12,7 @@ export interface FormMultiListBoxProps extends UseControllerProps {
   selectedCountLabelPlural?: string // e.g. `${count} ${selectedCountLabel}s` falls back to `label` if not provided
   placeholder?: string
   helperText?: string
-  options: FormListBoxOption[]
+  options: FormOption[]
   hideLabel?: boolean
   disabled?: boolean
   appendClassName?: string
@@ -86,8 +83,8 @@ export const FormMultiListBox: React.FC<FormMultiListBoxProps> = ({
                 >
                   <span
                     className={clsx('block truncate', {
-                      ['text-palette-form-input']: !!(Array.isArray(field.value) && field.value.length),
-                      ['text-palette-form-placeholder']:
+                      'text-palette-form-input': !!(Array.isArray(field.value) && field.value.length),
+                      'text-palette-form-placeholder':
                         !field.value || (Array.isArray(field.value) && field.value.length === 0),
                     })}
                   >
@@ -114,15 +111,16 @@ export const FormMultiListBox: React.FC<FormMultiListBoxProps> = ({
                 </Listbox.Button>
                 {typeof onAddItemClick === 'function' && (
                   <div className="flex items-stretch">
-                    <ActionButton
-                      variant="outline"
-                      border="thin"
-                      appendClassName="min-w-content ml-2"
+                    <button
+                      type="button"
+                      className={clsx(
+                        'fx-button-base fx-button-thin-border fx-button-outline-primary min-w-content ml-2',
+                      )}
                       onClick={onAddItemClick}
                     >
                       <span className="sr-only">{LABELS.ADD_ITEM}</span>
                       <PlusIcon className="h-5 w-5" aria-hidden="true" />
-                    </ActionButton>
+                    </button>
                   </div>
                 )}
               </div>

@@ -2,17 +2,17 @@ import React, { useId } from 'react'
 import clsx from 'clsx'
 import { useFormContext } from 'react-hook-form'
 
-import { Spinner } from '../feedback/Spinner'
-import type { ButtonCommonProps } from '../../../types/components/button-common-props.interface'
+import { Spinner } from '@firx/react-feedback'
+import type { ButtonCommonProps } from '../types/button-common-props.interface'
 
 export interface FormButtonProps
   extends Exclude<ButtonCommonProps, 'isSubmitting'>,
     React.ComponentPropsWithRef<'button'> {
   /**
-   * Explicitly set the underlying `button` element's `type` prop to protect against cross-browser corner-cases.
-   * The default type of a `FormButton` is "submit".
+   * The `type` prop of the underlying `button` element is explicitly set to avoid certain cross-browser
+   * corner-case behaviors. Default type: "submit".
    */
-  type: React.ComponentPropsWithRef<'button'>['type']
+  type?: React.ComponentPropsWithRef<'button'>['type']
 }
 
 /**
@@ -52,16 +52,16 @@ export const FormButton = React.forwardRef<HTMLButtonElement, FormButtonProps>(f
           'animate-pulse': isLoading || isSubmitting,
 
           // border style
-          ['fx-button-standard-border']: border === 'standard',
-          ['fx-button-thin-border']: border === 'thin',
+          'fx-button-standard-border': border === 'standard',
+          'fx-button-thin-border': border === 'thin',
 
           // button variant styles
-          ['fx-button-solid-primary']: variant === 'solid' && !renderDisabled,
-          ['fx-button-solid-primary-disabled']: variant === 'solid' && renderDisabled,
-          ['fx-button-outline-primary']: variant === 'outline' && !renderDisabled,
-          ['fx-button-outline-primary-disabled']: variant === 'outline' && renderDisabled,
-          ['fx-button-transparent-primary']: variant === 'transparent' && !renderDisabled,
-          ['fx-button-transparent-primary-disabled']: variant === 'transparent' && renderDisabled,
+          'fx-button-solid-primary': variant === 'solid' && !renderDisabled,
+          'fx-button-solid-primary-disabled': variant === 'solid' && renderDisabled,
+          'fx-button-outline-primary': variant === 'outline' && !renderDisabled,
+          'fx-button-outline-primary-disabled': variant === 'outline' && renderDisabled,
+          'fx-button-transparent-primary': variant === 'transparent' && !renderDisabled,
+          'fx-button-transparent-primary-disabled': variant === 'transparent' && renderDisabled,
         },
         appendClassName,
       )}
@@ -74,7 +74,7 @@ export const FormButton = React.forwardRef<HTMLButtonElement, FormButtonProps>(f
           <div className="inline-flex items-center justify-center">{children}</div>
         </>
       ) : (
-        <>{children}</>
+        children
       )}
     </button>
   )
