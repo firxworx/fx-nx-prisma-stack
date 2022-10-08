@@ -5,7 +5,7 @@ import { BsJoystick } from 'react-icons/bs'
 
 import { PageHeading } from '../../components/elements/headings/PageHeading'
 import { useBoxProfilesQuery } from '../../api/hooks/box-profiles'
-import { Spinner } from '../../components/elements/feedback/Spinner'
+import { Spinner } from '@firx/react-feedback'
 import { Heading } from '../../components/elements/headings/Heading'
 import { NavLink } from '../../components/elements/inputs/NavLink'
 // import { useBoxContext } from '../../context/BoxContextProvider'
