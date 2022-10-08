@@ -52,6 +52,9 @@ const isPublicRoute = (routerPath: string): boolean =>
         route === '/' ? false : routerPath.startsWith(route),
       )
 
+/**
+ * Project parent with top-level context providers including global configuration of react-query.
+ */
 const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router }) => {
   const app = useApplicationContext()
 
@@ -160,6 +163,9 @@ const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router }) => {
   )
 }
 
+/**
+ * Custom NextJS App.
+ */
 function CustomApp({ Component, pageProps, router }: AppProps): JSX.Element {
   const [appConfig] = useState<AppConfig>({
     keyRoutes: {

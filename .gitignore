@@ -21,6 +21,7 @@
 /**/.env
 /**/.env.*
 !/**/.env.sample
+!/**/.env.test
 !/apps/ui/.env.development
 
 # generated files e.g. prisma client (database)
@@ -41,7 +42,7 @@ cdk.context.json
 /wip
 /apps/**/*/wip
 /libs/**/*/wip
-/scripts/**/*/wip
+/scripts/wip
 
 # dev workflow
 /db-dumps
