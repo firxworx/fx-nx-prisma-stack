@@ -1,7 +1,7 @@
 import React, { type PropsWithChildren } from 'react'
 import clsx from 'clsx'
 
-import { Spinner } from '../feedback/Spinner'
+import { Spinner } from '@firx/react-feedback'
 import type { ButtonCommonProps } from '../../../types/components/button-common-props.interface'
 
 export interface ActionButtonProps

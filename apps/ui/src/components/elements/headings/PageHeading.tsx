@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { BouncyLoader } from '../feedback/BouncyLoader'
+import { BouncyLoader } from '@firx/react-feedback'
 
 export interface PageHeadingProps {
   subHeading?: string

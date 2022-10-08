@@ -76,8 +76,8 @@ export const LinkableTabs: React.FC = () => {
             {({ selected }): JSX.Element => (
               <a
                 className={clsx(tabClassName, {
-                  ['']: selected && !hideTabs, // @todo add tab color scheme
-                  ['bg-transparent']: !(selected && !hideTabs),
+                  // ['']: selected && !hideTabs, // @todo add tab color scheme
+                  'bg-transparent': !(selected && !hideTabs),
                 })}
               >
                 {`${id.charAt(0).toUpperCase()}${id.slice(1)}`}
@@ -90,7 +90,7 @@ export const LinkableTabs: React.FC = () => {
         {tabs.map((id) => {
           // @todo complete tab panels
           return (
-            <Tab.Panel key={id} className={clsx('rounded-sm fx-focus-ring', { ['hidden']: hideTabs })}>
+            <Tab.Panel key={id} className={clsx('rounded-sm fx-focus-ring', { hidden: hideTabs })}>
               <div>I am tab {id}</div>
             </Tab.Panel>
           )

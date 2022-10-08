@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 import clsx from 'clsx'
 
-import { Spinner } from '../../elements/feedback/Spinner'
+import { Spinner } from '@firx/react-feedback'
 import { getYouTubeThumbUrl, YouTubeVideoQuality } from '../../../lib/videos/youtube'
 
 export interface VideoThumbnailProps {

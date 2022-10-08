@@ -2,7 +2,7 @@ import React, { ChangeEvent, useMemo } from 'react'
 import { Cell, ColumnDef, flexRender, getCoreRowModel, Row, useReactTable } from '@tanstack/react-table'
 import { debounce } from 'lodash'
 
-import { FormInput } from '../forms/FormInput'
+import { FormInput } from '@firx/react-forms-rhf'
 import { SkeletonLoaderRows } from './skeletons/SkeletonLoaderRows'
 
 // type PrimitiveType = string | Symbol | number | boolean

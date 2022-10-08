@@ -8,7 +8,7 @@ import { RiPlayList2Line } from 'react-icons/ri'
 import type { ApiParentContext } from '../../../../api/types/common.types'
 import type { BoxProfileChildQueryContext } from '../../../../types/box-profiles.types'
 import { VideoGroupDto } from '../../../../types/videos.types'
-import { Spinner } from '../../../elements/feedback/Spinner'
+import { Spinner } from '@firx/react-feedback'
 import { OptionsMenu } from '../menus/OptionsMenu'
 import { ToggleSwitch, ToggleSwitchProps } from '../../../elements/inputs/ToggleSwitch'
 
