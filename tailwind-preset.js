@@ -4,7 +4,7 @@ const plugin = require('tailwindcss/plugin')
 const defaultTheme = require('tailwindcss/defaultTheme')
 
 const colord = require('colord').colord
-// const alpha = (c, value) => colord(c).alpha(value).toRgbString()
+const alpha = (c, value) => colord(c).alpha(value).toRgbString()
 const lighten = (c, value) => colord(c).lighten(value).toRgbString()
 const darken = (c, value) => colord(c).darken(value).toRgbString()
 
@@ -74,13 +74,52 @@ module.exports = {
           800: '#2d495f',
           900: '#293e51',
         },
-        // palette: {},
         a11y: {
           ring: {
             highlight: colors.amber[300],
             DEFAULT: colors.sky[100],
             dark: colors.sky[200], // use if component's background color is similar to DEFAULT
             line: colors.slate[300], // only if required for contrast e.g. ToggleSwitch
+          },
+        },
+        P: {
+          a11y: {
+            highlight: {
+              bright: colors.amber[300],
+              light: colors.amber[100],
+            },
+            focus: {
+              darker: alpha(colors.sky[200], 0.25),
+              DEFAULT: colors.sky[100],
+              ring: {
+                DEFAULT: colors.sky[100],
+                darker: alpha(colors.sky[200], 0.25),
+              },
+            },
+          },
+          heading: {
+            DEFAULT: colors.sky[900],
+          },
+          subheading: {
+            DEFAULT: lighten(colors.sky[900], 0.05),
+          },
+          neutral: {
+            ...colors.slate,
+          },
+          action: {
+            primary: {
+              toggle: {
+                DEFAULT: lighten(colors.sky[900], 0.1),
+                hover: lighten(colors.sky[900], 0.15),
+              },
+              DEFAULT: colors.sky[900],
+              hover: darken(colors.sky[900], 0.1),
+            },
+          },
+          spinner: {
+            primary: {
+              DEFAULT: alpha(colors.sky[900], 0.75),
+            },
           },
         },
         button: {
@@ -303,18 +342,22 @@ module.exports = {
           '@apply first:rounded-t-md first:border-t first:border-b-0 last:rounded-b-md last:border-t-0 last:border-b':
             {},
         },
-        // if parent has `-space-y-px` (this variant is useful if borders of individual items in the set may be highlighted)
-        '.fx-rounded-set-md-parent': {
-          '@apply border': {},
-          '@apply first:rounded-t-md last:rounded-b-md': {},
-        },
-        // apply to parent containing set of vertical items (e.g. ul) for overall round borders + divider between each
-        '.fx-set-parent-rounded-md': {
+        // apply to parent of a set of stacked items (e.g. ul list) to add a rounded border + dividers between children
+        '.fx-stack-set-parent-rounded-border-divided-children': {
           '@apply -space-y-px': {},
           '&>*': {
-            // tailwind 3.1 arbitrary variants e.g. className="[&>a]:text-black"
-            '@apply border': {},
+            // note in tailwind 3.1 arbitrary variants can also be written inline e.g. className="[&>a]:text-black"
+            '@apply border -space-y-px': {}, //
             '@apply first:rounded-t-md last:rounded-b-md': {},
+
+            // use of -space-y-px prevents double-borders between list items but a top or bottom border of an
+            // active item may get hidden by an inactive one (in cases where active item borders may be a different
+            // color). this can be mitigated by adding a higher z-index either via .fx-active or adding z-10
+            // to the className as long as it doesn't interfere with the stacking context of any dropdowns within the
+            // components.
+            '&.fx-active': {
+              // '@apply z-10': {},
+            },
           },
         },
       })
