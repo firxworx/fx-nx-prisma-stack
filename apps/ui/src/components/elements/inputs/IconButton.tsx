@@ -28,7 +28,7 @@ const className = clsx(
   'text-action-primary hover:text-action-primary-hover',
   'fx-focus-ring-form focus:shadow-sm hover:shadow-sm hover:bg-slate-50 hover:border-action-primary-alpha',
   'border-slate-300 text-sm bg-white/75',
-  'transition-colors focus:bg-slate-50 focus:text-action-primary',
+  'transition-all focus:bg-slate-50 focus:text-action-primary',
   {
     'group-hover:bg-slate-50 group-hover:border-action-primary-alpha': true,
   },
