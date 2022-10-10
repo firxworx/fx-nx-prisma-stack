@@ -32,6 +32,7 @@ export enum ModalVariant {
 
 export interface ModalBodyProps {
   title?: string
+  subtitle?: string
   variant?: ModalVariant
   action?: () => void
   actionLabel?: string
@@ -57,6 +58,7 @@ export const MODAL_LABELS = {
  */
 export const ModalBody: React.FC<React.PropsWithChildren<ModalBodyProps & ModalBodyContextProps>> = ({
   title,
+  subtitle,
   variant = ModalVariant.DEFAULT,
   action,
   actionLabel,
@@ -113,7 +115,7 @@ export const ModalBody: React.FC<React.PropsWithChildren<ModalBodyProps & ModalB
           leave="ease-in duration-200"
           leaveFrom="opacity-100 translate-y-0 sm:scale-100"
           leaveTo="opacity-0 translate-y-4 sm:translate-y-12 sm:scale-95"
-          className="relative transform transition-all inline-block align-bottom sm:align-middle sm:my-8 xxs:min-w-[18rem] sm:w-full sm:max-w-lg text-left"
+          className="relative transform transition-all inline-block align-bottom sm:align-middle sm:my-8 xxs:min-w-[18rem] sm:w-full sm:max-w-xl md:max-w-2xl text-left"
         >
           <FocusTrap
             active={focusActive}
@@ -133,7 +135,7 @@ export const ModalBody: React.FC<React.PropsWithChildren<ModalBodyProps & ModalB
               ref={modalRef}
               tabIndex={-1}
               className={clsx(
-                // note: adding overflow-hidden risks hiding open drop-down menus
+                // note: adding overflow-hidden risks hiding portions of open drop-down menus
                 'p-4 sm:p-6 rounded-lg text-left bg-white focus:outline-none fx-modal-body-after-shadow',
                 {
                   // add shadow to ::after w/ opacity transition (refer to '.fx-modal-body-after-shadow' in preset)
@@ -158,13 +160,15 @@ export const ModalBody: React.FC<React.PropsWithChildren<ModalBodyProps & ModalB
                     <div>
                       <ModalBodyVariantIcon variant={variant} />
                       <div>
-                        <h3
-                          className="mb-4 text-lg font-medium leading-6 text-center text-heading-primary"
-                          id={headingId}
-                        >
+                        <h3 id={headingId} className="text-lg font-medium leading-6 text-center text-P-heading">
                           {title}
                         </h3>
-                        <div className="text-base text-slate-500">{children}</div>
+                        {!!subtitle && (
+                          <h4 className="mb-4 font-normal text-P-subheading italic text-center tracking-tight leading-tight">
+                            {subtitle}
+                          </h4>
+                        )}
+                        <div className="mt-4 text-base">{children}</div>
                       </div>
                     </div>
                     {(variant !== ModalVariant.FORM || action) && (
