@@ -47,12 +47,7 @@ const InnerForm: React.FC<{
   return (
     <form onSubmit={onSubmit} className={clsx('w-full', { ['animate-pulse']: isLoading })}>
       <div className="grid grid-cols-1 gap-2 xs:gap-4">
-        <FormInput
-          name="name"
-          label="Playlist Name"
-          placeholder="Playlist Name"
-          validationOptions={{ required: true }}
-        />
+        <FormInput name="name" label="Name" placeholder="Playlist Name" validationOptions={{ required: true }} />
         {!!videoSelectOptions?.length && (
           <FormMultiListBox
             name="videos"

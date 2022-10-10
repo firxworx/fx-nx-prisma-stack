@@ -48,12 +48,13 @@ export function useVideoGroupsDataQuery({
   )
 }
 
-export function useVideoGroupQuery({
-  parentContext,
-  uuid,
-}: ParentContext & { uuid: string | undefined }): UseQueryResult<VideoGroupDto> {
+export function useVideoGroupQuery(
+  { parentContext, uuid }: ParentContext & { uuid: string | undefined },
+  initialData?: VideoGroupDto,
+): UseQueryResult<VideoGroupDto> {
   return useQuery<VideoGroupDto>(cacheKeys.detail.unique(uuid), () => fetchVideoGroup({ parentContext, uuid }), {
     enabled: !!uuid?.length && !!parentContext?.boxProfileUuid?.length,
+    ...(initialData ? { initialData: { ...initialData } } : {}),
   })
 }
 

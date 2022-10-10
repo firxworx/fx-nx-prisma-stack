@@ -88,7 +88,7 @@ export const VideosManager: React.FC<VideosManagerProps> = ({ parentContext }) =
       {videosQuery.isLoading && <Spinner />}
       {videosQuery.isSuccess && !!videos?.length && (
         <>
-          <div className="mb-4 mt-2">
+          <div className="mb-6">
             <ManagerControls
               labels={{
                 search: {

@@ -104,8 +104,8 @@ const GrayFilter: React.FC<React.PropsWithChildren> = ({ children }) => (
 //  * Renders a border with consistent round corners and _no_ 1-2px gaps (although there is minor
 //  * but tolerable spillover from underlying elements at different scales).
 //  *
-//  * This component is a workaround for having borders around video items that render with gaps,
-//  * presumably due to grid + 16:9 ratio, which appears only when borders are applied.
+//  * This component was a workaround for having borders around video items that render with gaps,
+//  * presumably due to grid + 16:9 ratio that appeared only when borders are applied.
 //  */
 // const AbsoluteRoundBorder: React.FC<React.PropsWithChildren> = ({ children }) => {
 //   return (
@@ -126,18 +126,17 @@ const GrayFilter: React.FC<React.PropsWithChildren> = ({ children }) => (
  * Video thumb caption that displays video name.
  */
 const VideoCaption: React.FC<VideoCaptionProps> = ({ video, hasBorder }) => {
-  const borderClassName = clsx('border-b border-l border-r border-slate-200 group-hover:border-slate-400')
+  const borderClassName = clsx('border-b border-l border-r border-P-neutral-200 group-hover:border-P-neutral-400')
 
   return (
     <div
       className={clsx(
-        'absolute bottom-0 left-0 right-0 text-sm sm:text-base px-2 py-2 sm:px-4 sm:py-4 bg-slate-700 bg-opacity-85',
-        'group-hover:bg-opacity-60 transition-all',
-        'rounded-bl-md rounded-br-md',
-        'text-white',
+        'absolute bottom-0 left-0 right-0 px-2 py-2 sm:px-4 sm:py-4 rounded-bl-md rounded-br-md',
+        'group-hover:bg-opacity-60',
+        'text-sm sm:text-base sm:leading-snug',
+        'text-white bg-P-neutral-700 bg-opacity-85 transition-all',
         {
           [borderClassName]: hasBorder,
-          // ['border-2 border-transparent']: !hasBorder,
         },
       )}
     >

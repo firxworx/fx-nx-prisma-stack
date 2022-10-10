@@ -43,6 +43,7 @@ cdk.context.json
 /apps/**/*/wip
 /libs/**/*/wip
 /scripts/wip
+TASKS*.md
 
 # dev workflow
 /db-dumps
