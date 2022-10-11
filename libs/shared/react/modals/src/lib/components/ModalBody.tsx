@@ -154,7 +154,7 @@ export const ModalBody: React.FC<React.PropsWithChildren<ModalBodyProps & ModalB
               )}
               <div>
                 {variant === ModalVariant.BLANK ? (
-                  <>{children}</>
+                  children
                 ) : (
                   <>
                     <div>

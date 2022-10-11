@@ -25,7 +25,7 @@ const ScrollLock: React.FC<{ modalCount: number }> = ({ modalCount }) => {
     }
   }, [modalCount, scrollbarWidth])
 
-  return <></>
+  return null
 }
 
 /**

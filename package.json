@@ -35,6 +35,7 @@
     "test:affected": "nx affected:test --all --codeCoverage --skip-nx-cache",
     "test:ui": "nx test ui",
     "test:api": "nx test api",
+    "test:react-libs": "nx run-many --target=test --projects=shared-react-feedback,shared-react-forms-rhf,shared-react-hooks,shared-react-modals --parallel",
     "prebuild": "yarn prisma:generate",
     "prisma:generate": "yarn dotenv -e apps/api/.env yarn prisma generate --schema apps/api/prisma/schema.prisma",
     "prisma:migrate": "yarn dotenv -e apps/api/.env yarn prisma migrate --schema apps/api/prisma/schema.prisma",

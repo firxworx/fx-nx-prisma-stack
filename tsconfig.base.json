@@ -21,7 +21,8 @@
       "@firx/op-data": ["libs/shared/data/op/src/index.ts"],
       "@firx/react-feedback": ["libs/shared/react/feedback/src/index.ts"],
       "@firx/react-forms-rhf": ["libs/shared/react/forms-rhf/src/index.ts"],
-      "@firx/react-hooks": ["libs/shared/react/hooks/src/index.ts"]
+      "@firx/react-hooks": ["libs/shared/react/hooks/src/index.ts"],
+      "@firx/react-modals": ["libs/shared/react/modals/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp", "wip", "notes", "examples", "scripts"]

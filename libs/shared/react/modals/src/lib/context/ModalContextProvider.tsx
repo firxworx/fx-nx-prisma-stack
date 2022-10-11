@@ -1,8 +1,8 @@
 import React, { useRef, useState, useEffect } from 'react'
 import { useModal, ModalProvider as ReactModalHookProvider } from 'react-modal-hook'
 
-import { ModalBody, ModalBodyProps } from '../components/elements/modals/ModalBody'
-import { ModalContainer } from '../components/elements/modals/ModalContainer'
+import { ModalBody, ModalBodyProps } from '../components/ModalBody'
+import { ModalContainer } from '../components/ModalContainer'
 
 /**
  * React hook that returns an array containing functions to show and hide a modal.
