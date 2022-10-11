@@ -5,7 +5,7 @@ import { NotFoundError, PrismaClientKnownRequestError } from '@prisma/client/run
 import type { AuthUser } from '../auth/types/auth-user.type'
 import { PrismaQueryErrorCode } from './constants/prisma-query-error-code.enum'
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ConstructorType<T> = new (...args: any[]) => T
 
 export interface PrismaModelCrudServiceOptionProps {
@@ -89,7 +89,7 @@ export abstract class PrismaModelCrudService<D extends PrismaDelegate, RES_DTO, 
     }
   }
 
-  protected handleError(error: unknown) {
+  protected handleError(error: unknown): NotFoundException | unknown {
     // `NotFoundError`: thrown by select queries when configured to throw on not found
     if (error instanceof NotFoundError) {
       return new NotFoundException(error.message)

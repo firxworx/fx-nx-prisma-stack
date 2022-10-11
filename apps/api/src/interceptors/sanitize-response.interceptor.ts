@@ -1,7 +1,7 @@
 import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common'
 import { map, Observable } from 'rxjs'
 
-const PROPERTY_NAME_BLACK_LIST = ['password', 'refreshToken']
+const PROPERTY_NAME_BLACKLIST = ['password', 'refreshToken']
 
 const isObject = (input: unknown): input is Record<string, unknown> => {
   return !!input && typeof input === 'object' && !Array.isArray(input)
@@ -14,7 +14,7 @@ const sanitizeResponseValues = (value: unknown): unknown => {
 
   if (isObject(value)) {
     return Object.entries(value).map(([key, value]) => {
-      if (PROPERTY_NAME_BLACK_LIST.includes(key)) {
+      if (PROPERTY_NAME_BLACKLIST.includes(key)) {
         return [key, undefined]
       }
 

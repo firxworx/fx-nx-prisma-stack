@@ -1,26 +1,30 @@
 import React, { type PropsWithChildren } from 'react'
 import clsx from 'clsx'
 
-import { Spinner } from '../feedback/Spinner'
-import type { ButtonSharedProps } from '../../../types/components/ButtonSharedProps.interface'
+import { Spinner } from '@firx/react-feedback'
+import type { ButtonCommonProps } from '../../../types/components/button-common-props.interface'
 
 export interface ActionButtonProps
-  extends ButtonSharedProps,
+  extends ButtonCommonProps,
     Exclude<React.HTMLAttributes<HTMLButtonElement>, 'type' | 'className'> {
   /**
    * Button `type` is explicitly included and required to protect against corner-case differences across browsers.
+   * ActionButton default type is "button".
    */
   type?: React.ComponentPropsWithoutRef<'button'>['type']
 }
 
 /**
- * Reusable button component with a standard set of styles for different variants.
- * Renders an actual HTML `button` element with explicitly defined default `type` "button".
+ * Reusable button[type=button] component with a standard set of styles for different variants that matches the
+ * look-and-feel of `FormButton` + `LinkButton` components.
+ *
+ * Intended for standalone buttons with `onClick` or similar event handlers defined.
  *
  * @see FormButton for a button component integrated with react-hook-form.
  * @see LinkButton for a nextjs-compatible anchor (link) styled as a button.
  */
 export const ActionButton: React.FC<PropsWithChildren<ActionButtonProps>> = ({
+  type,
   variant,
   border,
   appendClassName,
@@ -34,6 +38,7 @@ export const ActionButton: React.FC<PropsWithChildren<ActionButtonProps>> = ({
 
   return (
     <button
+      type={type ?? 'button'}
       className={clsx(
         'fx-button-base',
         {

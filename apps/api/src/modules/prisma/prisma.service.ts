@@ -42,7 +42,7 @@ export class PrismaService
     })
   }
 
-  async onModuleInit() {
+  async onModuleInit(): Promise<void> {
     this.$on('error', (event: Prisma.LogEvent) => {
       this.logger.error(event.message, event)
     })
@@ -54,7 +54,7 @@ export class PrismaService
     await this.$connect()
   }
 
-  async enableShutdownHooks(app: INestApplication) {
+  async enableShutdownHooks(app: INestApplication): Promise<void> {
     this.$on('beforeExit', async () => {
       await app.close()
     })

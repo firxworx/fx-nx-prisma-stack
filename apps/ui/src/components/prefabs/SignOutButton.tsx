@@ -1,8 +1,9 @@
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 
-import { useAuthSignOut } from '../../api/auth'
-import { useIsMounted } from '../../hooks/useIsMounted'
+import { useIsMounted } from '@firx/react-hooks'
+
+import { useAuthSignOut } from '../../api/hooks/auth'
 import { ActionButton } from '../elements/inputs/ActionButton'
 
 export interface SignOutButtonProps {
@@ -32,7 +33,7 @@ export const SignOutButton: React.FC<SignOutButtonProps> = ({ signOutRedirectPat
     }
   }, [isSuccess, isMounted, routerPush, onSignOut, signOutRedirectPath])
 
-  const handleSignOut = async () => {
+  const handleSignOut = async (): Promise<void> => {
     if (!isMounted()) {
       return
     }

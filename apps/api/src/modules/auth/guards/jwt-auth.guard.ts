@@ -1,6 +1,7 @@
 import { ExecutionContext, Injectable } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { AuthGuard } from '@nestjs/passport'
+import type { Observable } from 'rxjs'
 
 import { FX_KEY_IS_PUBLIC_ROUTE_HANDLER } from '../decorators/public-route-handler.decorator'
 
@@ -16,7 +17,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     super()
   }
 
-  canActivate(context: ExecutionContext) {
+  canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(FX_KEY_IS_PUBLIC_ROUTE_HANDLER, [
       context.getHandler(),
       context.getClass(),

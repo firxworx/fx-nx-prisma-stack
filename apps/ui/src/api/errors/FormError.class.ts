@@ -1,5 +1,5 @@
 export class FormError extends Error {
-  private readonly status: number
+  public readonly status: number
   private readonly data?: unknown
 
   constructor(message: string, status: number, data?: unknown) {
@@ -16,7 +16,11 @@ export class FormError extends Error {
     this.data = data
   }
 
-  getErrorMessage() {
+  getErrorMessage(): string {
     return `Form submit error (${this.status}): ${this.message}`
+  }
+
+  getData(): unknown {
+    return this.data
   }
 }

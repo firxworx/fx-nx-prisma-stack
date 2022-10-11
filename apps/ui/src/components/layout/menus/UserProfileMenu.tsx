@@ -2,8 +2,8 @@ import React, { Fragment, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { Menu, Transition } from '@headlessui/react'
 import clsx from 'clsx'
-import { useAuthSignOut } from '../../../api/auth'
-import { useIsMounted } from '../../../hooks/useIsMounted'
+import { useAuthSignOut } from '../../../api/hooks/auth'
+import { useIsMounted } from '@firx/react-hooks'
 
 const DEFAULT_SIGN_OUT_REDIRECT_PATH = '/'
 
@@ -55,10 +55,10 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({ name }) => {
     <Menu as="div" className="relative">
       <Menu.Button
         className={clsx(
-          'flex items-center justify-center w-10 h-10 border-2 rounded-full',
-          'text-sm font-normal text-action-primary transition-colors',
-          'bg-slate-100 border-action-primary-darkest hover:bg-white',
-          'fx-focus-ring focus:bg-white',
+          'flex items-center justify-center w-10 h-10 border-[3px] rounded-full',
+          'text-sm font-normal text-action-primary focus:text-action-primary-hover transition-colors',
+          'bg-white/25 border-action-primary hover:bg-white',
+          'fx-focus-ring-form focus:border-action-primary-hover focus:bg-white/40',
         )}
       >
         <span className="inline-block leading-none font-semibold">{name.charAt(0).toUpperCase()}</span>
@@ -82,7 +82,7 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({ name }) => {
           <div className="divide-y divide-slate-200">
             {menuItems.map((item) => (
               <Menu.Item key={item}>
-                {({ active }) => (
+                {({ active }): JSX.Element => (
                   <button
                     className={clsx('group flex items-center w-full px-3 py-2 hover:bg-slate-100', {
                       'text-slate-600': !active,

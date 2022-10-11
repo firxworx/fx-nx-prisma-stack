@@ -1,4 +1,5 @@
-import { IsString, IsNotEmpty, MinLength } from 'class-validator'
+import { IsString, IsNotEmpty, Length } from 'class-validator'
+import { IsStrongPassword } from '../decorators/validation/is-strong-password.decorator'
 
 export class ChangePasswordDto {
   @IsString()
@@ -7,6 +8,7 @@ export class ChangePasswordDto {
 
   @IsString()
   @IsNotEmpty()
-  @MinLength(8)
+  @Length(8, 128, { message: 'Password must be between 8-128 characters long' })
+  @IsStrongPassword()
   newPassword!: string
 }

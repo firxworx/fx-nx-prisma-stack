@@ -6,7 +6,7 @@
  *
  * Acknowledgement to @kalicki2k on SO <https://stackoverflow.com/a/53952925/9171738>
  */
-export const toPascalCase = (input: string) => {
+export const toPascalCase = (input: string): string => {
   return `${input}`
     .toLowerCase()
     .replace(new RegExp(/[-_]+/, 'g'), ' ')

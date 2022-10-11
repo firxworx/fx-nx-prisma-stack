@@ -5,6 +5,7 @@ import clsx from 'clsx'
 export interface NavLinkProps extends LinkProps {
   appendClassName?: string
   anchorProps?: Exclude<React.HTMLAttributes<HTMLAnchorElement>, 'className'>
+  openInNewTab?: boolean
 }
 
 /**
@@ -16,12 +17,18 @@ export interface NavLinkProps extends LinkProps {
 const NavLinkComponent: React.FC<PropsWithChildren<NavLinkProps>> = ({
   appendClassName,
   children,
+  openInNewTab,
   anchorProps,
-  ...restProps
+  ...restLinkProps
 }) => {
   return (
-    <Link {...restProps}>
-      <a className={clsx('fx-link', appendClassName)} {...anchorProps}>
+    <Link {...restLinkProps}>
+      <a
+        target={openInNewTab ? '_blank' : undefined}
+        rel={openInNewTab ? 'noopener noreferrer' : undefined}
+        className={clsx('fx-link', appendClassName)}
+        {...anchorProps}
+      >
         {children}
       </a>
     </Link>

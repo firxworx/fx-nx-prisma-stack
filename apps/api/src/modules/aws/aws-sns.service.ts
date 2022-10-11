@@ -23,8 +23,12 @@ import {
 } from '@aws-sdk/client-sns'
 import { Injectable, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+
 import { AwsAbstractService } from './aws.abstract.service'
 
+/**
+ * WIP NestJS service for working with AWS SNS in the current AWS environment.
+ */
 @Injectable()
 export class AwsSnsService extends AwsAbstractService<SNSClient> {
   protected readonly logger = new Logger(this.constructor.name)
@@ -42,13 +46,9 @@ export class AwsSnsService extends AwsAbstractService<SNSClient> {
    * @returns
    */
   public async listTopics(nextToken?: string): Promise<ListTopicsCommandOutput> {
-    try {
-      const data = await this.client.send(new ListTopicsCommand({ NextToken: nextToken }))
+    const data = await this.client.send(new ListTopicsCommand({ NextToken: nextToken }))
 
-      return data // for unit tests
-    } catch (error: unknown) {
-      return this.handleError(error)
-    }
+    return data // for unit tests
   }
 
   // @todo setTopicAttributes
@@ -64,15 +64,11 @@ export class AwsSnsService extends AwsAbstractService<SNSClient> {
     topicName: string,
     otherParams: Omit<CreateTopicCommandInput, 'Name'>,
   ): Promise<CreateTopicCommandOutput> {
-    try {
-      const data = await this.client.send(
-        new CreateTopicCommand({ Name: topicName, ...(otherParams ? otherParams : {}) }),
-      )
+    const data = await this.client.send(
+      new CreateTopicCommand({ Name: topicName, ...(otherParams ? otherParams : {}) }),
+    )
 
-      return data // for unit tests
-    } catch (error: unknown) {
-      return this.handleError(error)
-    }
+    return data // for unit tests
   }
 
   /**
@@ -83,13 +79,9 @@ export class AwsSnsService extends AwsAbstractService<SNSClient> {
    * @returns
    */
   public async deleteTopics(topicArn: string): Promise<DeleteTopicCommandOutput> {
-    try {
-      const data = await this.client.send(new DeleteTopicCommand({ TopicArn: topicArn }))
+    const data = await this.client.send(new DeleteTopicCommand({ TopicArn: topicArn }))
 
-      return data // for unit tests
-    } catch (error: unknown) {
-      return this.handleError(error)
-    }
+    return data // for unit tests
   }
 
   /**
@@ -103,19 +95,15 @@ export class AwsSnsService extends AwsAbstractService<SNSClient> {
     message: string | Record<string, unknown>,
     otherParams: Omit<PublishCommandInput, 'TopicArn' | 'Message'>,
   ): Promise<PublishCommandOutput> {
-    try {
-      const data = await this.client.send(
-        new PublishCommand({
-          TopicArn: topicArn,
-          Message: typeof message === 'object' ? JSON.stringify(message) : message,
-          ...(otherParams ? otherParams : {}),
-        }),
-      )
+    const data = await this.client.send(
+      new PublishCommand({
+        TopicArn: topicArn,
+        Message: typeof message === 'object' ? JSON.stringify(message) : message,
+        ...(otherParams ? otherParams : {}),
+      }),
+    )
 
-      return data // unit tests
-    } catch (error: unknown) {
-      return this.handleError(error)
-    }
+    return data // unit tests
   }
 
   /**
@@ -129,23 +117,16 @@ export class AwsSnsService extends AwsAbstractService<SNSClient> {
     message: string,
     otherParams?: Omit<PublishCommandInput, 'PhoneNumber' | 'Message'>,
   ): Promise<PublishCommandOutput> {
-    try {
-      const data = await this.client.send(
-        new PublishCommand({ PhoneNumber: phoneNumber, Message: message, ...(otherParams ? otherParams : {}) }),
-      )
-      return data
-    } catch (error: unknown) {
-      return this.handleError(error)
-    }
+    const data = await this.client.send(
+      new PublishCommand({ PhoneNumber: phoneNumber, Message: message, ...(otherParams ? otherParams : {}) }),
+    )
+
+    return data
   }
 
   public async listTopicSubscriptions(topicArn: string): Promise<ListSubscriptionsByTopicCommandOutput> {
-    try {
-      const data = await this.client.send(new ListSubscriptionsByTopicCommand({ TopicArn: topicArn }))
-      return data // for unit tests
-    } catch (error) {
-      return this.handleError(error)
-    }
+    const data = await this.client.send(new ListSubscriptionsByTopicCommand({ TopicArn: topicArn }))
+    return data // for unit tests
   }
 
   /**
@@ -165,21 +146,17 @@ export class AwsSnsService extends AwsAbstractService<SNSClient> {
     returnSubsriptionArn: boolean,
     otherParams?: Omit<SubscribeCommandInput, 'Protocol' | 'TopicArn' | 'Endpoint'>,
   ): Promise<SubscribeCommandOutput> {
-    try {
-      const data = await this.client.send(
-        new SubscribeCommand({
-          Protocol: protocol,
-          TopicArn: topicArn,
-          Endpoint: endpoint,
-          ReturnSubscriptionArn: returnSubsriptionArn,
-          ...(otherParams ? otherParams : {}),
-        }),
-      )
+    const data = await this.client.send(
+      new SubscribeCommand({
+        Protocol: protocol,
+        TopicArn: topicArn,
+        Endpoint: endpoint,
+        ReturnSubscriptionArn: returnSubsriptionArn,
+        ...(otherParams ? otherParams : {}),
+      }),
+    )
 
-      return data // for unit tests
-    } catch (error) {
-      return this.handleError(error)
-    }
+    return data // for unit tests
   }
 
   /**
@@ -195,19 +172,15 @@ export class AwsSnsService extends AwsAbstractService<SNSClient> {
     topicArn: string,
     authenticateOnUnsubscribe: boolean,
   ): Promise<ConfirmSubscriptionCommandOutput> {
-    try {
-      const data = await this.client.send(
-        new ConfirmSubscriptionCommand({
-          Token: token,
-          TopicArn: topicArn,
-          AuthenticateOnUnsubscribe: authenticateOnUnsubscribe ? 'true' : 'false',
-        }),
-      )
+    const data = await this.client.send(
+      new ConfirmSubscriptionCommand({
+        Token: token,
+        TopicArn: topicArn,
+        AuthenticateOnUnsubscribe: authenticateOnUnsubscribe ? 'true' : 'false',
+      }),
+    )
 
-      return data // for unit tests
-    } catch (error) {
-      return this.handleError(error)
-    }
+    return data // for unit tests
   }
 
   /**
@@ -221,14 +194,10 @@ export class AwsSnsService extends AwsAbstractService<SNSClient> {
     subscriptionArn: string,
     otherParams?: Omit<UnsubscribeCommandInput, 'SubscriptionArn'>,
   ): Promise<UnsubscribeCommandOutput> {
-    try {
-      const data = await this.client.send(
-        new UnsubscribeCommand({ SubscriptionArn: subscriptionArn, ...(otherParams ? otherParams : {}) }),
-      )
+    const data = await this.client.send(
+      new UnsubscribeCommand({ SubscriptionArn: subscriptionArn, ...(otherParams ? otherParams : {}) }),
+    )
 
-      return data // for unit tests
-    } catch (error) {
-      return this.handleError(error)
-    }
+    return data // for unit tests
   }
 }

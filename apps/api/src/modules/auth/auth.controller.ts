@@ -9,9 +9,16 @@ import {
   Post,
   Req,
   Res,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common'
-import { Response } from 'express'
+import type { CookieOptions, Response } from 'express'
+import { ConfigService } from '@nestjs/config'
+
+import type { AuthConfig } from '../../config/types/auth-config.interface'
+import type { AppConfig } from '../../config/types/app-config.interface'
+import type { RequestWithUser } from './types/request-with-user.interface'
+import type { SanitizedUser } from './types/sanitized-user.type'
 
 import { GetUser } from './decorators/get-user.decorator'
 import { AuthService } from './auth.service'
@@ -20,8 +27,6 @@ import { RegisterUserDto } from './dto/register-user.dto'
 import { JwtAuthGuard } from './guards/jwt-auth.guard'
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard'
 import { LocalAuthGuard } from './guards/local-auth.guard'
-import { RequestWithUser } from './types/request-with-user.interface'
-import { SanitizedUser } from './types/sanitized-user.type'
 
 type SanitizedUserResponse = Pick<SanitizedUser, 'name' | 'email'>
 
@@ -33,7 +38,80 @@ export class AuthController {
     INVALID_CHANGE_PASSWORD_MATCH: 'New password cannot be the same as the old password',
   }
 
-  constructor(private readonly authService: AuthService) {}
+  private readonly authConfig: AuthConfig
+
+  constructor(private readonly configService: ConfigService<AppConfig>, private readonly authService: AuthService) {
+    const authConfig = this.configService.get<AuthConfig>('auth')
+
+    if (!authConfig) {
+      throw new Error('AuthModule unable to access auth config')
+    }
+
+    this.authConfig = authConfig
+  }
+
+  /**
+   * Helper that returns an Express `CookieOptions` object with configuration for
+   * authentication + refresh cookies.
+   *
+   * The function accepts an argument for the cookie lifetime in seconds relative to now.
+   * It performs an internal conversion to the _milliseconds from `Date.now()`_ unit required
+   * by Express.
+   *
+   * @future consider making SameSite configurable via env (values: 'lax' | 'strict' | 'none')
+   */
+  private getCookieOptions(expiresInSeconds: number): CookieOptions {
+    return {
+      secure: process.env.NODE_ENV === 'production',
+      httpOnly: true,
+      sameSite: true,
+      signed: true,
+      maxAge: expiresInSeconds * 1000,
+    }
+  }
+
+  /**
+   * Helper to set sign out cookies on the given Express `Response` object.
+   */
+  private setSignOutCookies(response: Response): void {
+    response.clearCookie('Authentication', this.getCookieOptions(0))
+    response.clearCookie('Refresh', this.getCookieOptions(0))
+  }
+
+  /**
+   * Helper to set signed Authentication + Refresh token cookies on the given Express
+   * `Response` object.
+   *
+   * If `expiresInSeconds` is not provided for a given cookie the config value obtained from
+   * the environment for that cookie will be used.
+   */
+  private setCredentialsCookies(
+    response: Response,
+    config: {
+      authentication: {
+        signedTokenPayload: string
+        expiresInSeconds?: number
+      }
+      refresh: {
+        signedTokenPayload: string
+        expiresInSeconds?: number
+      }
+    },
+  ): void {
+    const { authentication, refresh } = config
+
+    response.cookie(
+      'Authentication',
+      authentication.signedTokenPayload,
+      this.getCookieOptions(authentication.expiresInSeconds ?? this.authConfig.jwt.accessToken.expirationTime),
+    )
+
+    response.cookie(
+      'Refresh',
+      refresh.signedTokenPayload,
+      this.getCookieOptions(refresh.expiresInSeconds ?? this.authConfig.jwt.refreshToken.expirationTime),
+    )
+  }
 
   @Post('register')
   async register(@Body() dto: RegisterUserDto): Promise<SanitizedUserResponse> {
@@ -48,7 +126,7 @@ export class AuthController {
   async changePassword(
     @GetUser() user: SanitizedUser,
     @Body() dto: ChangePasswordDto,
-    @Res({ passthrough: true }) res: Response,
+    @Res({ passthrough: true }) response: Response,
   ): Promise<void> {
     this.logger.log(`User change password request: ${user.email}`)
 
@@ -56,27 +134,38 @@ export class AuthController {
       throw new BadRequestException(this.ERROR_MESSAGES.INVALID_CHANGE_PASSWORD_MATCH)
     }
 
-    res.setHeader('Set-Cookie', this.authService.buildSignOutCookies())
+    this.setSignOutCookies(response)
     return this.authService.changeUserPassword(user.email, dto)
   }
 
   @Post('sign-in')
   @UseGuards(LocalAuthGuard)
   @HttpCode(HttpStatus.OK) // override default 201
-  async signIn(@Req() request: RequestWithUser): Promise<SanitizedUserResponse> {
+  async signIn(
+    @Req() request: RequestWithUser,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<SanitizedUserResponse> {
     const { user } = request
     const { name, email } = user
 
     this.logger.log(`User sign-in: ${user.email} <${user.id}> <${user.uuid}> <${user.name}>`)
 
-    const payload = this.authService.buildJwtTokenPayload(user)
-    const authTokenCookie = this.authService.buildSignedAuthenticationTokenCookie(payload)
-    const { cookie: refreshTokenCookie, token: signedRefreshToken } =
-      this.authService.buildSignedRefreshTokenCookie(payload)
+    const payload = this.authService.createJwtTokenPayload(user)
+    const signedAuthenticationToken = await this.authService.signAuthenticationPayload(payload)
+    const signedRefreshToken = await this.authService.signRefreshPayload(payload)
 
     await this.authService.setUserRefreshTokenHash(user.email, signedRefreshToken)
 
-    request.res?.setHeader('Set-Cookie', [authTokenCookie, refreshTokenCookie])
+    this.setCredentialsCookies(response, {
+      authentication: {
+        signedTokenPayload: signedAuthenticationToken,
+        expiresInSeconds: this.authConfig.jwt.accessToken.expirationTime,
+      },
+      refresh: {
+        signedTokenPayload: signedRefreshToken,
+        expiresInSeconds: this.authConfig.jwt.refreshToken.expirationTime,
+      },
+    })
 
     return { name, email }
   }
@@ -97,41 +186,76 @@ export class AuthController {
   @Post('sign-out')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
-  async signOut(@Req() request: RequestWithUser): Promise<void> {
+  async signOut(@Req() request: RequestWithUser, @Res({ passthrough: true }) response: Response): Promise<void> {
     const { email } = request.user
     this.logger.log(`User sign-out: ${email}`)
 
     await this.authService.clearUserRefreshToken(email)
-    request.res?.setHeader('Set-Cookie', this.authService.buildSignOutCookies())
+    this.setSignOutCookies(response)
   }
 
-  // @todo upon issuing a rotated refresh token, MUST NOT extend the lifetime
-  // of the new refresh token beyond the lifetime of the initial
-  // refresh token if the refresh token has a pre-established expiration
-  // time
-  //
-  // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-browser-based-apps-05#section-8
   @Get('refresh')
   @UseGuards(JwtRefreshGuard)
   @HttpCode(HttpStatus.OK)
-  async refreshToken(@Req() request: RequestWithUser): Promise<SanitizedUserResponse> {
+  async refreshToken(
+    @Req() request: RequestWithUser,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<SanitizedUserResponse> {
+    // the expended refresh token payload is verified + decoded to implement this security recommendation:
+    // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-browser-based-apps-05#section-8
+    //
+    // requirement: when issuing a rotated refresh token it MUST NOT extend the lifetime past
+    //              that of initial refresh token expiry
+    //
+    // - `exp` claim of a signed jsonwebtoken is NumericDate format i.e. seconds since unix epoch
+    //    - https://www.npmjs.com/package/jsonwebtoken#token-expiration-exp-claim
+    // - `maxAge` of express CookieOptions is specified in milliseconds relative to now
+
+    // @future consider SameSite as env file setting (options: 'lax' | 'strict' | 'none'; `true` === 'strict')
+    // http://expressjs.com/en/resources/middleware/cookie-session.html
+
     const { user } = request
     const { name, email } = user
 
-    this.logger.log(`Auth refresh token request: ${email}`)
+    this.logger.log(`Auth refresh token request by user: ${email}`)
 
-    // issue fresh auth + refresh tokens (@see "refresh token rotation")
-    const payload = this.authService.buildJwtTokenPayload(user)
-    const authTokenCookie = this.authService.buildSignedAuthenticationTokenCookie(payload)
-    const { cookie: refreshTokenCookie, token: signedRefreshToken } =
-      this.authService.buildSignedRefreshTokenCookie(payload)
-    await this.authService.setUserRefreshTokenHash(user.email, signedRefreshToken)
+    try {
+      const payload = this.authService.createJwtTokenPayload(user)
+      const redeemedRefreshTokenDecodedPayload = await this.authService.verifyRefreshToken(
+        request.signedCookies?.Refresh,
+      )
 
-    request.res?.setHeader('Set-Cookie', [authTokenCookie, refreshTokenCookie])
+      const redeemedRefreshTokenExpiredInSeconds =
+        redeemedRefreshTokenDecodedPayload.exp - Math.floor(Date.now() / 1000)
 
-    return {
-      name,
-      email,
+      const signedAuthenticationToken = await this.authService.signAuthenticationPayload(payload)
+      const signedRefreshToken = await this.authService.signRefreshPayload(
+        payload,
+        redeemedRefreshTokenExpiredInSeconds,
+      )
+
+      await this.authService.setUserRefreshTokenHash(user.email, signedRefreshToken)
+
+      this.logger.debug(`expended refresh token exp claim value: ${redeemedRefreshTokenDecodedPayload.exp}s`)
+      this.logger.debug(`new-issue refresh token cookie maxAge is: ${redeemedRefreshTokenExpiredInSeconds}s`)
+
+      this.setCredentialsCookies(response, {
+        authentication: {
+          signedTokenPayload: signedAuthenticationToken,
+        },
+        refresh: {
+          signedTokenPayload: signedRefreshToken,
+          expiresInSeconds: redeemedRefreshTokenExpiredInSeconds,
+        },
+      })
+
+      return {
+        name,
+        email,
+      }
+    } catch (error: unknown) {
+      this.logger.error('refresh token error', error)
+      throw new UnauthorizedException()
     }
   }
 }

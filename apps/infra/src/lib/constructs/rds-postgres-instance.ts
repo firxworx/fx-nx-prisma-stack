@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { CfnOutput, Duration, RemovalPolicy } from 'aws-cdk-lib'
+import { Duration, RemovalPolicy } from 'aws-cdk-lib'
 import * as ec2 from 'aws-cdk-lib/aws-ec2'
 import * as rds from 'aws-cdk-lib/aws-rds'
 import * as logs from 'aws-cdk-lib/aws-logs'
@@ -153,7 +153,7 @@ export class RdsPostgresInstance extends FxBaseConstruct {
     // })
     // this.readReplica.connections.allowDefaultPortFromAnyIpv4()
 
-    this.printOutputs()
+    // this.printOutputs()
   }
 
   private generateDatabaseSecret(port?: number, databaseName?: string): typeof this.credentials {
@@ -225,5 +225,5 @@ export class RdsPostgresInstance extends FxBaseConstruct {
   //   iopsAlarm.addAlarmAction(new cloudwatchActions.SnsAction(topic))
   // }
 
-  private printOutputs(): void {}
+  // private printOutputs(): void {}
 }

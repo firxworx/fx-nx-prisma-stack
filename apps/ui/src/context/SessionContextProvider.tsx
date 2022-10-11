@@ -1,9 +1,10 @@
-import React, { useMemo, useContext, useState, useEffect, useCallback } from 'react'
+import React, { useMemo, useContext, useState, useCallback } from 'react'
 
-import { LOCAL_STORAGE_SESSION_CTX_FLAG_KEY, useAuthSessionQuery } from '../api/auth'
-import { isAuthSessionResult } from '../types/type-guards/auth.type-guards'
+import { LOCAL_STORAGE_SESSION_CTX_FLAG_KEY } from '../api/constants/auth'
 import type { AuthSession } from '../types/session.types'
 import type { SessionStatus } from '../types/enums/session.enums'
+import { useAuthSessionQuery } from '../api/hooks/auth'
+import { isAuthSessionResult } from '../types/type-guards/auth.type-guards'
 
 const SessionContext = React.createContext<AuthSession<SessionStatus> | undefined>(undefined)
 
@@ -17,20 +18,15 @@ const SessionContext = React.createContext<AuthSession<SessionStatus> | undefine
 export const SessionContextProvider: React.FC<{
   children: (isSessionReady: boolean) => React.ReactElement
 }> = ({ children }) => {
-  const [isQueryEnabled, setIsQueryEnabled] = useState<boolean>(true)
-  const { data: profile, refetch, error, status, invalidate, remove, ...rest } = useAuthSessionQuery(isQueryEnabled)
-
-  useEffect(() => {
+  const [isQueryEnabled, setIsQueryEnabled] = useState<boolean>((): boolean => {
     if (typeof window !== 'undefined') {
       const ctxEnabledFlag = window.localStorage.getItem(LOCAL_STORAGE_SESSION_CTX_FLAG_KEY)
-
-      if (ctxEnabledFlag === 'enabled') {
-        setIsQueryEnabled(true)
-      } else {
-        setIsQueryEnabled(false)
-      }
+      return ctxEnabledFlag === 'enabled'
     }
-  }, [])
+
+    return true
+  })
+  const { data: profile, refetch, error, status, invalidate, remove } = useAuthSessionQuery(isQueryEnabled) // ...rest
 
   const setEnabled = useCallback(
     (nextState: boolean) => {
@@ -42,7 +38,7 @@ export const SessionContextProvider: React.FC<{
     [setIsQueryEnabled],
   )
 
-  // memoize to ensure a stable context value
+  // memoize to ensure stable context value
   const contextValue: AuthSession<SessionStatus> | undefined = useMemo(() => {
     const isLoading = status === 'loading'
 
@@ -60,9 +56,10 @@ export const SessionContextProvider: React.FC<{
     }
   }, [profile, status, error, setEnabled, refetch, invalidate, remove])
 
-  // console.debug(`SessionContextProvider: [enabled, ${enabled}], [status, ${status}], [profile, ${!!profile}]`)
+  // console.log(`SessionContextProvider: [enabled, ${isQueryEnabled}], [status, ${status}], [profile, ${!!profile}]`)
+  // console.log('profile value', JSON.stringify(profile, null, 2))
 
-  const isSessionReady = isQueryEnabled && status !== 'loading' && !!profile
+  const isSessionReady = status !== 'loading' && !!profile
   return <SessionContext.Provider value={contextValue}>{children(isSessionReady)}</SessionContext.Provider>
 }
 

@@ -20,19 +20,20 @@ datasource db {
 }
 
 model User {
-  id           Int          @id @default(autoincrement())
-  uuid         String       @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  createdAt    DateTime     @default(now()) @db.Timestamptz()
-  updatedAt    DateTime     @updatedAt @db.Timestamptz()
-  verifiedAt   DateTime?    @db.Timestamptz()
-  email        String       @unique
+  id           Int       @id @default(autoincrement())
+  uuid         String    @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt    DateTime  @default(now()) @db.Timestamptz()
+  updatedAt    DateTime  @updatedAt @db.Timestamptz()
+  verifiedAt   DateTime? @db.Timestamptz()
+  email        String    @unique
   name         String
   password     String
   refreshToken String?
-  profile      UserProfile?
 
-  videos      Video[]
-  videoGroups VideoGroup[]
+  profile UserProfile?
+  app     AppProfile?
+
+  boxProfiles BoxProfile[] // @todo associate with appProfile to explore pluggability of user + authmodule
 }
 
 model UserProfile {
@@ -48,6 +49,48 @@ model UserProfile {
   locale String  @default("en-US")
 }
 
+model AppProfile {
+  id        Int      @id @default(autoincrement())
+  uuid      String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int      @unique
+}
+
+// oliviaparty accessibility hardware ("box") profile
+model BoxProfile {
+  id        Int      @id @default(autoincrement())
+  uuid      String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId Int
+
+  name    String
+  urlCode String
+
+  videos      Video[]
+  videoGroups VideoGroup[]
+
+  phraseGroups PhraseGroup[]
+}
+
+// groups of phrases for SpeechMode's
+model PhraseGroup {
+  id        Int      @id @default(autoincrement())
+  uuid      String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+
+  BoxProfile   BoxProfile @relation(fields: [boxProfileId], references: [id])
+  boxProfileId Int
+
+  phrases  Json    @default("[]") // {uuid: string, phrase: string, label: string, emoji?: string, version: string }[]
+  isActive Boolean @default(true)
+}
+
 enum VideoPlatform {
   YOUTUBE
 }
@@ -57,15 +100,16 @@ model Video {
   uuid      String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   createdAt DateTime @default(now()) @db.Timestamptz()
   updatedAt DateTime @updatedAt @db.Timestamptz()
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId    Int
+
+  boxProfile   BoxProfile @relation(fields: [boxProfileId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  boxProfileId Int
 
   name       String
   platform   VideoPlatform
   externalId String
   groups     VideoGroupsOnVideos[]
 
-  @@unique([userId, platform, externalId])
+  @@unique([boxProfileId, platform, externalId])
 }
 
 model VideoGroup {
@@ -73,14 +117,16 @@ model VideoGroup {
   uuid      String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   createdAt DateTime @default(now()) @db.Timestamptz()
   updatedAt DateTime @updatedAt @db.Timestamptz()
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId    Int
 
-  name        String
-  description String?
-  videos      VideoGroupsOnVideos[]
+  enabledAt DateTime? @db.Timestamptz()
 
-  @@unique([userId, name])
+  boxProfile   BoxProfile @relation(fields: [boxProfileId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  boxProfileId Int
+
+  name   String
+  videos VideoGroupsOnVideos[]
+
+  @@unique([boxProfileId, name])
 }
 
 model VideoGroupsOnVideos {

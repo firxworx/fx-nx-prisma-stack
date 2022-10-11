@@ -67,7 +67,7 @@ const rdsStackProd = new RdsStack(app, 'RdsStackProd', {
   ...getBaseProps(DeployStage.PRODUCTION, PROJECT_DOMAIN),
 })
 
-const projectStackProd = new ProjectStack(app, 'ProjectStackProd', {
+const _projectStackProd = new ProjectStack(app, 'ProjectStackProd', {
   env,
   description: `[${PROJECT_TAG}] - App/Project Stack`,
   vpc: coreStackProd.vpc,

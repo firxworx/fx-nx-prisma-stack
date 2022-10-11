@@ -1,4 +1,4 @@
-import { SetMetadata } from '@nestjs/common'
+import { type CustomDecorator, SetMetadata } from '@nestjs/common'
 
 export const FX_KEY_IS_PUBLIC_ROUTE_HANDLER = 'FX_KEY_IS_PUBLIC_ROUTE_HANDLER' as const
 
@@ -16,4 +16,5 @@ export const FX_KEY_IS_PUBLIC_ROUTE_HANDLER = 'FX_KEY_IS_PUBLIC_ROUTE_HANDLER' a
  *
  * @see https://docs.nestjs.com/security/authentication
  */
-export const PublicRouteHandler = () => SetMetadata(FX_KEY_IS_PUBLIC_ROUTE_HANDLER, true)
+export const PublicRouteHandler = (): CustomDecorator<typeof FX_KEY_IS_PUBLIC_ROUTE_HANDLER> =>
+  SetMetadata(FX_KEY_IS_PUBLIC_ROUTE_HANDLER, true)

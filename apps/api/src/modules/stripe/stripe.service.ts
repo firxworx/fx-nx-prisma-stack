@@ -16,7 +16,7 @@ export class StripeService {
   /**
    * Retrieve a list of Stripe Customers.
    */
-  getCustomers(params?: Stripe.CustomerListParams): Stripe.ApiListPromise<Stripe.Customer> {
+  async getCustomers(params?: Stripe.CustomerListParams): Promise<Stripe.Response<Stripe.ApiList<Stripe.Customer>>> {
     return this.stripeClient.customers.list(params)
   }
 
@@ -56,7 +56,9 @@ export class StripeService {
   /**
    * Retrieve a list of the given customer's credit cards.
    */
-  public async getCustomerCreditCards(stripeCustomerId: string) {
+  public async getCustomerCreditCards(
+    stripeCustomerId: string,
+  ): Promise<Stripe.Response<Stripe.ApiList<Stripe.PaymentMethod>>> {
     return this.stripeClient.paymentMethods.list({
       customer: stripeCustomerId,
       type: 'card',
@@ -118,7 +120,7 @@ export class StripeService {
     amount: number,
     currency: string,
     params?: Omit<Stripe.PaymentIntentCreateParams, 'customer' | 'payment_method' | 'amount' | 'currency'>,
-  ) {
+  ): Promise<Stripe.Response<Stripe.PaymentIntent>> {
     return this.stripeClient.paymentIntents.create({
       customer: stripeCustomerId,
       payment_method: paymentMethodId,
@@ -139,7 +141,7 @@ export class StripeService {
     stripeCustomerId: string,
     paymentMethodId: string,
     params?: Omit<Stripe.SetupIntentCreateParams, 'customer' | 'payment_method'>,
-  ) {
+  ): Promise<Stripe.Response<Stripe.SetupIntent>> {
     return this.stripeClient.setupIntents.create({
       customer: stripeCustomerId,
       payment_method: paymentMethodId,
@@ -147,7 +149,10 @@ export class StripeService {
     })
   }
 
-  public async createSubscription(stripeCustomerId: string, priceId: string) {
+  public async createSubscription(
+    stripeCustomerId: string,
+    priceId: string,
+  ): Promise<Stripe.Response<Stripe.Subscription>> {
     try {
       return await this.stripeClient.subscriptions.create({
         customer: stripeCustomerId,
@@ -165,7 +170,10 @@ export class StripeService {
     }
   }
 
-  public async listSubscriptions(stripeCustomerId: string, priceId: string) {
+  public async listSubscriptions(
+    stripeCustomerId: string,
+    priceId: string,
+  ): Promise<Stripe.Response<Stripe.ApiList<Stripe.Subscription>>> {
     return this.stripeClient.subscriptions.list({
       customer: stripeCustomerId,
       price: priceId,

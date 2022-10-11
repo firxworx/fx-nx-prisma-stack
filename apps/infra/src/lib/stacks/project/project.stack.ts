@@ -236,7 +236,7 @@ export class ProjectStack extends FxBaseStack {
       ec2.Port.tcp(props.database.instance.instanceEndpoint.port),
     )
 
-    const ui = new StaticUi(this, 'Ui', {
+    const _ui = new StaticUi(this, 'Ui', {
       apexDomain: this.deploy.domain,
       uri: this.deploy.domain,
       api: {

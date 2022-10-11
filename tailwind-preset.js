@@ -3,20 +3,41 @@ const plugin = require('tailwindcss/plugin')
 
 const defaultTheme = require('tailwindcss/defaultTheme')
 
-// const Color = require('color')
-// const alpha = (c, val) => Color(c).alpha(val).rgb().string()
-// const lighen = (c, val) => Color(c).lighten(val).rgb().string()
-// const darken = (c, val) => Color(c).darken(val).rgb().string()
+const colord = require('colord').colord
+const alpha = (c, value) => colord(c).alpha(value).toRgbString()
+const lighten = (c, value) => colord(c).lighten(value).toRgbString()
+const darken = (c, value) => colord(c).darken(value).toRgbString()
 
 module.exports = {
   theme: {
     screens: {
+      xxs: '315px', // 320px is about as small as a smartphone gets
       xs: '475px',
       ...defaultTheme.screens,
     },
     extend: {
+      animation: {
+        // loading bounce (refer to inline plugin `Utilities` below for animation delays)
+        'bouncy-opacity': 'bouncy-opacity 0.75s infinite alternate',
+      },
+      keyframes: {
+        'bouncy-opacity': {
+          from: {
+            opacity: 0.8,
+            transform: 'translate3d(0, 0.5rem, 0)',
+          },
+          to: {
+            opacity: 0.1,
+            transform: 'translate3d(0, -0.5rem, 0)',
+          },
+        },
+      },
       spacing: {
         1.25: '0.3125rem',
+      },
+      padding: {
+        '1/3': '33.33333%',
+        '2/3': '66.66666%',
       },
       minWidth: {
         '1/4': '25%',
@@ -28,6 +49,12 @@ module.exports = {
       },
       opacity: {
         5: '0.05',
+        85: '0.85',
+      },
+      grayscale: {
+        25: '25%',
+        50: '50%',
+        75: '75%',
       },
       // add zIndex values from 60-100 in steps of 10
       zIndex: Array.from({ length: 5 }, (_, i) => (6 + i) * 10).reduce(
@@ -35,11 +62,89 @@ module.exports = {
         {},
       ),
       colors: {
-        // palette: {},
+        fx1: {
+          50: '#f1f5f9',
+          100: '#e9eff5',
+          200: '#cedde9',
+          300: '#a3c0d6',
+          400: '#729fbe',
+          500: '#5083a7',
+          600: '#3d698c',
+          700: '#325572',
+          800: '#2d495f',
+          900: '#293e51',
+        },
+        a11y: {
+          ring: {
+            highlight: colors.amber[300],
+            DEFAULT: colors.sky[100],
+            dark: colors.sky[200], // use if component's background color is similar to DEFAULT
+            line: colors.slate[300], // only if required for contrast e.g. ToggleSwitch
+          },
+        },
+        P: {
+          a11y: {
+            highlight: {
+              bright: colors.amber[300],
+              light: colors.amber[100],
+            },
+            focus: {
+              darker: alpha(colors.sky[200], 0.25),
+              DEFAULT: colors.sky[100],
+              ring: {
+                DEFAULT: colors.sky[100],
+                darker: alpha(colors.sky[200], 0.25),
+              },
+            },
+          },
+          heading: {
+            DEFAULT: colors.sky[900],
+          },
+          subheading: {
+            DEFAULT: lighten(colors.sky[900], 0.05),
+          },
+          neutral: {
+            ...colors.slate,
+          },
+          action: {
+            primary: {
+              toggle: {
+                DEFAULT: lighten(colors.sky[900], 0.1),
+                hover: lighten(colors.sky[900], 0.15),
+              },
+              DEFAULT: colors.sky[900],
+              hover: darken(colors.sky[900], 0.1),
+            },
+          },
+          spinner: {
+            primary: {
+              DEFAULT: alpha(colors.sky[900], 0.75),
+            },
+          },
+        },
         button: {
           primary: colors.sky[700],
         },
+        heading: {
+          primary: {
+            DEFAULT: colors.sky[900],
+          },
+        },
         action: {
+          // dark high-contrast (vs light background) color
+          primary: {
+            idle: colors.slate[400],
+            half: lighten(colors.sky[900], 0.5),
+            lightest: colors.sky[500],
+            lighter: colors.sky[600],
+            DEFAULT: colors.sky[900],
+            alpha: colord(colors.sky[900]).alpha(0.5).toRgbString(),
+            hover: lighten(colors.sky[900], 0.1),
+            darker: colors.sky[800],
+            darkest: colors.sky[900],
+          },
+        },
+        brand: {
           primary: {
             lightest: colors.sky[500],
             lighter: colors.sky[600],
@@ -71,7 +176,7 @@ module.exports = {
           },
         },
         error: {
-          DEFAULT: '#cb4848',
+          DEFAULT: '#a72e2e',
           50: '#fdf3f3',
           100: '#fbe5e5',
           200: '#f8d0d0',
@@ -97,7 +202,7 @@ module.exports = {
     require('@headlessui/tailwindcss'),
 
     // add custom styles via inline custom plugin
-    plugin(function ({ addBase, addComponents }) {
+    plugin(function ({ addBase, addComponents, addUtilities }) {
       const webkitSearchInputXIconTarget =
         'input[type="search"]::-webkit-search-decoration, input[type="search"]::-webkit-search-cancel-button, input[type="search"]::-webkit-search-results-button, input[type="search"]::-webkit-search-results-decoration'
 
@@ -110,9 +215,10 @@ module.exports = {
       // const buttonTargets = `button, [type='button'], [type='reset'], [type='submit']`
 
       addBase({
-        // always show scrollbar to avoid horizontal jank on Windows PC's during loading + modals + transitions
+        // always show scrollbar to help avoid horizontal jank especially on Win/PC's during loading/modals/transitions
         body: {
           overflowY: 'scroll',
+          scrollBehavior: 'smooth',
         },
         main: {
           '@apply text-slate-900': {},
@@ -136,8 +242,11 @@ module.exports = {
           width: 0,
           height: 0,
         },
-        [formInputTargets]: {
-          '@apply fx-form-input': {},
+        // [formInputTargets]: {
+        //   '@apply fx-form-input': {},
+        // },
+        strong: {
+          '@apply font-medium text-slate-800': {},
         },
         // [formInputFocusTargets]: {
         // }
@@ -147,10 +256,21 @@ module.exports = {
           '@apply max-w-6xl': {},
         },
         '.fx-layout-padding-x': {
-          '@apply px-0 xs:px-4 sm:px-6 xl:px-8': {},
+          '@apply px-4 sm:px-6 xl:px-8': {},
         },
         '.fx-layout-padding-y': {
           '@apply pt-0 xs:pt-4 sm:pt-6 pb-10 xs:pb-12 sm:pb-16': {},
+        },
+        '.fx-modal-body-shadow': {
+          '@apply shadow-[0_0_24px_8px_rgba(51,65,85,0.5)]': {}, // slate-700 50% opacity
+        },
+        // add modal body shadow to ::after pseudo element, to transition in after modal body renders for performance
+        // usage: add conditional styles `after:opacity-0` when !hasEntered + `after:opacity-100` when hasEntered
+        '.fx-modal-body-after-shadow': {
+          '@apply relative after:pointer-events-none': {},
+          "@apply after:absolute after:top-0 after:left-0 after:w-full after:h-full after:content-['']": {},
+          '@apply after:rounded-md after:shadow-[0_0_24px_8px_rgba(51,65,85,0.5)]': {}, // slate-700 50% opacity
+          '@apply after:transition-opacity after:duration-100': {},
         },
         '.fx-box': {
           'p-2 xs:p-4 sm:p-6 lg:p-8': {},
@@ -173,7 +293,7 @@ module.exports = {
           '@apply border-slate-200 bg-slate-200 text-slate-400 cursor-not-allowed': {},
         },
         'button.fx-button-outline-primary, a.fx-button-outline-primary': {
-          '@apply bg-transparent border-sky-800 text-sky-800 hover:bg-sky-100 hover:border-sky-900 hover:text-sky-900':
+          '@apply bg-transparent border-sky-800 text-sky-800 hover:bg-slate-100 hover:border-sky-900 hover:text-sky-900':
             {},
         },
         'button.fx-button-outline-primary-disabled, a.fx-button-outline-primary-disabled': {
@@ -195,19 +315,19 @@ module.exports = {
           '@apply focus:outline-none focus:border-slate-300 focus:ring-2 focus:ring-sky-100': {},
         },
         '.fx-link': {
-          '@apply font-medium text-action-primary-darker fx-focus-ring focus:rounded-sm transition-colors duration-150':
+          '@apply font-medium text-action-primary fx-focus-ring-form ring-offset-1 focus:rounded-sm transition-colors duration-150':
             {},
           '&:hover': {
-            '@apply text-action-primary underline': {},
+            '@apply text-action-primary-hover underline': {},
           },
           '&:active': {
-            '@apply text-action-primary': {},
+            '@apply text-action-primary-hover': {},
           },
         },
         '.fx-form-input': {
           '@apply border rounded-md': {},
           '@apply border-palette-form-border text-palette-form-input placeholder:text-palette-form-placeholder': {},
-          '@apply fx-focus-ring-form': {},
+          // '@apply fx-focus-ring-form': {},
         },
         '.fx-form-label': {
           // requires that a parent wrapping div have the tailwind 'group' class applied
@@ -215,6 +335,38 @@ module.exports = {
           '@apply text-palette-form-label group-focus-within:font-medium group-focus-within:text-palette-form-label-focus':
             {},
         },
+        // round the corners and add a border seperator to sets of adjacent items e.g. list items
+        // usage: apply this class along with definitions for border width + color
+        '.fx-rounded-set-md': {
+          '@apply border-x border-y': {},
+          '@apply first:rounded-t-md first:border-t first:border-b-0 last:rounded-b-md last:border-t-0 last:border-b':
+            {},
+        },
+        // apply to parent of a set of stacked items (e.g. ul list) to add a rounded border + dividers between children
+        '.fx-stack-set-parent-rounded-border-divided-children': {
+          '@apply -space-y-px': {},
+          '&>*': {
+            // note in tailwind 3.1 arbitrary variants can also be written inline e.g. className="[&>a]:text-black"
+            '@apply border -space-y-px': {}, //
+            '@apply first:rounded-t-md last:rounded-b-md': {},
+
+            // use of -space-y-px prevents double-borders between list items but a top or bottom border of an
+            // active item may get hidden by an inactive one (in cases where active item borders may be a different
+            // color). this can be mitigated by adding a higher z-index either via .fx-active or adding z-10
+            // to the className as long as it doesn't interfere with the stacking context of any dropdowns within the
+            // components.
+            '&.fx-active': {
+              // '@apply z-10': {},
+            },
+          },
+        },
+      })
+      addUtilities({
+        // add .animation-delay-100 to .animation-delay-900
+        ...Array.from({ length: 9 }, (_, i) => i).reduce(
+          (acc, i) => ({ ...acc, [`.animation-delay-${i * 100}`]: { animationDelay: `0.${i}s` } }),
+          {},
+        ),
       })
     }),
   ],

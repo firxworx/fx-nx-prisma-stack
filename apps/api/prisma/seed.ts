@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from '../src/generated/prisma-client' // import from custom output path (@see schema.prisma)
+import { Prisma, PrismaClient } from '@prisma/client' // import from custom output path schema.prisma)
 import { hash } from 'argon2'
 
 const INSECURE_SHARED_DEV_PASSWORD = 'passpass123'
@@ -38,7 +38,7 @@ const userData: Omit<Prisma.UserCreateInput, 'password'>[] = [
   },
 ]
 
-async function main() {
+async function main(): Promise<void> {
   console.log(`Start seeding ...`)
 
   const password = await hash(INSECURE_SHARED_DEV_PASSWORD)

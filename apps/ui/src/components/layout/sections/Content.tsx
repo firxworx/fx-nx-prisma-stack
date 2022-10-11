@@ -10,17 +10,9 @@ export interface ContentProps {
  * children inside of a `<main>..</main>` block.
  *
  * @todo - consider customizing the tailwind '.container' utility class in preset
+ *
+ * // fx-layout-max-width fx-layout-padding-x fx-layout-padding-y
  */
 export const Content: React.FC<PropsWithChildren<ContentProps>> = ({ appendClassName, children }) => {
-  return (
-    <main
-      className={clsx(
-        'flex-1 w-full mx-auto',
-        'fx-layout-max-width fx-layout-padding-x fx-layout-padding-y',
-        appendClassName,
-      )}
-    >
-      {children}
-    </main>
-  )
+  return <main className={clsx('flex-1 w-full mx-auto bg-slate-50', appendClassName)}>{children}</main>
 }

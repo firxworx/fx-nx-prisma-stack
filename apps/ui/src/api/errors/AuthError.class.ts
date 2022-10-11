@@ -1,5 +1,5 @@
 export class AuthError extends Error {
-  private readonly status: number
+  public readonly status: number
 
   constructor(message?: string) {
     // Error will break the prototype chain here (see next line)
@@ -13,7 +13,7 @@ export class AuthError extends Error {
     this.status = 401
   }
 
-  getErrorMessage() {
+  getErrorMessage(): string {
     return `Unauthorized (${this.status}): ${this.message}`
   }
 }

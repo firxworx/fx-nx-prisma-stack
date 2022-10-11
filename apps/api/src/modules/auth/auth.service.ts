@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   InternalServerErrorException,
@@ -11,14 +12,15 @@ import { JwtService } from '@nestjs/jwt'
 import { Prisma, User } from '@prisma/client'
 import type { AppConfig } from '../../config/types/app-config.interface'
 import type { AuthConfig } from '../../config/types/auth-config.interface'
-// import { CookieOptions } from 'express'
+import type { SanitizedUser } from './types/sanitized-user.type'
+import type { SignedToken } from './types/signed-token.interface'
+import type { TokenPayload } from './types/token-payload.interface'
 
 import { PrismaService } from '../prisma/prisma.service'
 import { ChangePasswordDto } from './dto/change-password.dto'
 import { RegisterUserDto } from './dto/register-user.dto'
 import { PasswordService } from './password.service'
-import { SanitizedUser } from './types/sanitized-user.type'
-import { TokenPayload } from './types/token-payload.interface'
+import { isSignedTokenPayload } from './types/type-guards/is-signed-token-payload'
 
 @Injectable()
 export class AuthService {
@@ -32,12 +34,22 @@ export class AuthService {
     EMAIL_CONFLICT: 'Email already exists',
   }
 
+  private readonly authConfig: AuthConfig
+
   constructor(
     private readonly configService: ConfigService<AppConfig>,
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
     private readonly passwordService: PasswordService,
-  ) {}
+  ) {
+    const authConfig = this.configService.get<AuthConfig>('auth')
+
+    if (!authConfig) {
+      throw new Error('AuthModule unable to access auth config')
+    }
+
+    this.authConfig = authConfig
+  }
 
   // @see https://github.com/prisma/prisma/issues/5042#issuecomment-1104679760
   // usage: { select: excludeFields(Prisma.UserScalarFieldEnum, ['password']), }
@@ -100,11 +112,11 @@ export class AuthService {
   /**
    * Change a user's password and clear their refreshToken hash.
    *
-   * @throws {UnauthorizedException} if current (old) password fails verification
+   * @throws {UnauthorizedException} if previous/old password fails verification
    * @throws {InternalServerErrorException} in other cases of failure
    */
   async changeUserPassword(email: string, dto: ChangePasswordDto): Promise<void> {
-    // verify the current credentials - throws UnauthorizedException on auth failure
+    // verify the current credentials - throws UnauthorizedException on failure
     await this.getAuthenticatedUserByCredentials(email, dto.oldPassword)
 
     const passwordHash = await this.passwordService.hash(dto.newPassword)
@@ -250,9 +262,9 @@ export class AuthService {
   }
 
   /**
-   * Return the raw JWT token payload corresponding to the given `SanitizedUser`.
+   * Return JWT token payload for the given `SanitizedUser`.
    */
-  public buildJwtTokenPayload(user: SanitizedUser): TokenPayload {
+  public createJwtTokenPayload(user: SanitizedUser): TokenPayload {
     return {
       email: user.email,
       name: user.name,
@@ -260,62 +272,58 @@ export class AuthService {
   }
 
   /**
-   * Return an Authentication token cookie with a signed JWT created with the given payload.
+   * Return a signed JWT authentication token computed vs. the given payload.
+   */
+  public async signAuthenticationPayload(payload: TokenPayload): Promise<string> {
+    const token = await this.jwtService.signAsync(payload, {
+      secret: this.authConfig.jwt.accessToken.secret,
+      expiresIn: `${this.authConfig.jwt.accessToken.expirationTime}s`,
+    })
+
+    return token
+  }
+
+  /**
+   * Return a signed JWT refresh token computed vs. the given payload.
    *
-   * @todo conditional SameSite on cookie
+   * Sets the expiry based on the optional "expires in" time in seconds if provided, otherwise the expiry
+   * time defaults to the config value set via the environment.
    */
-  public buildSignedAuthenticationTokenCookie(tokenPayload: TokenPayload): string {
-    const authConfig = this.configService.get<AuthConfig>('auth')
-
-    const token = this.jwtService.sign(tokenPayload, {
-      secret: authConfig?.jwt.accessToken.secret,
-      expiresIn: `${authConfig?.jwt.accessToken.expirationTime}s`,
+  public async signRefreshPayload(payload: TokenPayload, expiresInSeconds?: number): Promise<string> {
+    const token = await this.jwtService.signAsync(payload, {
+      secret: this.authConfig.jwt.refreshToken.secret,
+      expiresIn: `${expiresInSeconds ?? this.authConfig.jwt.refreshToken.expirationTime}s`,
     })
 
-    const secureCookie = process.env.NODE_ENV === 'production' ? 'Secure; ' : ''
-
-    return `Authentication=${token}; HttpOnly; ${secureCookie}Path=/; Max-Age=${authConfig?.jwt.accessToken.expirationTime}`
+    return token
   }
 
   /**
-   * Return a Refresh token cookie with a signed JWT created with the given payload.
+   * Return a signed JWT refresh token computed vs. the given payload.
+   *
+   * Sets the expiry based on the optional "expires in" time in seconds if provided, otherwise the expiry
+   * time defaults to the config value obtained from the environment.
+   *
+   * @throws BadRequestException if there are any issues verifying the token or validating the payload.
    */
-  public buildSignedRefreshTokenCookie(tokenPayload: TokenPayload): { token: string; cookie: string } {
-    const authConfig = this.configService.get<AuthConfig>('auth')
+  public async verifyRefreshToken(token: string | unknown): Promise<TokenPayload & SignedToken> {
+    try {
+      if (typeof token !== 'string') {
+        throw new Error(`refresh token from request is not a string: ${JSON.stringify(token, null, 2)}`)
+      }
 
-    const token = this.jwtService.sign(tokenPayload, {
-      secret: authConfig?.jwt.refreshToken.secret,
-      expiresIn: `${authConfig?.jwt.refreshToken.expirationTime}s`,
-    })
+      const decoded = await this.jwtService.verifyAsync<TokenPayload & SignedToken>(token, {
+        secret: this.authConfig.jwt.refreshToken.secret,
+      })
 
-    const secureCookie = process.env.NODE_ENV === 'production' ? 'Secure; ' : ''
+      if (!isSignedTokenPayload(decoded)) {
+        throw new Error(`verified refresh token failed object validation: ${JSON.stringify(decoded, null, 2)}`)
+      }
 
-    // @todo consider refactor to use express to build cookie (at risk of dropping fastify support for AuthService)
-    // https://expressjs.com/en/4x/api.html#res.cookie
-    // const x: CookieOptions = {
-    //   secure: process.env.NODE_ENV === 'production',
-    //   httpOnly: true,
-    //   maxAge: authConfig?.jwt.refreshToken.expirationTime,
-    //   sameSite: true, // @todo make SameSite an env file setting // also 'lax' | 'strict' | 'none'
-    //   path: '/', //@todo confirm
-    //   // expires: authConfig?.jwt.refreshToken.expirationTime, // @todo Date() GMT
-    // }
-
-    return {
-      token,
-      cookie: `Refresh=${token}; HttpOnly; ${secureCookie}Path=/; Max-Age=${authConfig?.jwt.refreshToken.expirationTime}`,
+      return decoded
+    } catch (error: unknown) {
+      this.logger.error(error)
+      throw new BadRequestException()
     }
-  }
-
-  /**
-   * Return Authentication and Refresh cookies with Max-Age 0 for sign-out.
-   */
-  public buildSignOutCookies() {
-    const secureCookie = process.env.NODE_ENV === 'production' ? 'Secure; ' : ''
-
-    return [
-      `Authentication=; HttpOnly; ${secureCookie}Path=/; Max-Age=0`,
-      `Refresh=; HttpOnly; ${secureCookie}Path=/; Max-Age=0`,
-    ]
   }
 }

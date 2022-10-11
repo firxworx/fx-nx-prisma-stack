@@ -14,7 +14,7 @@ const footerClassName = clsx(
  */
 export const Footer: React.FC<FooterProps> = () => {
   return (
-    <footer className="border-t-2 bg-slate-100 border-slate-200">
+    <footer className="border-t bg-fx1-100 border-fx1-200">
       <div className={footerClassName}>
         {process.env.NEXT_PUBLIC_PROJECT_ORG_CONTACT_URL && process.env.NEXT_PUBLIC_PROJECT_ORG_NAME && (
           <div>

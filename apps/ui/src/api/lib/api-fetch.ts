@@ -1,7 +1,8 @@
-import { authQueryEndpointRoutes } from '../auth'
 import { ApiError } from '../errors/ApiError.class'
 import { AuthError } from '../errors/AuthError.class'
 import { FormError } from '../errors/FormError.class'
+
+import { authQueryEndpointRoutes } from '../fetchers/auth' // for refresh endpoint
 
 /** Base URL of the project's back-end API. */
 export const API_BASE_URL = process.env.NEXT_PUBLIC_PROJECT_API_BASE_URL
@@ -82,18 +83,18 @@ export async function projectFetch(path: string, options?: RequestInit): Promise
  * @see CustomApp `pages/_app.tsx` for global query error handling + error boundary
  */
 export async function apiFetch<T>(path: string, options?: RequestInit, isRetryAttempt?: boolean): Promise<T>
-export async function apiFetch(path: string, options?: RequestInit, isRetryAttempt?: boolean) {
+export async function apiFetch(path: string, options?: RequestInit, isRetryAttempt?: boolean): Promise<unknown> {
   try {
     const response = await projectFetch(path, options)
 
     if (response.status === 401) {
       switch (!!isRetryAttempt) {
         case true: {
-          console.warn('apiFetch refresh token retry attempt failed...')
+          console.warn('(401) - apiFetch refresh token retry attempt failed...')
           return Promise.reject(new AuthError(LABELS.ERROR_INVALID_OR_EXPIRED_CREDENTIALS))
         }
         case false: {
-          console.warn('apiFetch attempting refresh...')
+          console.warn(`(401) - apiFetch request failed (${path})... attempting refresh request...`)
 
           const RETRY_TIMEOUT = 5000
           const controller = new AbortController()
@@ -103,11 +104,13 @@ export async function apiFetch(path: string, options?: RequestInit, isRetryAttem
             const refreshResponse = await projectFetch(authQueryEndpointRoutes.refresh, { signal: controller.signal })
 
             if (refreshResponse.status === 401) {
+              console.warn(`(401) - apiFetch refresh request failed - (${path}) `)
               console.warn(LABELS.ERROR_AUTH_REFRESH_TOKEN_FAILED)
               return Promise.reject(new AuthError(LABELS.ERROR_INVALID_OR_EXPIRED_CREDENTIALS))
             }
 
             if (!refreshResponse.ok) {
+              console.warn(`(${refreshResponse.status}) - apiFetch refresh failed - not ok (${path}) `)
               console.warn(LABELS.ERROR_API_SERVER)
               return Promise.reject(
                 new ApiError(`${LABELS.ERROR_API_SERVER} (${refreshResponse.status})`, response.status),
@@ -145,7 +148,7 @@ export async function apiFetch(path: string, options?: RequestInit, isRetryAttem
 
     try {
       // parse responses that are not http-204 (no content) as json (return {} in 204 case for truthy result)
-      const json = response.status === 204 ? {} : await response.json()
+      const json = response.status === 204 ? ({} as Record<string, never>) : await response.json()
       return json
     } catch (error: unknown) {
       return Promise.reject(

@@ -48,7 +48,7 @@ export class RdsStack extends FxBaseStack {
     this.printOutputs()
   }
 
-  private printOutputs() {
+  private printOutputs(): void {
     new CfnOutput(this, 'RdsInstanceEndpoint', {
       value: this.instance.instanceEndpoint.hostname,
       description: `${this.getProjectTag()}-${this.getDeployStageTag()} RDS Postgres Instance Endpoint`,
