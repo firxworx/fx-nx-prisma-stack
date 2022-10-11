@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react'
 
+import { ModalVariant, useModalContext } from '@firx/react-modals'
 import { Spinner } from '@firx/react-feedback'
 import {
   useVideoCreateQuery,
@@ -8,8 +9,6 @@ import {
   useVideoQuery,
   useVideosQuery,
 } from '../../../api/hooks/videos'
-import { useModalContext } from '../../../context/ModalContextProvider'
-import { ModalVariant } from '../../elements/modals/ModalBody'
 import { VideoForm } from './forms/VideoForm'
 import { VideoGallery } from './gallery/VideoGallery'
 import { ManagerControls } from './input-groups/ManagerControls'

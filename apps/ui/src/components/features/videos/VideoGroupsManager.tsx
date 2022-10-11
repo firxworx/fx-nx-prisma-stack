@@ -1,5 +1,7 @@
 import { useCallback, useState } from 'react'
 
+import { ModalVariant, useModalContext } from '@firx/react-modals'
+import { Spinner } from '@firx/react-feedback'
 import type { VideoDto, VideoGroupDto } from '../../../types/videos.types'
 import {
   useVideoGroupCreateQuery,
@@ -8,10 +10,7 @@ import {
   useVideoGroupQuery,
   useVideoGroupsQuery,
 } from '../../../api/hooks/video-groups'
-import { useModalContext } from '../../../context/ModalContextProvider'
-import { ModalVariant } from '../../elements/modals/ModalBody'
 import { VideoGroupForm } from './forms/VideoGroupForm'
-import { Spinner } from '@firx/react-feedback'
 import { VideoGroupItem } from './input-groups/VideoGroupsListItem'
 import { ManagerControls } from './input-groups/ManagerControls'
 import { useSearchFilter } from '../../../hooks/useSearchFilter'

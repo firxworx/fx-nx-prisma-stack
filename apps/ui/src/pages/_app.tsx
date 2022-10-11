@@ -13,9 +13,10 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 import '../styles/tailwind.css'
 
+import { ModalContextProvider } from '@firx/react-modals'
+
 import { AuthError } from '../api/errors/AuthError.class'
 import { ApiError } from '../api/errors/ApiError.class'
-import { ModalContextProvider } from '../context/ModalContextProvider'
 import { SessionContextProvider } from '../context/SessionContextProvider'
 import { AppLayout } from '../components/layout/AppLayout'
 import { AuthenticatedLayout } from '../components/layout/AuthenticatedLayout'
