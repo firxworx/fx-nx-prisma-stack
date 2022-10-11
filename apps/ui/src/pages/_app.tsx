@@ -27,6 +27,7 @@ import { ActionButton } from '../components/elements/inputs/ActionButton'
 import { LOCAL_STORAGE_SESSION_CTX_FLAG_KEY } from '../api/constants/auth'
 import { authQueryKeys } from '../api/hooks/auth'
 import { AppConfig, ApplicationContextProvider, useApplicationContext } from '../context/ApplicationContextProvider'
+import { ParentContextProvider } from '../context/ParentContextProvider'
 
 export const SIGN_IN_ROUTE = '/sign-in'
 export const DEFAULT_AUTHENTICATED_ROUTE = '/app'
@@ -143,8 +144,10 @@ const ReactApp: React.FC<AppProps> = ({ Component, pageProps, router }) => {
               ) : isSessionReady ? (
                 <AppLayout navigationLinks={isSessionReady ? AUTHENTICATED_NAV_LINKS : PUBLIC_NAV_LINKS}>
                   <AuthenticatedLayout>
-                    {/* autherrorlistener, sessiontimer, etc */}
-                    <Component {...pageProps} />
+                    <ParentContextProvider>
+                      {/* autherrorlistener, sessiontimer, etc */}
+                      <Component {...pageProps} />
+                    </ParentContextProvider>
                   </AuthenticatedLayout>
                 </AppLayout>
               ) : (

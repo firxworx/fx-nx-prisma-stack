@@ -52,6 +52,12 @@ export async function fetchCreateVideo({ parentContext, ...data }: ParentContext
   })
 }
 
+export function fetchCreateVideoWithParentContext(
+  parentContext: ParentContext['parentContext'],
+): (data: CreateVideoDto) => Promise<VideoDto> {
+  return (data: CreateVideoDto) => fetchCreateVideo({ parentContext, ...data })
+}
+
 // @todo implement the videos array and refactor types to shared lib
 export async function fetchMutateVideo({
   parentContext,
@@ -64,8 +70,20 @@ export async function fetchMutateVideo({
   })
 }
 
+export function fetchMutateVideoWithParentContext(
+  parentContext: ParentContext['parentContext'],
+): (uuidAndData: ApiMutateRequestDto<UpdateVideoDto>) => Promise<VideoDto> {
+  return (uuidAndData: ApiMutateRequestDto<UpdateVideoDto>) => fetchMutateVideo({ parentContext, ...uuidAndData })
+}
+
 export async function fetchDeleteVideo({ parentContext, uuid }: ParentContext & ApiDeleteRequestDto): Promise<void> {
   await apiFetch<void>(`${getRestEndpoint(parentContext)}/${uuid}`, {
     method: 'DELETE',
   })
+}
+
+export function fetchDeleteVideoWithParentContext(
+  parentContext: ParentContext['parentContext'],
+): (uuid: ApiDeleteRequestDto) => Promise<void> {
+  return (uuid: ApiDeleteRequestDto) => fetchDeleteVideo({ parentContext, ...uuid })
 }

@@ -52,7 +52,7 @@ export async function fetchVideoGroup({
   })
 }
 
-export async function createVideoGroup({
+export async function fetchCreateVideoGroup({
   parentContext,
   ...data
 }: CreateVideoGroupDto & ParentContext): Promise<VideoGroupDto> {
@@ -62,7 +62,13 @@ export async function createVideoGroup({
   })
 }
 
-export async function updateVideoGroup({
+export function fetchCreateVideoGroupWithParentContext(
+  parentContext: ParentContext['parentContext'],
+): (data: CreateVideoGroupDto) => Promise<VideoGroupDto> {
+  return (data: CreateVideoGroupDto) => fetchCreateVideoGroup({ parentContext, ...data })
+}
+
+export async function fetchMutateVideoGroup({
   parentContext,
   uuid,
   ...data
@@ -73,8 +79,24 @@ export async function updateVideoGroup({
   })
 }
 
-export async function deleteVideoGroup({ parentContext, uuid }: ApiDeleteRequestDto & ParentContext): Promise<void> {
+export function fetchMutateVideoGroupWithParentContext(
+  parentContext: ParentContext['parentContext'],
+): (uuidAndData: ApiMutateRequestDto<UpdateVideoGroupDto>) => Promise<VideoGroupDto> {
+  return (uuidAndData: ApiMutateRequestDto<UpdateVideoGroupDto>) =>
+    fetchMutateVideoGroup({ parentContext, ...uuidAndData })
+}
+
+export async function fetchDeleteVideoGroup({
+  parentContext,
+  uuid,
+}: ApiDeleteRequestDto & ParentContext): Promise<void> {
   await apiFetch<void>(`${getRestEndpoint(parentContext)}/${uuid}`, {
     method: 'DELETE',
   })
+}
+
+export function fetchDeleteVideoGroupWithParentContext(
+  parentContext: ParentContext['parentContext'],
+): (uuid: ApiDeleteRequestDto) => Promise<void> {
+  return (uuid: ApiDeleteRequestDto) => fetchDeleteVideoGroup({ parentContext, ...uuid })
 }
