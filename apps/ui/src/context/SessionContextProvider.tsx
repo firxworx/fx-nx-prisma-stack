@@ -1,4 +1,4 @@
-import React, { useMemo, useContext, useState, useEffect, useCallback } from 'react'
+import React, { useMemo, useContext, useState, useCallback } from 'react'
 
 import { LOCAL_STORAGE_SESSION_CTX_FLAG_KEY } from '../api/constants/auth'
 import type { AuthSession } from '../types/session.types'
@@ -18,20 +18,15 @@ const SessionContext = React.createContext<AuthSession<SessionStatus> | undefine
 export const SessionContextProvider: React.FC<{
   children: (isSessionReady: boolean) => React.ReactElement
 }> = ({ children }) => {
-  const [isQueryEnabled, setIsQueryEnabled] = useState<boolean>(true)
-  const { data: profile, refetch, error, status, invalidate, remove } = useAuthSessionQuery(isQueryEnabled) // ...rest
-
-  useEffect(() => {
+  const [isQueryEnabled, setIsQueryEnabled] = useState<boolean>((): boolean => {
     if (typeof window !== 'undefined') {
       const ctxEnabledFlag = window.localStorage.getItem(LOCAL_STORAGE_SESSION_CTX_FLAG_KEY)
-
-      if (ctxEnabledFlag === 'enabled') {
-        setIsQueryEnabled(true)
-      } else {
-        setIsQueryEnabled(false)
-      }
+      return ctxEnabledFlag === 'enabled'
     }
-  }, [])
+
+    return true
+  })
+  const { data: profile, refetch, error, status, invalidate, remove } = useAuthSessionQuery(isQueryEnabled) // ...rest
 
   const setEnabled = useCallback(
     (nextState: boolean) => {
