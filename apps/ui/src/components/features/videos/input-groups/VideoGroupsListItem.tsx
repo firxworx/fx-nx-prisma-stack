@@ -5,16 +5,12 @@ import { PencilSquareIcon } from '@heroicons/react/20/solid'
 import { XCircleIcon } from '@heroicons/react/20/solid'
 import { RiPlayList2Line } from 'react-icons/ri'
 
-import type { ApiParentContext } from '../../../../api/types/common.types'
-import type { BoxProfileChildQueryContext } from '../../../../types/box-profiles.types'
-import { VideoGroupDto } from '../../../../types/videos.types'
-import { Spinner } from '@firx/react-feedback'
+import type { VideoGroupDto } from '../../../../types/videos.types'
 import { OptionsMenu } from '../menus/OptionsMenu'
 import { ToggleSwitch, ToggleSwitchProps } from '../../../elements/inputs/ToggleSwitch'
 import { IconButton } from '../../../elements/inputs/IconButton'
 
 export interface VideoGroupsListItemProps {
-  parentContext: ApiParentContext<BoxProfileChildQueryContext>['parentContext']
   videoGroup: VideoGroupDto
   isActive: boolean
   isActiveToggleLoading?: boolean
@@ -51,7 +47,6 @@ const LABELS = {
 }
 
 export const VideoGroupItem: React.FC<VideoGroupsListItemProps> = ({
-  parentContext,
   videoGroup,
   isActive,
   isActiveToggleLoading,
@@ -78,10 +73,6 @@ export const VideoGroupItem: React.FC<VideoGroupsListItemProps> = ({
     },
     [onDeleteClick],
   )
-
-  if (!parentContext?.boxProfileUuid) {
-    return <Spinner />
-  }
 
   return (
     <li

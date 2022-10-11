@@ -1,9 +1,8 @@
 import { useCallback, useState } from 'react'
 
-import type { ApiParentContext } from '../../../api/types/common.types'
-import type { BoxProfileChildQueryContext } from '../../../types/box-profiles.types'
 import type { VideoDto, VideoGroupDto } from '../../../types/videos.types'
 import {
+  useVideoGroupCreateQuery,
   useVideoGroupDeleteQuery,
   useVideoGroupMutateQuery,
   useVideoGroupQuery,
@@ -20,38 +19,24 @@ import { VideoSelector } from './input-groups/VideoSelector'
 import { useVideosQuery } from '../../../api/hooks/videos'
 import { ActionButton } from '../../elements/inputs/ActionButton'
 
-export interface VideoGroupsManagerProps {
-  parentContext: ApiParentContext<BoxProfileChildQueryContext>['parentContext']
-}
+export interface VideoGroupsManagerProps {}
 
 export interface VideoSelectorModalBodyProps {
-  parentContext: ApiParentContext<BoxProfileChildQueryContext>['parentContext']
   videoGroup: VideoGroupDto | undefined
   videos: VideoDto[]
-  onSaveOrCloseClick: () => void
+  onSaveVideoSelectionAsync: (videoUuids: string[]) => Promise<void>
 }
 
 const VideoSelectorModalBody: React.FC<VideoSelectorModalBodyProps> = ({
-  parentContext,
   videoGroup,
   videos,
-  onSaveOrCloseClick,
+  onSaveVideoSelectionAsync,
 }) => {
   const [selectedVideos, setSelectedVideos] = useState<string[]>([])
-  const { mutateAsync: mutateVideoGroupAsync, ...videoGroupMutateQuery } = useVideoGroupMutateQuery()
 
   const handleChangeVideoSelection = useCallback((uuids: string[]): void => {
     setSelectedVideos([...uuids])
   }, [])
-
-  const handleSaveVideoSelection = async (): Promise<void> => {
-    if (!videoGroup) {
-      return
-    }
-
-    await mutateVideoGroupAsync({ parentContext: parentContext, uuid: videoGroup.uuid, videos: [...selectedVideos] })
-    onSaveOrCloseClick()
-  }
 
   if (!videoGroup) {
     return null
@@ -68,8 +53,10 @@ const VideoSelectorModalBody: React.FC<VideoSelectorModalBodyProps> = ({
       />
       <ActionButton
         appendClassName="mt-4 sm:mt-6"
-        isSubmitting={videoGroupMutateQuery.isLoading}
-        onClick={handleSaveVideoSelection}
+        // isSubmitting={videoGroupMutateQuery.isLoading}
+        onClick={async (): Promise<void> => {
+          await onSaveVideoSelectionAsync(selectedVideos)
+        }}
       >
         Save
       </ActionButton>
@@ -81,16 +68,16 @@ const VideoSelectorModalBody: React.FC<VideoSelectorModalBodyProps> = ({
  * Comprehensive component for users to perform CRUD operations on Video Groups and manage the
  * associations of Video <-> Video Group entities.
  */
-export const VideoGroupsManager: React.FC<VideoGroupsManagerProps> = ({ parentContext }) => {
+export const VideoGroupsManager: React.FC<VideoGroupsManagerProps> = () => {
   const [currentVideoGroupUuid, setCurrentVideoGroupUuid] = useState<string | undefined>(undefined)
 
-  const { data: videos } = useVideosQuery({ parentContext: parentContext })
-  const { data: videoGroups, ...videoGroupsQuery } = useVideoGroupsQuery({ parentContext: parentContext })
+  const { data: videos } = useVideosQuery()
+  const { data: videoGroups, ...videoGroupsQuery } = useVideoGroupsQuery()
   const { data: currentVideoGroup } = useVideoGroupQuery(
-    { parentContext, uuid: currentVideoGroupUuid },
+    { uuid: currentVideoGroupUuid },
     videoGroups?.find((vg) => vg.uuid === currentVideoGroupUuid),
   )
-
+  const { mutateAsync: createVideoGroupAsync } = useVideoGroupCreateQuery()
   const { mutateAsync: mutateVideoGroupAsync, ...videoGroupMutateQuery } = useVideoGroupMutateQuery()
   const { mutate: deleteVideoGroup, ...videoGroupDeleteQuery } = useVideoGroupDeleteQuery()
 
@@ -103,9 +90,13 @@ export const VideoGroupsManager: React.FC<VideoGroupsManagerProps> = ({ parentCo
     },
     (hideModal) => (
       <VideoGroupForm
-        parentContext={parentContext}
+        videos={videos ?? []}
         create={{
-          onSuccess: (): void => {
+          onCreateAsync: async (formValues): Promise<void> => {
+            await createVideoGroupAsync({
+              ...formValues,
+            })
+
             hideModal()
           },
         }}
@@ -120,16 +111,25 @@ export const VideoGroupsManager: React.FC<VideoGroupsManagerProps> = ({ parentCo
     },
     (hideModal) => (
       <VideoGroupForm
-        parentContext={parentContext}
+        videos={videos ?? []}
         mutate={{
           data: currentVideoGroup,
-          onSuccess: (): void => {
+          onMutateAsync: async (formValues): Promise<void> => {
+            if (!currentVideoGroupUuid) {
+              return
+            }
+
+            await mutateVideoGroupAsync({
+              uuid: currentVideoGroupUuid,
+              ...formValues,
+            })
+
             hideModal()
           },
         }}
       />
     ),
-    [parentContext, currentVideoGroup],
+    [currentVideoGroup],
   )
 
   const [showVideoSelectorModal] = useModalContext(
@@ -139,22 +139,30 @@ export const VideoGroupsManager: React.FC<VideoGroupsManagerProps> = ({ parentCo
       variant: ModalVariant.FORM,
     },
     (hideModal) => (
-      <VideoSelectorModalBody
-        parentContext={parentContext}
-        videoGroup={currentVideoGroup}
-        videos={videos ?? []}
-        onSaveOrCloseClick={hideModal}
-      />
+      <>
+        <VideoSelectorModalBody
+          videoGroup={currentVideoGroup}
+          videos={videos ?? []}
+          onSaveVideoSelectionAsync={async (videoUuids): Promise<void> => {
+            if (!currentVideoGroupUuid) {
+              return
+            }
+
+            await mutateVideoGroupAsync({ uuid: currentVideoGroupUuid, videos: videoUuids })
+            hideModal()
+          }}
+        />
+      </>
     ),
-    [parentContext, currentVideoGroup, videos, videoGroups],
+    [currentVideoGroup, videos, videoGroups],
   )
 
   const handleChangeActiveVideoGroup = useCallback(
     (uuid: string): ((enabled: boolean) => void) =>
       (enabled) => {
-        mutateVideoGroupAsync({ parentContext: parentContext, uuid, enabled })
+        mutateVideoGroupAsync({ uuid, enabled })
       },
-    [parentContext, mutateVideoGroupAsync],
+    [mutateVideoGroupAsync],
   )
 
   const handleEditVideoGroup = useCallback(
@@ -179,11 +187,10 @@ export const VideoGroupsManager: React.FC<VideoGroupsManagerProps> = ({ parentCo
     (uuid: string): React.MouseEventHandler<HTMLAnchorElement> =>
       (_event) => {
         deleteVideoGroup({
-          parentContext,
           uuid,
         })
       },
-    [parentContext, deleteVideoGroup],
+    [deleteVideoGroup],
   )
 
   return (
@@ -191,7 +198,7 @@ export const VideoGroupsManager: React.FC<VideoGroupsManagerProps> = ({ parentCo
       {videoGroupsQuery.isError && <p>Error fetching data</p>}
       {videoGroupDeleteQuery.error && <p>Error deleting video group</p>}
       {videoGroupsQuery.isLoading && <Spinner />}
-      {videoGroupsQuery.isSuccess && !!videoGroups?.length && !!parentContext?.boxProfileUuid && (
+      {videoGroupsQuery.isSuccess && !!videoGroups?.length && (
         <div className="">
           <div className="mb-6">
             <ManagerControls
@@ -214,7 +221,6 @@ export const VideoGroupsManager: React.FC<VideoGroupsManagerProps> = ({ parentCo
             {searchResults?.map((videoGroup) => (
               <VideoGroupItem
                 key={videoGroup.uuid}
-                parentContext={parentContext}
                 videoGroup={videoGroup}
                 isActive={!!videoGroup.enabledAt}
                 isActiveToggleLoading={videoGroupMutateQuery.isLoading} // disable all toggles
@@ -233,7 +239,7 @@ export const VideoGroupsManager: React.FC<VideoGroupsManagerProps> = ({ parentCo
       )}
       {videoGroupsQuery.isSuccess && (!videoGroups?.length || !searchResults.length) && (
         <div className="flex items-center border-2 border-dashed rounded-md p-4">
-          <div className="text-slate-600">No video groups found.</div>
+          <div className="text-slate-600">No playlists found.</div>
         </div>
       )}
     </>

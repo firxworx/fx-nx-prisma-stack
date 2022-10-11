@@ -4,16 +4,15 @@ import { useRouter } from 'next/router'
 import { Tab } from '@headlessui/react'
 import clsx from 'clsx'
 
+import { Spinner } from '@firx/react-feedback'
 import type { ApiParentContext } from '../../../../api/types/common.types'
 import type { BoxProfileChildQueryContext } from '../../../../types/box-profiles.types'
 import { useVideosQuery } from '../../../../api/hooks/videos'
 import { useVideoGroupsQuery } from '../../../../api/hooks/video-groups'
-import { Spinner } from '@firx/react-feedback'
 import { PageHeading } from '../../../../components/elements/headings/PageHeading'
 import { getRouterParamValue } from '../../../../lib/router'
 import { VideosManager } from '../../../../components/features/videos/VideosManager'
 import { VideoGroupsManager } from '../../../../components/features/videos/VideoGroupsManager'
-// import { FormMultiComboBox } from '../../../../components/elements/forms/FormMultiComboBox'
 
 type ParentContext = ApiParentContext<BoxProfileChildQueryContext>['parentContext']
 
@@ -32,18 +31,18 @@ interface TabLayoutProps {
   tabs: Tab[]
 }
 
-const VideosTab: React.FC<TabContentProps> = ({ parentContext }) => {
+const VideosTab: React.FC<TabContentProps> = () => {
   return (
     <>
-      <VideosManager parentContext={parentContext} />
+      <VideosManager />
     </>
   )
 }
 
-const VideoGroupsTab: React.FC<TabContentProps> = ({ parentContext }) => {
+const VideoGroupsTab: React.FC<TabContentProps> = () => {
   return (
     <>
-      <VideoGroupsManager parentContext={parentContext} />
+      <VideoGroupsManager />
     </>
   )
 }
@@ -64,6 +63,7 @@ const VideoGroupsTab: React.FC<TabContentProps> = ({ parentContext }) => {
  * make the component non-focusable and not being able to use the `tabIndex` prop.
  *
  * @see {@link https://github.com/tailwindlabs/headlessui/discussions/1433#discussioncomment-3779815}
+ * @see {@link https://github.com/tailwindlabs/headlessui/issues/1917}
  */
 export const TabLayout: React.FC<TabLayoutProps> = ({ tabs }) => {
   const router = useRouter()
@@ -159,7 +159,7 @@ export const TabLayout: React.FC<TabLayoutProps> = ({ tabs }) => {
             <Tab.Panel
               key={tab.label}
               tabIndex={-1} // @see above comment + issue note that this is currently not supported (headless bug)
-              className="py-4 sm:py-6 focus:rounded-sm fx-focus-ring-form focus:ring-offset-8"
+              className="py-6 focus:rounded-sm fx-focus-ring-form focus:ring-offset-8"
             >
               {!!parentContext.boxProfileUuid && <tab.Component parentContext={parentContext}></tab.Component>}
             </Tab.Panel>
@@ -177,15 +177,8 @@ export const TabLayout: React.FC<TabLayoutProps> = ({ tabs }) => {
 */
 
 export const ManageVideosIndexPage: NextPage = () => {
-  const router = useRouter()
-  const boxProfileUuid = getRouterParamValue(router.query, 'box')
-
-  const parentContext: ApiParentContext<BoxProfileChildQueryContext>['parentContext'] = {
-    boxProfileUuid,
-  }
-
-  const { data: videos, ...videosQuery } = useVideosQuery({ parentContext: parentContext })
-  const { data: videoGroups, ...videoGroupsQuery } = useVideoGroupsQuery({ parentContext: { boxProfileUuid } })
+  const { data: videos, ...videosQuery } = useVideosQuery()
+  const { data: videoGroups, ...videoGroupsQuery } = useVideoGroupsQuery()
 
   const isDataReady = videosQuery.isSuccess && videoGroupsQuery.isSuccess
 
